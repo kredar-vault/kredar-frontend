@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+  --kredar-green: #0f8b4b;
+  --kredar-green-dark: #10422a;
+  --kredar-surface: #f7faf6;
+  --kredar-surface-strong: #d8eae0;
+  --kredar-bg: #0a1f16;
+  --kredar-text: #081b10;
+  --kredar-text-muted: #45504b;
+  --kredar-border: #d8e1da;
+  --kredar-white: #ffffff;
+  --kredar-error: #ef4444;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    min-height: 100%;
+    background: var(--kredar-surface);
+    color: var(--kredar-text);
+  }
+
+  body {
+    min-height: 100%;
+    background: var(--kredar-surface);
+    color: var(--kredar-text);
+    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
+      BlinkMacSystemFont, "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #__next {
+    min-height: 100%;
+  }
+
+  ::selection {
+    background: rgba(15, 139, 75, 0.18);
+    color: var(--kredar-green-dark);
+  }
+
+  a {
+    color: var(--kredar-green);
+  }
+
+  .hero-gradient {
+    width: 841px;
+    height: 812px;
+    border-radius: 841px;
+    background: rgba(22, 158, 92, 0.3);
+    filter: blur(300px);
+  }
+
+  .paid {
+    color: var(--white, #FFF);
+    font-family: Geist;
+    font-size: 48px;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 56px;
+  }
+
+  .managed {
+    color: var(--white, #FFF);
+    font-family: Geist;
+    font-size: 20px;
+    font-style: normal;
+    font-weight: 400;
+    line-height: 32px;
+  }
+
+  button,
+  input,
+  textarea,
+  select {
+    font: inherit;
+  }
+}
+
+@layer components {
+
+  /* ── Inputs ── */
+  .kredar-input {
+    @apply h-11 w-full rounded-lg border border-[#d8e1da] bg-white px-4 text-sm text-[#081b10] outline-none transition-colors duration-150 placeholder:text-[#45504b]/50;
+  }
+
+  .kredar-input:focus {
+    border-color: var(--kredar-green);
+    box-shadow: 0 0 0 3px rgba(15, 139, 75, 0.08);
+  }
+
+  .kredar-input.input-error {
+    border-color: var(--kredar-error);
+  }
+
+  .kredar-input.input-error:focus {
+    border-color: var(--kredar-error);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+  }
+
+  /* ── Selects ── */
+  .kredar-select {
+    @apply kredar-input cursor-pointer appearance-none bg-white;
+  }
+
+  .kredar-select:focus {
+    border-color: var(--kredar-green);
+    box-shadow: 0 0 0 3px rgba(15, 139, 75, 0.08);
+  }
+
+  .kredar-select.input-error {
+    border-color: var(--kredar-error);
+  }
+
+  /* ── Labels ── */
+  .kredar-label {
+    @apply block text-sm font-medium text-[#081b10] mb-1.5;
+  }
+
+  /* ── Buttons ── */
+  .kredar-btn-primary {
+    @apply h-11 rounded-lg bg-[#0f8b4b] px-6 text-sm font-medium text-white transition-colors hover:bg-[#0b6b3c] disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .kredar-btn-outline {
+    @apply h-11 rounded-lg border border-[#d8e1da] bg-white px-6 text-sm font-medium text-[#081b10] transition-colors hover:bg-[#f7faf6];
+  }
+
+  /* ── Field error text ── */
+  .kredar-error-text {
+    @apply mt-1 text-xs text-[#ef4444];
+  }
+
+  .font-inter {
+    font-family: var(--font-inter), sans-serif;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(24px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes scaleIn {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+
+  .animate-scale-in {
+    animation: scaleIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+}
