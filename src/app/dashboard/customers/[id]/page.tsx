@@ -1,6 +1,6 @@
 'use client';
 
-import { use } from 'react';
+import { use, useState, useEffect } from 'react';
 import { MoreVertical, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,12 @@ const statusColors: Record<string, string> = {
 export default function CustomerDetailsPage({ params }: PageProps) {
   const resolvedParams = use(params);
   const id = resolvedParams.id;
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   // Mocked Customer Info based on id
   const customer: Customer = {
@@ -64,49 +70,107 @@ export default function CustomerDetailsPage({ params }: PageProps) {
         </Link>
       </div>
 
-      {/* Summary Profile Header Card */}
-      <CustomerSummaryCard customer={customer} />
-
-      {/* Grid tabs detail panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left side: subtabs */}
-        <div className="lg:col-span-2 space-y-6">
-          <CustomerTabs customer={customer} />
-        </div>
-
-        {/* Right side: Transactions list history for the customer */}
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-5 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-[#f0f4f1] pb-3">
-            <h3 className="text-base font-bold text-[#081b10]">Customer transactions</h3>
-            <span className="text-xs text-[#45504b] font-medium">History</span>
+      {loading ? (
+        /* SKELETAL LOADING STATE */
+        <>
+          {/* Skeleton: Summary Header Card */}
+          <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 shadow-sm">
+            <div className="flex items-center gap-4">
+              <div className="w-16 h-16 rounded-full bg-gray-200 animate-pulse flex-shrink-0" />
+              <div className="space-y-2">
+                <div className="h-5 bg-gray-200 rounded animate-pulse w-40" />
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-48" />
+              </div>
+            </div>
+            <div className="h-8 bg-gray-200 rounded-full animate-pulse w-24" />
           </div>
 
-          <div className="divide-y divide-[#f0f4f1]">
-            {transactionsData.slice(0, 5).map((tx) => (
-              <div key={tx.id} className="py-3 flex items-center justify-between text-sm">
-                <div>
-                  <p className="font-bold text-[#081b10]">{tx.id}</p>
-                  <p className="text-[11px] text-[#45504b] font-medium mt-0.5">{tx.date}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-[#081b10]">{tx.amount}</span>
-                  <span
-                    className={cn(
-                      'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border',
-                      statusColors[tx.status],
-                    )}
-                  >
-                    {tx.status}
-                  </span>
-                  <button className="text-[#45504b] hover:text-[#081b10] p-1">
-                    <MoreVertical size={14} />
-                  </button>
+          {/* Skeletons: Details Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            <div className="lg:col-span-2 space-y-6 bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm">
+              <div className="flex gap-4 border-b border-[#f0f4f1] pb-3">
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
+              </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {[1, 2, 3, 4].map((i) => (
+                    <div key={i} className="space-y-1.5">
+                      <div className="h-3.5 bg-gray-200 rounded animate-pulse w-24" />
+                      <div className="h-10 bg-gray-100 rounded-xl animate-pulse w-full" />
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
+            </div>
+
+            <div className="bg-white border border-[#d8e1da] rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="h-5 bg-gray-200 rounded animate-pulse w-40" />
+              <div className="space-y-3 pt-2">
+                {[1, 2, 3, 4].map((i) => (
+                  <div
+                    key={i}
+                    className="flex justify-between items-center py-2.5 border-b border-[#f0f4f1] last:border-0"
+                  >
+                    <div className="space-y-1">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-16" />
+                    </div>
+                    <div className="h-4 bg-gray-200 rounded animate-pulse w-12" />
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </>
+      ) : (
+        /* ACTUAL RENDERED CONTENTS */
+        <>
+          {/* Summary Profile Header Card */}
+          <CustomerSummaryCard customer={customer} />
+
+          {/* Grid tabs detail panels */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            {/* Left side: subtabs */}
+            <div className="lg:col-span-2 space-y-6">
+              <CustomerTabs customer={customer} />
+            </div>
+
+            {/* Right side: Transactions list history for the customer */}
+            <div className="bg-white border border-[#d8e1da] rounded-2xl p-5 shadow-sm space-y-4">
+              <div className="flex items-center justify-between border-b border-[#f0f4f1] pb-3">
+                <h3 className="text-base font-bold text-[#081b10]">Customer transactions</h3>
+                <span className="text-xs text-[#45504b] font-medium">History</span>
+              </div>
+
+              <div className="divide-y divide-[#f0f4f1]">
+                {transactionsData.slice(0, 5).map((tx) => (
+                  <div key={tx.id} className="py-3 flex items-center justify-between text-sm">
+                    <div>
+                      <p className="font-bold text-[#081b10]">{tx.id}</p>
+                      <p className="text-[11px] text-[#45504b] font-medium mt-0.5">{tx.date}</p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-semibold text-[#081b10]">{tx.amount}</span>
+                      <span
+                        className={cn(
+                          'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border',
+                          statusColors[tx.status],
+                        )}
+                      >
+                        {tx.status}
+                      </span>
+                      <button className="text-[#45504b] hover:text-[#081b10] p-1">
+                        <MoreVertical size={14} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

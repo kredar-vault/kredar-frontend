@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import KredarLogo from '@/components/KredarLogo';
 
 export default function LandingHero() {
   return (
@@ -17,25 +18,7 @@ export default function LandingHero() {
         {/* CAPSULE NAVBAR */}
         <header className="w-full max-w-6xl mx-auto bg-white/5 border border-white/10 rounded-full px-6 py-3 flex items-center justify-between backdrop-blur-md z-20">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0">
-              <img
-                src="/images/logo-icon.ico"
-                alt="Kredar"
-                className="w-3.5 h-3.5 brightness-0 invert"
-              />
-            </div>
-            <span
-              style={{
-                color: '#FFF',
-                fontFamily: 'var(--font-lexend-zetta)',
-                fontSize: '11px',
-                fontWeight: 400,
-                letterSpacing: '1.2px',
-              }}
-              className="uppercase tracking-[0.11em] select-none"
-            >
-              KREDAR
-            </span>
+            <KredarLogo light />
           </Link>
 
           {/* Nav Links */}

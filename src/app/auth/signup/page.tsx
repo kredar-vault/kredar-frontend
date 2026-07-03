@@ -8,6 +8,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff } from 'lucide-react';
 import AuthPageShell from '@/components/auth/AuthPageShell';
+import AuthLoadingModal from '@/components/auth/AuthLoadingModal';
 import { cn } from '@/lib/utils';
 
 const signupSchema = z
@@ -78,6 +79,7 @@ export default function SignupPage() {
       bottomCtaHref="/auth/login"
       bottomCtaLabel="Sign in"
     >
+      {isSubmitting && <AuthLoadingModal message="Creating your account..." />}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
         <div className="space-y-5">
           {/* Email */}

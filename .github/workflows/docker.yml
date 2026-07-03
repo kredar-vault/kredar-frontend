@@ -1,0 +1,18 @@
+name: Docker Build
+
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - run: docker compose config
+
+      - run: docker compose build

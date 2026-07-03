@@ -52,6 +52,8 @@ export default function Sidebar({
     return () => clearTimeout(timer);
   }, []);
 
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
@@ -82,6 +84,7 @@ export default function Sidebar({
             isCollapsed={isCollapsed}
             loading={loading}
             isActive={isActive}
+            onItemClick={onCloseMobile}
           />
 
           {/* Bottom Settings/Help Links (brought up, below main links) */}
@@ -91,6 +94,7 @@ export default function Sidebar({
               isCollapsed={isCollapsed}
               loading={loading}
               isActive={isActive}
+              onItemClick={onCloseMobile}
             />
           </div>
         </div>
@@ -117,7 +121,7 @@ export default function Sidebar({
 
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className={cn(
               'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[#45504b] hover:bg-[#fff0f0] hover:text-red-600 transition-colors',
               isCollapsed && 'justify-center px-0',
@@ -141,6 +145,37 @@ export default function Sidebar({
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+          <div className="bg-white border border-[#d8e1da] rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-6 animate-in fade-in zoom-in duration-200">
+            <div className="space-y-2">
+              <h3 className="text-lg font-bold text-[#081b10]">Confirm Log Out</h3>
+              <p className="text-sm text-[#45504b]">
+                Are you sure you want to log out? You will need to sign in again to access your
+                account.
+              </p>
+            </div>
+            <div className="flex items-center gap-3 justify-end">
+              <button
+                type="button"
+                onClick={() => setShowLogoutConfirm(false)}
+                className="px-4 py-2 border border-[#d8e1da] rounded-xl text-xs font-semibold text-[#45504b] hover:bg-[#f7faf6] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleLogout}
+                className="px-4 py-2 bg-[#ef4444] hover:bg-red-700 text-white rounded-xl text-xs font-semibold transition-colors"
+              >
+                Log out
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 

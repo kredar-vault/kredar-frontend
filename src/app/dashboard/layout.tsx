@@ -20,7 +20,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       />
 
       {/* Main content wrapper */}
-      <div className="flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out">
+      <div
+        onClick={() => {
+          if (isMobileOpen) setIsMobileOpen(false);
+        }}
+        className="flex-1 flex flex-col min-w-0 transition-all duration-200 ease-in-out"
+      >
         {/* Top Navbar */}
         <Navbar onToggleMobile={() => setIsMobileOpen(!isMobileOpen)} />
 

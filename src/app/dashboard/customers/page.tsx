@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import CustomersTable, { CustomerItem } from '@/components/features/customers/CustomersTable';
@@ -62,6 +62,12 @@ const customersData: CustomerItem[] = [
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   const filteredCustomers = customersData.filter(
     (c) =>
@@ -88,28 +94,73 @@ export default function CustomersPage() {
         </Link>
       </div>
 
-      {/* Metrics summary cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
-          <span className="text-sm font-medium text-[#45504b]">Total Customers</span>
-          <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">5</span>
-        </div>
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
-          <span className="text-sm font-medium text-[#45504b]">Active Wallets</span>
-          <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">5</span>
-        </div>
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
-          <span className="text-sm font-medium text-[#45504b]">KYC Verified</span>
-          <span className="text-3xl font-bold text-[#0f8b4b] mt-2 tracking-tight">5</span>
-        </div>
-      </div>
+      {loading ? (
+        /* SKELETAL LOADING STATE */
+        <>
+          {/* Skeletons: Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            {[1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="bg-white border border-[#d8e1da] rounded-2xl p-6 min-h-[120px] flex flex-col justify-between shadow-sm"
+              >
+                <div className="h-4 bg-gray-200 rounded animate-pulse w-28" />
+                <div className="h-8 bg-gray-200 rounded animate-pulse w-16 mt-2" />
+              </div>
+            ))}
+          </div>
 
-      {/* Main Customers List Grid Card */}
-      <div className="bg-white border border-[#d8e1da] rounded-2xl p-5 shadow-sm space-y-4">
-        <CustomersFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+          {/* Skeletons: Table */}
+          <div className="bg-white border border-[#d8e1da] rounded-2xl p-5 shadow-sm space-y-4">
+            <div className="h-10 bg-gray-100 rounded-xl animate-pulse w-full" />
+            <div className="space-y-4 pt-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div
+                  key={i}
+                  className="flex justify-between items-center py-3 border-b border-[#f0f4f1] last:border-0"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-gray-200 animate-pulse" />
+                    <div className="space-y-1">
+                      <div className="h-4 bg-gray-200 animate-pulse w-28" />
+                      <div className="h-3 bg-gray-200 animate-pulse w-36" />
+                    </div>
+                  </div>
+                  <div className="h-4 bg-gray-200 animate-pulse w-24" />
+                  <div className="h-4 bg-gray-200 animate-pulse w-16" />
+                  <div className="h-6 bg-gray-200 rounded-full animate-pulse w-20" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </>
+      ) : (
+        /* ACTUAL CONTENT */
+        <>
+          {/* Metrics summary cards */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+            <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
+              <span className="text-sm font-medium text-[#45504b]">Total Customers</span>
+              <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">5</span>
+            </div>
+            <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
+              <span className="text-sm font-medium text-[#45504b]">Active Wallets</span>
+              <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">5</span>
+            </div>
+            <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
+              <span className="text-sm font-medium text-[#45504b]">KYC Verified</span>
+              <span className="text-3xl font-bold text-[#0f8b4b] mt-2 tracking-tight">5</span>
+            </div>
+          </div>
 
-        <CustomersTable customers={filteredCustomers} />
-      </div>
+          {/* Main Customers List Grid Card */}
+          <div className="bg-white border border-[#d8e1da] rounded-2xl p-5 shadow-sm space-y-4">
+            <CustomersFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
+
+            <CustomersTable customers={filteredCustomers} />
+          </div>
+        </>
+      )}
     </div>
   );
 }
