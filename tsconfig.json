@@ -21,6 +21,9 @@
     "jsx": "preserve",
     "baseUrl": "./",
     "paths": {
+      "lucide-react": [
+        "src/types/lucide-react.d.ts"
+      ],
       "@/*": [
         "src/*"
       ]
