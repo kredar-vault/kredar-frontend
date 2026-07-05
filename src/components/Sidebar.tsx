@@ -35,6 +35,7 @@ interface SidebarProps {
   onToggleCollapse: () => void;
   isMobileOpen: boolean;
   onCloseMobile: () => void;
+  onNavigate?: () => void;
 }
 
 export default function Sidebar({
@@ -42,6 +43,7 @@ export default function Sidebar({
   onToggleCollapse,
   isMobileOpen,
   onCloseMobile,
+  onNavigate,
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
@@ -52,6 +54,13 @@ export default function Sidebar({
     const timer = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(timer);
   }, []);
+
+  const handleItemClick = (href: string) => {
+    onCloseMobile();
+    if (pathname !== href && onNavigate) {
+      onNavigate();
+    }
+  };
 
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -90,7 +99,7 @@ export default function Sidebar({
             isCollapsed={isCollapsed}
             loading={loading}
             isActive={isActive}
-            onItemClick={onCloseMobile}
+            onItemClick={handleItemClick}
           />
 
           {/* Bottom Settings/Help Links (brought up, below main links) */}
@@ -100,7 +109,7 @@ export default function Sidebar({
               isCollapsed={isCollapsed}
               loading={loading}
               isActive={isActive}
-              onItemClick={onCloseMobile}
+              onItemClick={handleItemClick}
             />
           </div>
         </div>
@@ -151,10 +160,39 @@ export default function Sidebar({
           </div>
         </div>
       </div>
+    </div>
+  );
+
+  return (
+    <>
+      {/* ── Mobile Sidebar Drawer backdrop overlay ── */}
+      {isMobileOpen && (
+        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onCloseMobile} />
+      )}
+
+      {/* ── Mobile Sidebar Panel ── */}
+      <aside
+        className={cn(
+          'fixed top-0 bottom-0 left-0 z-50 w-64 bg-white border-r border-[#d8e1da] transition-transform duration-200 ease-in-out lg:hidden',
+          isMobileOpen ? 'translate-x-0' : '-translate-x-full',
+        )}
+      >
+        {sidebarContent}
+      </aside>
+
+      {/* ── Desktop Permanent Sidebar Panel ── */}
+      <aside
+        className={cn(
+          'hidden lg:flex flex-col bg-white border-r border-[#d8e1da] min-h-screen transition-all duration-200 ease-in-out flex-shrink-0',
+          isCollapsed ? 'w-20' : 'w-64',
+        )}
+      >
+        {sidebarContent}
+      </aside>
 
       {/* Confirmation Modal */}
       {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           {isLoggingOut ? (
             <div className="bg-white border border-[#d8e1da] rounded-2xl shadow-xl max-w-xs w-full p-8 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in duration-200">
               <Loader2 className="w-10 h-10 text-[#0f8b4b] animate-spin" />
@@ -189,35 +227,6 @@ export default function Sidebar({
           )}
         </div>
       )}
-    </div>
-  );
-
-  return (
-    <>
-      {/* ── Mobile Sidebar Drawer backdrop overlay ── */}
-      {isMobileOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onCloseMobile} />
-      )}
-
-      {/* ── Mobile Sidebar Panel ── */}
-      <aside
-        className={cn(
-          'fixed top-0 bottom-0 left-0 z-50 w-64 bg-white border-r border-[#d8e1da] transition-transform duration-200 ease-in-out lg:hidden',
-          isMobileOpen ? 'translate-x-0' : '-translate-x-full',
-        )}
-      >
-        {sidebarContent}
-      </aside>
-
-      {/* ── Desktop Permanent Sidebar Panel ── */}
-      <aside
-        className={cn(
-          'hidden lg:flex flex-col bg-white border-r border-[#d8e1da] min-h-screen transition-all duration-200 ease-in-out flex-shrink-0',
-          isCollapsed ? 'w-20' : 'w-64',
-        )}
-      >
-        {sidebarContent}
-      </aside>
     </>
   );
 }
