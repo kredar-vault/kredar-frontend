@@ -2,100 +2,8 @@
 
 import { ChevronDown, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
-// Mock transactions list
-const recentTransactions = [
-  {
-    id: 1,
-    name: 'Fatima Abubakar',
-    avatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-23',
-    amount: '$48,000',
-    status: 'Reconciled',
-  },
-  {
-    id: 2,
-    name: 'Oluwaseun Adebayo',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-19',
-    amount: '$48,000',
-    status: 'Overpaid',
-  },
-  {
-    id: 3,
-    name: 'Emeka Nwosu',
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-17',
-    amount: '₦45,750',
-    status: 'Failed',
-  },
-  {
-    id: 4,
-    name: 'Ifeanyi Nwachukwu',
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-16',
-    amount: '₦100,000',
-    status: 'Reconciled',
-  },
-  {
-    id: 5,
-    name: 'Ngozi Eze',
-    avatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-15',
-    amount: '$48,000',
-    status: 'Pending',
-  },
-  {
-    id: 6,
-    name: 'Zainab Ibrahim',
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-11',
-    amount: '₦35,200',
-    status: 'Overpaid',
-  },
-  {
-    id: 7,
-    name: 'Bola Ogunleye',
-    avatar:
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-10',
-    amount: '₦250,000',
-    status: 'Reconciled',
-  },
-  {
-    id: 8,
-    name: 'Tunde Adeyemi',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-10',
-    amount: '₦30,500',
-    status: 'Failed',
-  },
-  {
-    id: 9,
-    name: 'Amina Bello',
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-09',
-    amount: '₦25,150',
-    status: 'Underpaid',
-  },
-  {
-    id: 10,
-    name: 'Chijioke Okafor',
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop&auto=format&q=80',
-    date: '2026-02-08',
-    amount: '₦20,000',
-    status: 'Reversed',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 
 const statusColors: Record<string, string> = {
   Reconciled: 'bg-[#effaf2] text-[#0f8b4b] border-[#d4eedb]',
@@ -107,6 +15,18 @@ const statusColors: Record<string, string> = {
 };
 
 export default function RecentTransactionsTable() {
+  const { data: transactions = [], isLoading } = useQuery({
+    queryKey: ['transactions'],
+    queryFn: async () => {
+      const res = await api.get('/transactions');
+      return Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+    },
+  });
+
   return (
     <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm space-y-6">
       <div className="flex items-center justify-between">
@@ -157,35 +77,91 @@ export default function RecentTransactionsTable() {
             </tr>
           </thead>
           <tbody className="divide-y divide-[#f0f4f1]">
-            {recentTransactions.map((tx) => (
-              <tr key={tx.id} className="text-sm hover:bg-[#f7faf6]/40 transition-colors">
-                <td className="py-3.5 flex items-center gap-3">
-                  <img
-                    src={tx.avatar}
-                    alt={tx.name}
-                    className="w-8 h-8 rounded-full object-cover border border-[#ebebeb]"
-                  />
-                  <span className="font-semibold text-[#081b10]">{tx.name}</span>
-                </td>
-                <td className="py-3.5 text-[#45504b]">{tx.date}</td>
-                <td className="py-3.5 font-semibold text-[#081b10]">{tx.amount}</td>
-                <td className="py-3.5">
-                  <span
-                    className={cn(
-                      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border',
-                      statusColors[tx.status],
-                    )}
-                  >
-                    {tx.status}
-                  </span>
-                </td>
-                <td className="py-3.5 text-right">
-                  <button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-lg hover:bg-[#f3f4f6]">
-                    <MoreVertical size={16} />
-                  </button>
+            {isLoading ? (
+              [1, 2, 3, 4, 5].map((i) => (
+                <tr key={i} className="animate-pulse">
+                  <td className="py-3.5 flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full bg-gray-200" />
+                    <div className="h-4 bg-gray-200 rounded w-28" />
+                  </td>
+                  <td className="py-3.5">
+                    <div className="h-4 bg-gray-200 rounded w-16" />
+                  </td>
+                  <td className="py-3.5">
+                    <div className="h-4 bg-gray-200 rounded w-16" />
+                  </td>
+                  <td className="py-3.5">
+                    <div className="h-5 bg-gray-200 rounded-full w-20" />
+                  </td>
+                  <td className="py-3.5 text-right">
+                    <div className="h-6 bg-gray-200 rounded w-6 ml-auto" />
+                  </td>
+                </tr>
+              ))
+            ) : transactions.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="py-8 text-center text-sm text-[#45504b]">
+                  No recent transactions found.
                 </td>
               </tr>
-            ))}
+            ) : (
+              transactions.slice(0, 10).map((tx: any) => {
+                const txId = tx.id || '';
+                const txName = tx.name || tx.customer?.name || tx.customerName || 'Anonymous';
+                const txAvatar =
+                  tx.avatar ||
+                  'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop&auto=format&q=80';
+                const txDate = tx.date || tx.createdAt?.split('T')[0] || '';
+                const txStatus = tx.status || 'Pending';
+
+                const formatCurrency = (val: number) => {
+                  return new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: tx.currency || 'NGN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(val);
+                };
+
+                const amountStr =
+                  typeof tx.amount === 'number' ? formatCurrency(tx.amount) : tx.amount;
+
+                // Format status matching statusColors keys
+                const mappedStatus =
+                  txStatus.charAt(0).toUpperCase() + txStatus.slice(1).toLowerCase();
+                const statusClass = statusColors[mappedStatus] || statusColors['Pending'];
+
+                return (
+                  <tr key={txId} className="text-sm hover:bg-[#f7faf6]/40 transition-colors">
+                    <td className="py-3.5 flex items-center gap-3">
+                      <img
+                        src={txAvatar}
+                        alt={txName}
+                        className="w-8 h-8 rounded-full object-cover border border-[#ebebeb]"
+                      />
+                      <span className="font-semibold text-[#081b10]">{txName}</span>
+                    </td>
+                    <td className="py-3.5 text-[#45504b]">{txDate}</td>
+                    <td className="py-3.5 font-semibold text-[#081b10]">{amountStr}</td>
+                    <td className="py-3.5">
+                      <span
+                        className={cn(
+                          'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border',
+                          statusClass,
+                        )}
+                      >
+                        {mappedStatus}
+                      </span>
+                    </td>
+                    <td className="py-3.5 text-right">
+                      <button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-lg hover:bg-[#f3f4f6]">
+                        <MoreVertical size={16} />
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

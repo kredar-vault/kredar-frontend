@@ -58,6 +58,12 @@ export default function SettingsPage() {
   const [profile, setProfile] = useState<ProfileData>(initialProfile);
   const [team, setTeam] = useState<TeamMember[]>(initialTeam);
   const [apiKeys, setApiKeys] = useState<ApiKey[]>(initialApiKeys);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 500);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     try {
@@ -187,26 +193,89 @@ export default function SettingsPage() {
         </div>
 
         {/* Render Active Tab */}
-        {activeTab === 'profile' && (
-          <ProfileTab profile={profile} setProfile={setProfile} onSave={handleSaveProfile} />
+        {loading ? (
+          <div className="space-y-6 animate-pulse">
+            {activeTab === 'profile' && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="h-4 bg-gray-200 rounded w-24" />
+                    <div className="h-10 bg-gray-100 rounded-xl w-full" />
+                  </div>
+                ))}
+              </div>
+            )}
+            {activeTab === 'team' && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="h-4 bg-gray-200 rounded w-32" />
+                  <div className="h-10 bg-gray-200 rounded-xl w-24" />
+                </div>
+                <div className="space-y-2.5 pt-2">
+                  {[1, 2, 3].map((i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between items-center py-3 border-b border-[#f0f4f1]"
+                    >
+                      <div className="space-y-1">
+                        <div className="h-4 bg-gray-200 rounded w-32" />
+                        <div className="h-3.5 bg-gray-200 rounded w-48" />
+                      </div>
+                      <div className="h-8 bg-gray-100 rounded-lg w-20" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            {activeTab === 'developers' && (
+              <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                  <div className="h-4 bg-gray-200 rounded w-40" />
+                  <div className="h-10 bg-gray-200 rounded-xl w-32" />
+                </div>
+                <div className="space-y-3 pt-2">
+                  <div className="flex justify-between items-center py-4 border-b border-[#f0f4f1]">
+                    <div className="h-4 bg-gray-200 rounded w-28" />
+                    <div className="h-4 bg-gray-200 rounded w-48" />
+                  </div>
+                </div>
+              </div>
+            )}
+            {activeTab === 'security' && (
+              <div className="max-w-md space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="space-y-1.5">
+                    <div className="h-4 bg-gray-200 rounded w-28" />
+                    <div className="h-10 bg-gray-100 rounded-xl w-full" />
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <>
+            {activeTab === 'profile' && (
+              <ProfileTab profile={profile} setProfile={setProfile} onSave={handleSaveProfile} />
+            )}
+            {activeTab === 'team' && (
+              <TeamTab
+                team={team}
+                setTeam={setTeam}
+                onAddMember={handleAddTeamMember}
+                onSaveMember={handleSaveTeamMember}
+                onDeleteMember={handleDeleteTeamMember}
+              />
+            )}
+            {activeTab === 'developers' && (
+              <DevelopersTab
+                apiKeys={apiKeys}
+                onCreateKey={handleCreateApiKey}
+                onDeleteKey={handleDeleteApiKey}
+              />
+            )}
+            {activeTab === 'security' && <SecurityTab />}
+          </>
         )}
-        {activeTab === 'team' && (
-          <TeamTab
-            team={team}
-            setTeam={setTeam}
-            onAddMember={handleAddTeamMember}
-            onSaveMember={handleSaveTeamMember}
-            onDeleteMember={handleDeleteTeamMember}
-          />
-        )}
-        {activeTab === 'developers' && (
-          <DevelopersTab
-            apiKeys={apiKeys}
-            onCreateKey={handleCreateApiKey}
-            onDeleteKey={handleDeleteApiKey}
-          />
-        )}
-        {activeTab === 'security' && <SecurityTab />}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import KredarLogo from '@/components/KredarLogo';
 
 export default function LandingFooter() {
   return (
@@ -8,21 +9,7 @@ export default function LandingFooter() {
       <div className="max-w-7xl mx-auto flex flex-col gap-12 lg:flex-row lg:items-start lg:justify-between">
         <div className="space-y-4 max-w-xs">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 bg-[#0f8b4b] rounded flex items-center justify-center flex-shrink-0">
-              <img src="/images/Vector(1).png" alt="Kredar" className="w-3.5 h-3.5 text-black" />
-            </div>
-            <span
-              style={{
-                color: '#FFF',
-                fontFamily: 'var(--font-lexend-zetta)',
-                fontSize: '11px',
-                fontWeight: 400,
-                letterSpacing: '1.2px',
-              }}
-              className="uppercase tracking-[0.11em] select-none"
-            >
-              KREDAR
-            </span>
+            <KredarLogo light />
           </Link>
           <p className="text-white/60 leading-relaxed text-xs">
             Infrastructure for Smarter Payments
