@@ -2,134 +2,148 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import AuthPageShell from '@/components/auth/AuthPageShell';
-import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-
-const verifySchema = z.object({
-  code: z.string().length(6, 'Verification code must be exactly 6 digits'),
-});
-
-type VerifyValues = z.infer<typeof verifySchema>;
+import { api } from '@/lib/api';
+import { Mail, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get('email') || '';
 
-  const [rootError, setRootError] = useState('');
+  const token = searchParams.get('token') || '';
+  const email =
+    searchParams.get('email') ||
+    (typeof window !== 'undefined' ? localStorage.getItem('kredar_registered_email') : '') ||
+    '';
+
+  const [status, setStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
+  const [error, setError] = useState('');
   const [resending, setResending] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<VerifyValues>({ resolver: zodResolver(verifySchema) });
-
   useEffect(() => {
-    if (!email) {
-      toast.error('Missing email address. Redirecting...');
-      router.replace('/auth/signup');
-    }
-  }, [email, router]);
+    const verifyToken = async (verifyToken: string) => {
+      setStatus('verifying');
+      setError('');
+      try {
+        const response = await api.get('/auth/verify-email', {
+          params: {
+            token: verifyToken,
+          },
+        });
 
-  const onSubmit = async (values: VerifyValues) => {
-    setRootError('');
-    try {
-      const storedCode = localStorage.getItem(`otp_verify_${email}`);
-      if (!storedCode || storedCode !== values.code) {
-        setRootError('Invalid or expired verification code.');
-        return;
+        const userToken = response.data.token || response.data.data?.token;
+        const user = response.data.user || response.data.data?.user || { email };
+
+        if (userToken) {
+          localStorage.setItem('kredar_token', userToken);
+          localStorage.setItem('kredar_current_user', JSON.stringify(user));
+        }
+
+        setStatus('success');
+        toast.success('Email verified successfully! Please sign in.');
+        setTimeout(() => {
+          router.replace('/auth/login');
+        }, 1500);
+      } catch (e: any) {
+        setStatus('error');
+        const msg =
+          e.response?.data?.message ||
+          e.message ||
+          'Email verification link is invalid or has expired.';
+        setError(msg);
       }
+    };
 
-      // Mark user as verified in localStorage db
-      const users: any[] = JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
-      const userIndex = users.findIndex((u) => u.email === email);
-
-      if (userIndex !== -1) {
-        users[userIndex].verified = true;
-        localStorage.setItem('kredar_users', JSON.stringify(users));
-
-        // Log in the verified user
-        const loggedUser = users[userIndex];
-        localStorage.setItem('kredar_token', `mock-token-${loggedUser.id}-${Date.now()}`);
-        localStorage.setItem('kredar_current_user', JSON.stringify(loggedUser));
-
-        // Remove code
-        localStorage.removeItem(`otp_verify_${email}`);
-
-        toast.success('Email verified successfully!');
-        router.replace('/onboarding');
-      } else {
-        setRootError('User profile not found. Please sign up again.');
-      }
-    } catch (e) {
-      setRootError('Verification failed. Please try again.');
+    if (token) {
+      verifyToken(token);
+    } else {
+      setStatus('idle');
     }
-  };
+  }, [token, email, router]);
 
   const handleResend = async () => {
+    if (!email) {
+      toast.error('Email address not found. Please sign up again.');
+      return;
+    }
     setResending(true);
     try {
-      const newCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const { sendVerificationEmail } = await import('@/lib/email');
-      await sendVerificationEmail(email, newCode);
-      toast.success('A new verification code has been simulated.');
-    } catch {
-      toast.error('Failed to resend code.');
+      await api.post('/auth/resend-verification', { email });
+      toast.success('Verification link resent successfully!');
+    } catch (e: any) {
+      const msg = e.response?.data?.message || e.message || 'Failed to resend verification link.';
+      toast.error(msg);
     } finally {
       setResending(false);
     }
   };
 
-  return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
-      <div className="space-y-5">
-        <p className="text-sm text-[#45504b] text-center">
-          We sent a 6-digit verification code to{' '}
-          <span className="font-semibold text-[#081b10]">{email}</span>
+  if (status === 'verifying') {
+    return (
+      <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
+        <Loader2 className="w-10 h-10 text-[#0f8b4b] animate-spin" />
+        <p className="text-sm font-medium text-[#45504b]">
+          Verifying your email address, please wait...
         </p>
+      </div>
+    );
+  }
 
-        {/* Code Input */}
-        <div>
-          <label htmlFor="code" className="kredar-label">
-            Verification Code
-          </label>
-          <input
-            id="code"
-            type="text"
-            maxLength={6}
-            placeholder="000000"
-            {...register('code')}
-            className={cn(
-              'kredar-input tracking-[0.5em] text-center text-lg font-bold',
-              errors.code && 'input-error',
-            )}
-          />
-          {errors.code && <p className="kredar-error-text">{errors.code.message}</p>}
-        </div>
+  if (status === 'success') {
+    return (
+      <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
+        <CheckCircle2 className="w-12 h-12 text-[#0f8b4b]" />
+        <h3 className="text-lg font-bold text-[#081b10]">Verification Successful!</h3>
+        <p className="text-sm text-[#45504b]">Taking you to onboarding...</p>
+      </div>
+    );
+  }
 
-        {rootError && <p className="text-sm text-[#ef4444] text-center">{rootError}</p>}
+  if (status === 'error') {
+    return (
+      <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
+        <AlertCircle className="w-12 h-12 text-[#ef4444]" />
+        <h3 className="text-lg font-bold text-[#ef4444]">Verification Failed</h3>
+        <p className="text-sm text-[#45504b] max-w-xs">{error}</p>
+        <button
+          onClick={() => router.replace('/auth/signup')}
+          className="kredar-btn-primary w-full max-w-xs mt-2"
+        >
+          Back to Sign Up
+        </button>
+      </div>
+    );
+  }
 
-        <button type="submit" disabled={isSubmitting} className="kredar-btn-primary w-full">
-          {isSubmitting ? 'Verifying…' : 'Verify Email'}
+  return (
+    <div className="flex flex-col items-center py-4 text-center space-y-5">
+      <div className="w-16 h-16 bg-[#effaf2] rounded-full flex items-center justify-center text-[#0f8b4b] mb-2">
+        <Mail size={32} />
+      </div>
+      <p className="text-sm text-[#45504b] leading-relaxed">
+        We've sent a confirmation link to{' '}
+        <span className="font-semibold text-[#081b10] break-all">
+          {email || 'your email address'}
+        </span>
+        . Please click the button in that email to confirm your account.
+      </p>
+
+      <div className="w-full pt-4 space-y-3">
+        <button
+          type="button"
+          disabled={resending}
+          onClick={handleResend}
+          className="kredar-btn-primary w-full"
+        >
+          {resending ? 'Resending Link...' : 'Resend link'}
         </button>
 
-        <div className="text-center pt-2">
-          <button
-            type="button"
-            disabled={resending}
-            onClick={handleResend}
-            className="text-xs text-[#0f8b4b] hover:underline font-medium disabled:opacity-50"
-          >
-            {resending ? 'Sending…' : "Didn't receive code? Resend"}
-          </button>
-        </div>
+        <p className="text-xs text-[#8c9c94] mt-2">
+          Didn't receive the email? Check your spam folder or click above to request a new link.
+        </p>
       </div>
-    </form>
+    </div>
   );
 }
 

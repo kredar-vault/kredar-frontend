@@ -10,6 +10,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import AuthLoadingModal from '@/components/auth/AuthLoadingModal';
 import { cn } from '@/lib/utils';
+import { api } from '@/lib/api';
 
 const signupSchema = z
   .object({
@@ -40,35 +41,29 @@ export default function SignupPage() {
   const onSubmit = async (values: SignupValues) => {
     setRootError('');
     try {
-      const users: { id: number; email: string; password: string; verified?: boolean }[] =
-        JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
-
-      if (users.find((u) => u.email === values.email)) {
-        setError('email', { message: 'An account with this email already exists.' });
-        return;
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('kredar_registered_email', values.email);
+        localStorage.removeItem('kredar_token');
+        localStorage.removeItem('kredar_onboarding_complete');
+        localStorage.removeItem('kredar_current_user');
       }
 
-      // Generate a 6-digit verification code
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-      // Save user with verified = false
-      const newUser = {
-        id: Date.now(),
+      await api.post('/auth/register', {
         email: values.email,
         password: values.password,
-        verified: false,
-      };
-      users.push(newUser);
-      localStorage.setItem('kredar_users', JSON.stringify(users));
-
-      // Import the helper dynamically or call it directly
-      const { sendVerificationEmail } = await import('@/lib/email');
-      await sendVerificationEmail(values.email, verificationCode);
+        confirmPassword: values.confirmPassword,
+      });
 
       // Redirect to verification page
       router.push(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
-    } catch (e) {
-      setRootError('Something went wrong. Please try again.');
+    } catch (e: any) {
+      const msg =
+        e.response?.data?.message || e.message || 'Something went wrong. Please try again.';
+      if (msg.toLowerCase().includes('email') || msg.toLowerCase().includes('exists')) {
+        setError('email', { message: msg });
+      } else {
+        setRootError(msg);
+      }
     }
   };
 

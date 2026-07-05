@@ -9,6 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 const resetSchema = z
   .object({
@@ -48,32 +49,25 @@ function ResetPasswordForm() {
   const onSubmit = async (values: ResetValues) => {
     setRootError('');
     try {
-      const storedCode = localStorage.getItem(`otp_reset_${email}`);
-      if (!storedCode || storedCode !== values.code) {
-        setRootError('Invalid or expired reset code.');
+      const response = await api.post('/auth/reset-password', {
+        token: values.code,
+        newPassword: values.password,
+        confirmPassword: values.confirmPassword,
+      });
+
+      if (response.data && response.data.isSuccess === false) {
+        setRootError(response.data.message || 'Failed to reset password. Please try again.');
         return;
       }
 
-      // Update password in local database
-      const users: any[] = JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
-      const userIndex = users.findIndex((u) => u.email === email);
-
-      if (userIndex !== -1) {
-        users[userIndex].password = values.password;
-        // Automatically verify user if not verified
-        users[userIndex].verified = true;
-        localStorage.setItem('kredar_users', JSON.stringify(users));
-
-        // Clean up reset code
-        localStorage.removeItem(`otp_reset_${email}`);
-
-        toast.success('Password reset successfully! Please sign in.');
-        router.replace('/auth/login');
-      } else {
-        setRootError('User profile not found.');
-      }
-    } catch {
-      setRootError('Failed to reset password. Please try again.');
+      toast.success('Password reset successfully! Please sign in.');
+      router.replace('/auth/login');
+    } catch (e: any) {
+      const msg =
+        e.response?.data?.message ||
+        e.message ||
+        'Failed to reset password. Please check the code.';
+      setRootError(msg);
     }
   };
 

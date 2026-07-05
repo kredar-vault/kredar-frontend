@@ -1,5 +1,3 @@
-'use client';
-
 import { ChevronDown, Filter } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -11,24 +9,56 @@ import {
   Legend,
   CartesianGrid,
 } from 'recharts';
-
-// Mock chart data for Incoming/Outgoing transactions
-const chartData = [
-  { name: 'Jan', Incoming: 1500, Outgoing: 4300 },
-  { name: 'Feb', Incoming: 3200, Outgoing: 3000 },
-  { name: 'Mar', Incoming: 2500, Outgoing: 3500 },
-  { name: 'Apr', Incoming: 2200, Outgoing: 5000 },
-  { name: 'May', Incoming: 4500, Outgoing: 7500 },
-  { name: 'Jun', Incoming: 5000, Outgoing: 6200 },
-  { name: 'Jul', Incoming: 7800, Outgoing: 3800 },
-  { name: 'Aug', Incoming: 6800, Outgoing: 2400 },
-  { name: 'Sep', Incoming: 9000, Outgoing: 2200 },
-  { name: 'Oct', Incoming: 6500, Outgoing: 4500 },
-  { name: 'Nov', Incoming: 3800, Outgoing: 3800 },
-  { name: 'Dec', Incoming: 4800, Outgoing: 2200 },
-];
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 
 export default function TransactionFlowChart() {
+  const { data: transactions = [], isLoading } = useQuery({
+    queryKey: ['transactions'],
+    queryFn: async () => {
+      const res = await api.get('/transactions');
+      return Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+    },
+  });
+
+  // Setup monthly buckets
+  const chartData = [
+    { name: 'Jan', Incoming: 0, Outgoing: 0 },
+    { name: 'Feb', Incoming: 0, Outgoing: 0 },
+    { name: 'Mar', Incoming: 0, Outgoing: 0 },
+    { name: 'Apr', Incoming: 0, Outgoing: 0 },
+    { name: 'May', Incoming: 0, Outgoing: 0 },
+    { name: 'Jun', Incoming: 0, Outgoing: 0 },
+    { name: 'Jul', Incoming: 0, Outgoing: 0 },
+    { name: 'Aug', Incoming: 0, Outgoing: 0 },
+    { name: 'Sep', Incoming: 0, Outgoing: 0 },
+    { name: 'Oct', Incoming: 0, Outgoing: 0 },
+    { name: 'Nov', Incoming: 0, Outgoing: 0 },
+    { name: 'Dec', Incoming: 0, Outgoing: 0 },
+  ];
+
+  transactions.forEach((tx: any) => {
+    const txDate = tx.createdAt || tx.date;
+    if (!txDate) return;
+    const dateObj = new Date(txDate);
+    const monthIndex = dateObj.getMonth();
+    if (monthIndex >= 0 && monthIndex < 12) {
+      const amount = tx.amount || 0;
+      const type = (tx.type || '').toLowerCase();
+      // Outgoing is identified by transfers or payouts
+      const isOutgoing = type.includes('transfer') || type.includes('payout');
+      if (isOutgoing) {
+        chartData[monthIndex].Outgoing += amount;
+      } else {
+        chartData[monthIndex].Incoming += amount;
+      }
+    }
+  });
+
   return (
     <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm space-y-6">
       <div className="flex items-center justify-between">
@@ -60,61 +90,79 @@ export default function TransactionFlowChart() {
 
       {/* Recharts chart area */}
       <div className="h-[320px] w-full">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f4f1" />
-            <XAxis
-              dataKey="name"
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#45504b', fontSize: 11 }}
-            />
-            <YAxis
-              axisLine={false}
-              tickLine={false}
-              tick={{ fill: '#45504b', fontSize: 11 }}
-              domain={[0, 10000]}
-              ticks={[0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 8000, 9000, 10000]}
-            />
-            <Tooltip
-              content={({ active, payload }) => {
-                if (active && payload && payload.length) {
-                  return (
-                    <div className="bg-white px-3 py-1.5 rounded-lg border border-[#d8e1da] shadow-md text-xs font-bold text-[#081b10]">
-                      5,000
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
-            <Legend
-              verticalAlign="bottom"
-              height={36}
-              iconType="square"
-              iconSize={10}
-              formatter={(value) => (
-                <span className="text-xs text-[#45504b] font-medium ml-1 mr-4">{value}</span>
-              )}
-            />
-            <Line
-              type="monotone"
-              dataKey="Incoming"
-              stroke="#0f8b4b"
-              strokeWidth={2.5}
-              dot={false}
-              activeDot={{ r: 5, fill: '#0f8b4b', strokeWidth: 0 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="Outgoing"
-              stroke="#10422a"
-              strokeWidth={2.5}
-              dot={false}
-              activeDot={{ r: 5, fill: '#10422a', strokeWidth: 0 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        {isLoading ? (
+          <div className="w-full h-full bg-gray-100 rounded-xl animate-pulse" />
+        ) : (
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f4f1" />
+              <XAxis
+                dataKey="name"
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#45504b', fontSize: 11 }}
+              />
+              <YAxis
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: '#45504b', fontSize: 11 }}
+                tickFormatter={(value) => {
+                  if (value >= 1000) {
+                    return `₦${(value / 1000).toFixed(0)}k`;
+                  }
+                  return `₦${value}`;
+                }}
+              />
+              <Tooltip
+                content={({ active, payload }) => {
+                  if (active && payload && payload.length) {
+                    return (
+                      <div className="bg-white p-2 rounded-lg border border-[#d8e1da] shadow-md text-xs font-semibold text-[#081b10] space-y-1">
+                        {payload.map((entry) => (
+                          <p key={entry.name} style={{ color: entry.color }}>
+                            {entry.name}:{' '}
+                            {new Intl.NumberFormat('en-NG', {
+                              style: 'currency',
+                              currency: 'NGN',
+                              minimumFractionDigits: 0,
+                              maximumFractionDigits: 0,
+                            }).format(entry.value as number)}
+                          </p>
+                        ))}
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Legend
+                verticalAlign="bottom"
+                height={36}
+                iconType="square"
+                iconSize={10}
+                formatter={(value) => (
+                  <span className="text-xs text-[#45504b] font-medium ml-1 mr-4">{value}</span>
+                )}
+              />
+              <Line
+                type="monotone"
+                dataKey="Incoming"
+                stroke="#0f8b4b"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5, fill: '#0f8b4b', strokeWidth: 0 }}
+              />
+              <Line
+                type="monotone"
+                dataKey="Outgoing"
+                stroke="#10422a"
+                strokeWidth={2.5}
+                dot={false}
+                activeDot={{ r: 5, fill: '#10422a', strokeWidth: 0 }}
+              />
+            </LineChart>
+          </ResponsiveContainer>
+        )}
       </div>
     </div>
   );

@@ -1,79 +1,53 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Plus } from 'lucide-react';
 import Link from 'next/link';
 import CustomersTable, { CustomerItem } from '@/components/features/customers/CustomersTable';
 import CustomersFilters from '@/components/features/customers/CustomersFilters';
-
-// Mock Customers data
-const customersData: CustomerItem[] = [
-  {
-    id: 'CUST-3920-18',
-    name: 'Chinonso Okeke',
-    email: 'chinonso.okeke@gmail.com',
-    phone: '+234 812 345 6789',
-    status: 'Verified',
-    registrationDate: '2026-02-23',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop&auto=format&q=80',
-  },
-  {
-    id: 'CUST-8492-01',
-    name: 'Fatima Abubakar',
-    email: 'fatima.abubakar@gmail.com',
-    phone: '+234 803 111 2222',
-    status: 'Verified',
-    registrationDate: '2026-02-23',
-    avatar:
-      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&fit=crop&auto=format&q=80',
-  },
-  {
-    id: 'CUST-1049-38',
-    name: 'Tunde Adeyemi',
-    email: 'tunde.adeyemi@gmail.com',
-    phone: '+234 905 555 6666',
-    status: 'Verified',
-    registrationDate: '2026-02-23',
-    avatar:
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&fit=crop&auto=format&q=80',
-  },
-  {
-    id: 'CUST-5839-20',
-    name: 'Oluwaseun Adebayo',
-    email: 'seun.adebayo@gmail.com',
-    phone: '+234 815 444 3333',
-    status: 'Verified',
-    registrationDate: '2026-02-23',
-    avatar:
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&fit=crop&auto=format&q=80',
-  },
-  {
-    id: 'CUST-4829-10',
-    name: 'Zainab Ibrahim',
-    email: 'zainab.ibrahim@gmail.com',
-    phone: '+234 708 999 8888',
-    status: 'Verified',
-    registrationDate: '2026-02-23',
-    avatar:
-      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80&fit=crop&auto=format&q=80',
-  },
-];
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/api';
 
 export default function CustomersPage() {
   const [searchQuery, setSearchQuery] = useState('');
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 500);
-    return () => clearTimeout(timer);
-  }, []);
+  const { data: rawCustomers = [], isLoading } = useQuery({
+    queryKey: ['customers'],
+    queryFn: async () => {
+      const res = await api.get('/customers');
+      return Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+    },
+  });
 
-  const filteredCustomers = customersData.filter(
+  // Map backend customer items safely to CustomerItem schema
+  const customers: CustomerItem[] = rawCustomers.map((c: any) => ({
+    id: c.id || c.customerId || '',
+    name: c.name || c.fullName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Anonymous',
+    email: c.email || '',
+    phone: c.phone || c.phoneNumber || '',
+    status: c.status || 'Pending',
+    registrationDate: c.registrationDate || c.createdAt?.split('T')[0] || '',
+    avatar:
+      c.avatar ||
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop&auto=format&q=80',
+  }));
+
+  const filteredCustomers = customers.filter(
     (c) =>
       c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       c.id.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  // Compile active totals
+  const totalCustomers = customers.length;
+  const activeWallets = customers.filter(
+    (c) => c.status.toLowerCase() === 'active' || c.status.toLowerCase() === 'verified',
+  ).length;
+  const kycVerified = customers.filter((c) => c.status.toLowerCase() === 'verified').length;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -94,7 +68,7 @@ export default function CustomersPage() {
         </Link>
       </div>
 
-      {loading ? (
+      {isLoading ? (
         /* SKELETAL LOADING STATE */
         <>
           {/* Skeletons: Cards */}
@@ -102,10 +76,10 @@ export default function CustomersPage() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-white border border-[#d8e1da] rounded-2xl p-6 min-h-[120px] flex flex-col justify-between shadow-sm"
+                className="bg-white border border-[#d8e1da] rounded-2xl p-6 min-h-[120px] flex flex-col justify-between shadow-sm animate-pulse"
               >
-                <div className="h-4 bg-gray-200 rounded animate-pulse w-28" />
-                <div className="h-8 bg-gray-200 rounded animate-pulse w-16 mt-2" />
+                <div className="h-4 bg-gray-200 rounded w-28" />
+                <div className="h-8 bg-gray-200 rounded w-16 mt-2" />
               </div>
             ))}
           </div>
@@ -141,15 +115,21 @@ export default function CustomersPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
               <span className="text-sm font-medium text-[#45504b]">Total Customers</span>
-              <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">5</span>
+              <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">
+                {totalCustomers}
+              </span>
             </div>
             <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
               <span className="text-sm font-medium text-[#45504b]">Active Wallets</span>
-              <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">5</span>
+              <span className="text-3xl font-bold text-[#081b10] mt-2 tracking-tight">
+                {activeWallets}
+              </span>
             </div>
             <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 flex flex-col justify-between min-h-[120px] shadow-sm">
               <span className="text-sm font-medium text-[#45504b]">KYC Verified</span>
-              <span className="text-3xl font-bold text-[#0f8b4b] mt-2 tracking-tight">5</span>
+              <span className="text-3xl font-bold text-[#0f8b4b] mt-2 tracking-tight">
+                {kycVerified}
+              </span>
             </div>
           </div>
 
