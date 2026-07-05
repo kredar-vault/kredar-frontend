@@ -55,4 +55,7 @@ declare module 'lucide-react' {
   export const Lock: LucideIcon;
   export const Edit2: LucideIcon;
   export const X: LucideIcon;
+  export const Mail: LucideIcon;
+  export const Copy: LucideIcon;
+  export const Check: LucideIcon;
 }
