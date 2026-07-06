@@ -60,4 +60,8 @@ declare module 'lucide-react' {
   export const Check: LucideIcon;
   export const ArrowRight: LucideIcon;
   export const Globe: LucideIcon;
+  export const Webhook: LucideIcon;
+  export const RotateCcw: LucideIcon;
+  export const Ban: LucideIcon;
+  export const ScrollText: LucideIcon;
 }
