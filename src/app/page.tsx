@@ -204,13 +204,14 @@ export default function Home() {
             </button>
           </div>
 
-          {/* Empty Space Placeholder for Dashboard Image */}
+          {/* Dashboard Image Preview */}
           <div className="w-full max-w-4xl aspect-[1.3] md:aspect-[1.5] border border-emerald-800/20 bg-zinc-950/40 rounded-2xl shadow-[0_20px_50px_rgba(4,18,10,0.8)] backdrop-blur-sm mx-auto overflow-hidden relative group">
-            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/20 to-transparent pointer-events-none" />
-            {/* Styled inner area left empty for the dashboard image */}
-            <div className="absolute inset-0 flex items-center justify-center text-zinc-750 font-mono text-sm border-2 border-dashed border-emerald-950/20 rounded-2xl m-4">
-              [Dashboard Mockup Image Container - Drop Image Here]
-            </div>
+            <div className="absolute inset-0 bg-gradient-to-tr from-emerald-950/15 to-transparent pointer-events-none z-10" />
+            <img
+              src="/images/minidb.png"
+              alt="Kredar Dashboard Preview"
+              className="w-full h-full object-cover object-top opacity-90 group-hover:scale-[1.01] transition-transform duration-700 ease-out"
+            />
           </div>
         </div>
       </section>
@@ -452,13 +453,15 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Empty space placeholder for infrastructure phone mockup image */}
+            {/* Infrastructure phone mockup image */}
             <div className="lg:col-span-7">
-              <div className="w-full aspect-[1.3] border border-emerald-800/20 bg-zinc-950/40 rounded-2xl shadow-[0_20px_50px_rgba(4,18,10,0.8)] backdrop-blur-sm overflow-hidden relative">
-                <div className="absolute inset-0 bg-gradient-to-bl from-emerald-950/10 to-transparent pointer-events-none" />
-                <div className="absolute inset-0 flex items-center justify-center text-zinc-750 font-mono text-sm border-2 border-dashed border-emerald-950/20 rounded-2xl m-4">
-                  [Mobile Phone Mockups Container - Drop Image Here]
-                </div>
+              <div className="w-full aspect-[1.3] border border-emerald-800/20 bg-zinc-950/40 rounded-2xl shadow-[0_20px_50px_rgba(4,18,10,0.8)] backdrop-blur-sm overflow-hidden relative group">
+                <div className="absolute inset-0 bg-gradient-to-bl from-emerald-950/10 to-transparent pointer-events-none z-10" />
+                <img
+                  src="/images/phones.png"
+                  alt="Kredar Mobile Mockups"
+                  className="w-full h-full object-cover object-center opacity-90 group-hover:scale-[1.01] transition-transform duration-700 ease-out"
+                />
               </div>
             </div>
           </div>

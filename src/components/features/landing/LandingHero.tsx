@@ -145,18 +145,6 @@ export default function LandingHero() {
           </div>
 
           {/* Right: Gold Hand holding transparent ATM cards */}
-          <div className="relative w-full h-[460px] flex items-center justify-center z-10 animate-scale-in">
-            {/* Background Glow behind the hand */}
-            <div className="hero-gradient absolute pointer-events-none select-none z-0 opacity-50 scale-50" />
-            <img
-              src="images/minidb.png"
-              alt="Kredar ATM cards"
-              className="max-w-full max-h-full object-contain pointer-events-none absolute z-10"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          </div>
         </div>
 
         {/* Bottom Information Grids styled like Figma screen */}
