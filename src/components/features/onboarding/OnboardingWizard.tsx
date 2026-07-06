@@ -1,11 +1,9 @@
 'use client';
-import AuthPageShell from '@/components/auth/AuthPageShell';
-import { api } from '@/lib/api';
-import { toast } from 'sonner';
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import KredarLogo from '@/components/KredarLogo';
 import StepIndicator from './StepIndicator';
 import Step1BusinessInfo, { type Step1Data } from './Step1BusinessInfo';
@@ -13,6 +11,15 @@ import Step2BusinessVerification, { type Step2Data } from './Step2BusinessVerifi
 import Step3Account, { type Step3Data } from './Step3Account';
 import Step4ReviewSubmit from './Step4ReviewSubmit';
 import SuccessScreen from './SuccessScreen';
+import { api } from '@/lib/api';
+import { useSubmitOnboarding } from '@/api/tenant/hooks';
+import {
+  getCurrentUser,
+  setOnboardingComplete,
+  getOnboardingDraft,
+  setOnboardingDraft,
+  clearOnboardingDraft,
+} from '@/lib/cookies';
 
 interface OnboardingData {
   businessInfo: Step1Data | null;
@@ -38,25 +45,20 @@ export default function OnboardingWizard() {
     accountDetails: null,
   });
 
-  // Save progress helper
+  const submitMutation = useSubmitOnboarding();
+
   const saveProgress = (step: number, updatedData: OnboardingData) => {
-    if (typeof window !== 'undefined') {
-      const user = JSON.parse(localStorage.getItem('kredar_current_user') || '{}');
-      const userKey = user.email
-        ? `kredar_onboarding_state_${user.email}`
-        : 'kredar_onboarding_state';
-      localStorage.setItem(
-        userKey,
-        JSON.stringify({
-          currentStep: step,
-          businessInfo: updatedData.businessInfo,
-          accountDetails: updatedData.accountDetails,
-        }),
-      );
-    }
+    const user = getCurrentUser();
+    setOnboardingDraft(
+      {
+        currentStep: step,
+        businessInfo: updatedData.businessInfo,
+        accountDetails: updatedData.accountDetails,
+      },
+      user?.email,
+    );
   };
 
-  // Mount checks: Load saved progress & redirect if already onboarded
   useEffect(() => {
     const initOnboarding = async () => {
       try {
@@ -66,7 +68,7 @@ export default function OnboardingWizard() {
           onboarding &&
           (onboarding.status === 'UnderReview' || onboarding.status === 'Approved')
         ) {
-          localStorage.setItem('kredar_onboarding_complete', 'true');
+          setOnboardingComplete(true);
           toast.success('Your application is under review. Redirecting to dashboard...');
           router.replace('/dashboard');
           return;
@@ -75,7 +77,7 @@ export default function OnboardingWizard() {
         const res = await api.get('/tenants/profile');
         const profile = res.data?.data || res.data;
         if (profile && (profile.legalName || profile.businessName || profile.isOnboarded)) {
-          localStorage.setItem('kredar_onboarding_complete', 'true');
+          setOnboardingComplete(true);
           toast.success('You have already completed onboarding!');
           router.replace('/dashboard');
           return;
@@ -84,28 +86,18 @@ export default function OnboardingWizard() {
         console.error('Failed to load profile/onboarding status on mount:', err);
       }
 
-      if (typeof window !== 'undefined') {
-        const user = JSON.parse(localStorage.getItem('kredar_current_user') || '{}');
-        const userKey = user.email
-          ? `kredar_onboarding_state_${user.email}`
-          : 'kredar_onboarding_state';
-        const savedState = localStorage.getItem(userKey);
-        if (savedState) {
-          try {
-            const parsed = JSON.parse(savedState);
-            if (parsed.currentStep) {
-              setCurrentStep(parsed.currentStep);
-            }
-            if (parsed.businessInfo || parsed.accountDetails) {
-              setData((prev) => ({
-                ...prev,
-                businessInfo: parsed.businessInfo || null,
-                accountDetails: parsed.accountDetails || null,
-              }));
-            }
-          } catch (e) {
-            console.error('Failed to parse saved state:', e);
-          }
+      const user = getCurrentUser();
+      const savedState = getOnboardingDraft(user?.email);
+      if (savedState) {
+        if (savedState.currentStep) {
+          setCurrentStep(savedState.currentStep);
+        }
+        if (savedState.businessInfo || savedState.accountDetails) {
+          setData((prev) => ({
+            ...prev,
+            businessInfo: savedState.businessInfo || null,
+            accountDetails: savedState.accountDetails || null,
+          }));
         }
       }
     };
@@ -119,10 +111,9 @@ export default function OnboardingWizard() {
       updateFn();
       setCurrentStep(nextStep);
       setTransitioning(false);
-    }, 200); // 200ms transition loading state
+    }, 200);
   };
 
-  /* ── Step handlers ── */
   const handleStep1 = (d: Step1Data) => {
     triggerTransition(2, () => {
       setData((prev) => {
@@ -172,7 +163,7 @@ export default function OnboardingWizard() {
         '',
       );
 
-      await api.post('/onboarding/submit', {
+      await submitMutation.mutateAsync({
         legalName: data.businessInfo?.businessName,
         registrationNumber: data.businessInfo?.registrationNumber || null,
         businessType: data.businessInfo?.businessType,
@@ -191,39 +182,15 @@ export default function OnboardingWizard() {
         settlementAccountNumber: data.accountDetails?.accountNumber,
       });
 
-      // Clear draft progress from localStorage
-      if (typeof window !== 'undefined') {
-        const user = JSON.parse(localStorage.getItem('kredar_current_user') || '{}');
-        const userKey = user.email
-          ? `kredar_onboarding_state_${user.email}`
-          : 'kredar_onboarding_state';
-        localStorage.removeItem(userKey);
-      }
-
-      localStorage.setItem('kredar_onboarding_complete', 'true');
+      const user = getCurrentUser();
+      clearOnboardingDraft(user?.email);
+      setOnboardingComplete(true);
       setIsComplete(true);
       toast.success('Onboarding details submitted successfully!');
     } catch (e: any) {
       console.error('Onboarding submit error details:', e.response?.data);
-      let errorMsg = 'Onboarding submission failed.';
-      if (e.response?.data) {
-        if (typeof e.response.data === 'string') {
-          errorMsg = e.response.data;
-        } else if (e.response.data.message) {
-          errorMsg = e.response.data.message;
-        } else if (e.response.data.error) {
-          errorMsg = e.response.data.error;
-        } else if (e.response.data.errors) {
-          const errorsObj = e.response.data.errors;
-          const details = Object.entries(errorsObj)
-            .map(([field, msgs]) => `${field}: ${Array.isArray(msgs) ? msgs.join(', ') : msgs}`)
-            .join(' | ');
-          if (details) errorMsg = details;
-        }
-      } else {
-        errorMsg = e.message || errorMsg;
-      }
-      toast.error(`Submission failed: ${errorMsg}`);
+      const msg = e.response?.data?.message || e.message || 'Onboarding submission failed.';
+      toast.error(`Submission failed: ${msg}`);
     } finally {
       setTransitioning(false);
     }
@@ -233,18 +200,15 @@ export default function OnboardingWizard() {
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] relative">
-      {/* Logo */}
       <div className="px-8 py-5">
         <KredarLogo />
       </div>
 
       <div className="mx-auto max-w-[680px] px-4 pb-12 relative">
-        {/* Stepper card */}
         <div className="bg-white/70 backdrop-blur-sm border border-[#d8e1da] rounded-2xl px-8 py-6 mb-4">
           <StepIndicator steps={STEPS} currentStep={currentStep} />
         </div>
 
-        {/* Transition Loading Overlay */}
         {transitioning && (
           <div className="absolute inset-0 bg-[#f5f5f5]/60 z-30 flex items-center justify-center min-h-[300px]">
             <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col items-center gap-3">
@@ -254,7 +218,6 @@ export default function OnboardingWizard() {
           </div>
         )}
 
-        {/* Active step */}
         {currentStep === 1 && (
           <Step1BusinessInfo
             defaultValues={data.businessInfo}

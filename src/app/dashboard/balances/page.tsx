@@ -1,39 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Minus, Copy, Check, ShieldCheck, Wallet, Loader2 } from 'lucide-react';
-import { useQuery } from '@tanstack/react-query';
-import { api } from '@/lib/api';
+import { Plus, Minus, Loader2, Wallet } from 'lucide-react';
 import { toast } from 'sonner';
+import SettlementCoordinatesCard from '@/components/features/balances/SettlementCoordinatesCard';
+import { useDedicatedAccount, useCreateDedicatedAccount } from '@/api/balances/hooks';
+import { getToken } from '@/lib/cookies';
 
 export default function BalancesPage() {
   const [copied, setCopied] = useState(false);
-  const [creating, setCreating] = useState(false);
 
-  const {
-    data: dedicatedAccount,
-    isLoading,
-    refetch,
-  } = useQuery({
-    queryKey: ['dedicated-account'],
-    queryFn: async () => {
-      try {
-        const res = await api.get('/dedicated-accounts');
-        if (!res || !res.data) {
-          return null;
-        }
-        const rawData = res.data.data !== undefined ? res.data.data : res.data;
-        if (rawData === undefined || rawData === null) {
-          return null;
-        }
-        const result = Array.isArray(rawData) ? rawData[0] : rawData;
-        return result !== undefined ? result : null;
-      } catch (err) {
-        console.error('Error fetching dedicated account:', err);
-        return null;
-      }
-    },
-  });
+  const { data: dedicatedAccount, isLoading, refetch } = useDedicatedAccount();
+  const createAccountMutation = useCreateDedicatedAccount();
 
   const handleCopy = (text: string) => {
     navigator.clipboard.writeText(text);
@@ -42,21 +20,44 @@ export default function BalancesPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const handleCreateAccount = async () => {
-    setCreating(true);
+  const getTenantId = () => {
     try {
-      await api.post('/dedicated-accounts', {});
+      const token = getToken();
+      if (!token) return null;
+      const base64Url = token.split('.')[1];
+      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+      const jsonPayload = decodeURIComponent(
+        window
+          .atob(base64)
+          .split('')
+          .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+          .join(''),
+      );
+      const parsed = JSON.parse(jsonPayload);
+      return parsed.tenantId || null;
+    } catch (e) {
+      console.warn('Failed to decode JWT token in BalancesPage:', e);
+      return null;
+    }
+  };
+
+  const handleCreateAccount = async () => {
+    try {
+      const tenantId = getTenantId();
+      if (!tenantId) {
+        throw new Error('User session not found. Please log in again.');
+      }
+      await createAccountMutation.mutateAsync({
+        customerId: tenantId,
+      });
       toast.success('Dedicated settlement account generated successfully!');
       refetch();
     } catch (e: any) {
       const msg = e.response?.data?.message || e.message || 'Failed to generate account.';
       toast.error(msg);
-    } finally {
-      setCreating(false);
     }
   };
 
-  // Format currency
   const formatCurrency = (val: number) => {
     return new Intl.NumberFormat('en-NG', {
       style: 'currency',
@@ -67,9 +68,7 @@ export default function BalancesPage() {
   };
 
   const balance = dedicatedAccount?.balance ?? 0;
-  const accountNumber = dedicatedAccount?.accountNumber;
-  const bankName = dedicatedAccount?.bankName;
-  const accountName = dedicatedAccount?.accountName;
+  const creating = createAccountMutation.isPending;
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto pb-12">
@@ -154,48 +153,11 @@ export default function BalancesPage() {
           </div>
 
           {/* Virtual Account coordinates sidebar */}
-          <div className="bg-[#0a2e1f] text-white border border-[#164d36] rounded-2xl p-6 shadow-sm space-y-5">
-            <div className="flex items-center gap-2 text-[#66c987]">
-              <ShieldCheck size={18} />
-              <span className="text-xs font-bold uppercase tracking-wider">
-                Settlement Coordinates
-              </span>
-            </div>
-
-            <div className="space-y-4 pt-1">
-              <div>
-                <span className="text-[11px] text-white/50 block font-medium">BANK PARTNER</span>
-                <span className="text-sm font-bold tracking-wide mt-0.5 block">
-                  {bankName || 'Wema Bank'}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[11px] text-white/50 block font-medium">ACCOUNT NAME</span>
-                <span className="text-sm font-bold tracking-wide mt-0.5 block">
-                  {accountName || 'Kredar Customer'}
-                </span>
-              </div>
-
-              <div>
-                <span className="text-[11px] text-white/50 block font-medium">ACCOUNT NUMBER</span>
-                <div className="flex items-center justify-between gap-2 mt-0.5">
-                  <span className="text-lg font-bold tracking-wider font-mono">
-                    {accountNumber || '0000000000'}
-                  </span>
-                  {accountNumber && (
-                    <button
-                      onClick={() => handleCopy(accountNumber)}
-                      className="text-white/70 hover:text-white p-1.5 bg-white/10 hover:bg-white/20 rounded-lg transition-colors"
-                      title="Copy account number"
-                    >
-                      {copied ? <Check size={14} className="text-[#66c987]" /> : <Copy size={14} />}
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
+          <SettlementCoordinatesCard
+            dedicatedAccount={dedicatedAccount}
+            onCopy={handleCopy}
+            copied={copied}
+          />
         </div>
       )}
     </div>

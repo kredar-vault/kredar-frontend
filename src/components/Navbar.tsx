@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Bell, ChevronDown, Menu } from 'lucide-react';
+import { Bell, Menu } from 'lucide-react';
+import { getCurrentUser } from '@/lib/cookies';
 
 interface UserData {
   email: string;
@@ -16,15 +17,11 @@ export default function Navbar({ onToggleMobile }: NavbarProps) {
   const [user, setUser] = useState<UserData | null>(null);
 
   useEffect(() => {
-    try {
-      const raw = localStorage.getItem('kredar_current_user');
-      if (raw) setUser(JSON.parse(raw));
-    } catch (e) {
-      console.warn('Failed to parse current user session', e);
+    const userObj = getCurrentUser();
+    if (userObj) {
+      setUser(userObj);
     }
   }, []);
-
-  const initials = user?.email?.charAt(0).toUpperCase() ?? 'U';
 
   return (
     <header className="h-16 bg-transparent flex items-center px-4 sm:px-6 justify-between sticky top-0 z-20">

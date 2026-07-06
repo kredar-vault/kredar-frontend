@@ -10,7 +10,8 @@ import { Eye, EyeOff } from 'lucide-react';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import AuthLoadingModal from '@/components/auth/AuthLoadingModal';
 import { cn } from '@/lib/utils';
-import { api } from '@/lib/api';
+import { useSignup } from '@/api/auth/hooks';
+import { setRegisteredEmail, clearAuthCookies } from '@/lib/cookies';
 
 const signupSchema = z
   .object({
@@ -31,30 +32,27 @@ export default function SignupPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [rootError, setRootError] = useState('');
 
+  const signupMutation = useSignup();
+
   const {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignupValues>({ resolver: zodResolver(signupSchema) });
 
   const onSubmit = async (values: SignupValues) => {
     setRootError('');
     try {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem('kredar_registered_email', values.email);
-        localStorage.removeItem('kredar_token');
-        localStorage.removeItem('kredar_onboarding_complete');
-        localStorage.removeItem('kredar_current_user');
-      }
+      clearAuthCookies();
+      setRegisteredEmail(values.email);
 
-      await api.post('/auth/register', {
+      await signupMutation.mutateAsync({
         email: values.email,
         password: values.password,
         confirmPassword: values.confirmPassword,
       });
 
-      // Redirect to verification page
       router.push(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
     } catch (e: any) {
       const msg =
@@ -66,6 +64,8 @@ export default function SignupPage() {
       }
     }
   };
+
+  const isSubmitting = signupMutation.isPending;
 
   return (
     <AuthPageShell

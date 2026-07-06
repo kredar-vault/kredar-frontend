@@ -1,24 +1,16 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense, useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Eye, EyeOff, Mail, Loader2, ArrowLeft } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import AuthLoadingModal from '@/components/auth/AuthLoadingModal';
-import { cn } from '@/lib/utils';
+import LoginCredentialsForm, { LoginValues } from '@/components/auth/LoginCredentialsForm';
+import LoginOtpForm from '@/components/auth/LoginOtpForm';
+import { useLogin, useVerifyOtp } from '@/api/auth/hooks';
+import { setToken, setCurrentUser, setOnboardingComplete, clearAuthCookies } from '@/lib/cookies';
 import { api } from '@/lib/api';
-import { toast } from 'sonner';
-
-const loginSchema = z.object({
-  email: z.string().email('Enter a valid email'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
 
 function LoginForm() {
   const router = useRouter();
@@ -26,7 +18,6 @@ function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get('expired') === 'true') {
-      // Small delay to ensure toast container is mounted
       const t = setTimeout(() => {
         toast.error('Your session has expired. Please sign in again.');
       }, 100);
@@ -35,39 +26,32 @@ function LoginForm() {
     }
   }, [searchParams, router]);
 
-  const [showPassword, setShowPassword] = useState(false);
   const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
   const [emailVal, setEmailVal] = useState('');
-
-  // OTP Verification states
+  const [passwordVal, setPasswordVal] = useState('');
   const [otpCode, setOtpCode] = useState('');
   const [otpError, setOtpError] = useState('');
-  const [verifyingOtp, setVerifyingOtp] = useState(false);
-  const [resendingOtp, setResendingOtp] = useState(false);
-
   const [rootError, setRootError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    getValues,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+  const loginMutation = useLogin();
+  const verifyOtpMutation = useVerifyOtp();
 
-  const onSubmit = async (values: LoginValues) => {
+  const handleCredentialsSubmit = async (values: LoginValues) => {
     setRootError('');
+    setEmailVal(values.email);
+    setPasswordVal(values.password);
+
     try {
-      const response = await api.post('/auth/login', {
+      const data = await loginMutation.mutateAsync({
         email: values.email,
         password: values.password,
       });
 
-      const data = response.data;
       if (data && data.isSuccess === false) {
         throw new Error(data.message || 'Invalid email or password.');
       }
 
-      setEmailVal(values.email);
       setStep('otp');
       toast.success('Login code sent successfully!');
     } catch (e: any) {
@@ -76,16 +60,15 @@ function LoginForm() {
     }
   };
 
-  const triggerOtpSubmit = async (codeToSubmit: string) => {
+  const executeOtpVerification = async (codeToSubmit: string) => {
     setOtpError('');
-    setVerifyingOtp(true);
+    setIsLoggingIn(true);
     try {
-      const response = await api.post('/auth/login/verify', {
+      const data = await verifyOtpMutation.mutateAsync({
         email: emailVal,
         otp: codeToSubmit,
       });
 
-      const data = response.data;
       if (data && data.isSuccess === false) {
         throw new Error(data.message || 'Verification failed. Please check the code.');
       }
@@ -97,8 +80,9 @@ function LoginForm() {
         throw new Error('Authentication token not received.');
       }
 
-      localStorage.setItem('kredar_token', token);
-      localStorage.setItem('kredar_current_user', JSON.stringify(user));
+      clearAuthCookies();
+      setToken(token);
+      setCurrentUser(user);
 
       // Inject token into Axios headers for immediate profile fetch
       api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -124,51 +108,46 @@ function LoginForm() {
         console.error('Failed to fetch onboarding/profile status during login:', err);
       }
 
+      setOnboardingComplete(onboardingDone);
+
       if (onboardingDone) {
-        localStorage.setItem('kredar_onboarding_complete', 'true');
         router.replace('/dashboard');
       } else {
-        localStorage.removeItem('kredar_onboarding_complete');
         router.replace('/onboarding');
       }
     } catch (e: any) {
       const msg =
         e.response?.data?.message || e.message || 'Verification failed. Please check the code.';
       setOtpError(msg);
-    } finally {
-      setVerifyingOtp(false);
+      setIsLoggingIn(false);
     }
   };
 
-  const handleVerifyOtp = async (e: React.FormEvent) => {
+  const handleOtpSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (otpCode.length !== 6) {
       setOtpError('Please enter a valid 6-digit login code.');
       return;
     }
-    await triggerOtpSubmit(otpCode);
+    await executeOtpVerification(otpCode);
   };
 
   const handleOtpChange = (val: string) => {
-    const cleanVal = val.replace(/\D/g, '');
-    setOtpCode(cleanVal);
-    if (cleanVal.length === 6) {
-      triggerOtpSubmit(cleanVal);
+    setOtpCode(val);
+    if (val.length === 6) {
+      executeOtpVerification(val);
     }
   };
 
   const handleResendOtp = async () => {
-    setResendingOtp(true);
     try {
-      await api.post('/auth/login', {
+      await loginMutation.mutateAsync({
         email: emailVal,
-        password: getValues('password'),
+        password: passwordVal,
       });
       toast.success('A new login code has been sent to your email.');
     } catch (e: any) {
       toast.error('Failed to resend code. Please try again.');
-    } finally {
-      setResendingOtp(false);
     }
   };
 
@@ -176,7 +155,9 @@ function LoginForm() {
   const shellSubtitle =
     step === 'credentials'
       ? 'Enter your email below to sign in'
-      : `Confirm your identity to complete sign in`;
+      : 'Confirm your identity to complete sign in';
+
+  const isMutating = loginMutation.isPending || verifyOtpMutation.isPending || isLoggingIn;
 
   return (
     <AuthPageShell
@@ -185,131 +166,36 @@ function LoginForm() {
       bottomCtaHref="/auth/signup"
       bottomCtaLabel="Sign up"
     >
-      {(isSubmitting || verifyingOtp) && (
+      {isMutating && (
         <AuthLoadingModal
-          message={isSubmitting ? 'Sending login code...' : 'Verifying login code...'}
+          message={
+            loginMutation.isPending
+              ? 'Sending login code...'
+              : isLoggingIn
+                ? 'Signing you in...'
+                : 'Verifying login code...'
+          }
         />
       )}
 
       {step === 'credentials' ? (
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
-          <div className="space-y-5">
-            {/* Email */}
-            <div>
-              <label htmlFor="email" className="kredar-label">
-                E-mail
-              </label>
-              <input
-                id="email"
-                type="email"
-                placeholder="name@example.com"
-                {...register('email')}
-                className={cn('kredar-input', errors.email && 'input-error')}
-              />
-              {errors.email && <p className="kredar-error-text">{errors.email.message}</p>}
-            </div>
-
-            {/* Password */}
-            <div>
-              <div className="flex justify-between items-center mb-1.5">
-                <label htmlFor="password" className="block text-sm font-medium text-[#081b10]">
-                  Password
-                </label>
-                <Link
-                  href="/auth/forgot-password"
-                  className="text-xs text-[#0f8b4b] hover:underline font-medium"
-                >
-                  Forgot password?
-                </Link>
-              </div>
-              <div className="relative mt-0">
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  {...register('password')}
-                  className={cn('kredar-input pr-12', errors.password && 'input-error')}
-                  placeholder="Enter your password"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword((p) => !p)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-[#45504b]"
-                >
-                  {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-                </button>
-              </div>
-              {errors.password && <p className="kredar-error-text">{errors.password.message}</p>}
-            </div>
-
-            {rootError && <p className="text-sm text-[#ef4444] text-center">{rootError}</p>}
-
-            <button type="submit" disabled={isSubmitting} className="kredar-btn-primary w-full">
-              {isSubmitting ? 'Sending Code…' : 'Sign in with Email'}
-            </button>
-          </div>
-
-          <div className="mt-auto pt-8 text-center text-sm text-[#45504b]">
-            By clicking continue, you agree to our{' '}
-            <Link href="/terms" className="underline text-[#0f8b4b]">
-              Terms of Service
-            </Link>{' '}
-            and{' '}
-            <Link href="/privacy" className="underline text-[#0f8b4b]">
-              Privacy Policy
-            </Link>
-            .
-          </div>
-        </form>
+        <LoginCredentialsForm
+          onSubmit={handleCredentialsSubmit}
+          isSubmitting={loginMutation.isPending}
+          rootError={rootError}
+        />
       ) : (
-        <form onSubmit={handleVerifyOtp} className="flex flex-1 flex-col">
-          <div className="space-y-5">
-            <p className="text-sm text-[#45504b] text-center">
-              We sent a 6-digit security code to{' '}
-              <span className="font-semibold text-[#081b10] break-all">{emailVal}</span>
-            </p>
-
-            {/* Code Input */}
-            <div>
-              <label htmlFor="otp" className="kredar-label">
-                Security Code
-              </label>
-              <input
-                id="otp"
-                type="text"
-                maxLength={6}
-                placeholder="000000"
-                value={otpCode}
-                onChange={(e) => handleOtpChange(e.target.value)}
-                className="kredar-input tracking-[0.5em] text-center text-lg font-bold"
-              />
-              {otpError && <p className="kredar-error-text text-center mt-2">{otpError}</p>}
-            </div>
-
-            <button type="submit" disabled={verifyingOtp} className="kredar-btn-primary w-full">
-              {verifyingOtp ? 'Verifying…' : 'Confirm Sign In'}
-            </button>
-
-            <div className="flex flex-col items-center gap-3 pt-3 text-center">
-              <button
-                type="button"
-                disabled={resendingOtp}
-                onClick={handleResendOtp}
-                className="text-xs text-[#0f8b4b] hover:underline font-medium disabled:opacity-50"
-              >
-                {resendingOtp ? 'Resending…' : "Didn't receive code? Resend"}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setStep('credentials')}
-                className="text-xs text-[#45504b] hover:text-[#081b10] font-medium flex items-center gap-1.5 mt-1"
-              >
-                <ArrowLeft size={14} />
-                Back to credentials login
-              </button>
-            </div>
-          </div>
-        </form>
+        <LoginOtpForm
+          email={emailVal}
+          otpCode={otpCode}
+          onOtpChange={handleOtpChange}
+          onSubmit={handleOtpSubmit}
+          onResend={handleResendOtp}
+          onBack={() => setStep('credentials')}
+          verifyingOtp={verifyOtpMutation.isPending || isLoggingIn}
+          resendingOtp={loginMutation.isPending}
+          otpError={otpError}
+        />
       )}
     </AuthPageShell>
   );

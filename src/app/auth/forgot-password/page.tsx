@@ -8,7 +8,7 @@ import { z } from 'zod';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { api } from '@/lib/api';
+import { useForgotPassword } from '@/api/auth/hooks';
 
 const forgotSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -20,21 +20,23 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
   const [rootError, setRootError] = useState('');
 
+  const forgotMutation = useForgotPassword();
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ForgotValues>({ resolver: zodResolver(forgotSchema) });
 
   const onSubmit = async (values: ForgotValues) => {
     setRootError('');
     try {
-      const response = await api.post('/auth/forgot-password', {
+      const response = await forgotMutation.mutateAsync({
         email: values.email,
       });
 
-      if (response.data && response.data.isSuccess === false) {
-        setRootError(response.data.message || 'Failed to send reset code. Please try again.');
+      if (response && response.isSuccess === false) {
+        setRootError(response.message || 'Failed to send reset code. Please try again.');
         return;
       }
 
@@ -46,6 +48,8 @@ export default function ForgotPasswordPage() {
       setRootError(msg);
     }
   };
+
+  const isSubmitting = forgotMutation.isPending;
 
   return (
     <AuthPageShell

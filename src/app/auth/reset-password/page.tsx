@@ -9,7 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
-import { api } from '@/lib/api';
+import { useResetPassword } from '@/api/auth/hooks';
 
 const resetSchema = z
   .object({
@@ -33,10 +33,12 @@ function ResetPasswordForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [rootError, setRootError] = useState('');
 
+  const resetMutation = useResetPassword();
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ResetValues>({ resolver: zodResolver(resetSchema) });
 
   useEffect(() => {
@@ -49,14 +51,14 @@ function ResetPasswordForm() {
   const onSubmit = async (values: ResetValues) => {
     setRootError('');
     try {
-      const response = await api.post('/auth/reset-password', {
+      const response = await resetMutation.mutateAsync({
         token: values.code,
         newPassword: values.password,
         confirmPassword: values.confirmPassword,
       });
 
-      if (response.data && response.data.isSuccess === false) {
-        setRootError(response.data.message || 'Failed to reset password. Please try again.');
+      if (response && response.isSuccess === false) {
+        setRootError(response.message || 'Failed to reset password. Please try again.');
         return;
       }
 
@@ -70,6 +72,8 @@ function ResetPasswordForm() {
       setRootError(msg);
     }
   };
+
+  const isSubmitting = resetMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
