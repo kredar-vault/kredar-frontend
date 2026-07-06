@@ -4,78 +4,77 @@ import { Suspense, useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { toast } from 'sonner';
-import { api } from '@/lib/api';
 import { Mail, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { useResendVerification, useVerifyEmailQuery } from '@/api/auth/hooks';
+import { getRegisteredEmail, setToken, setCurrentUser } from '@/lib/cookies';
 
 function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
   const token = searchParams.get('token') || '';
-  const email =
-    searchParams.get('email') ||
-    (typeof window !== 'undefined' ? localStorage.getItem('kredar_registered_email') : '') ||
-    '';
+  const email = searchParams.get('email') || getRegisteredEmail() || '';
 
   const [status, setStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
-  const [error, setError] = useState('');
-  const [resending, setResending] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  const verifyQuery = useVerifyEmailQuery(token, email);
+  const resendMutation = useResendVerification();
 
   useEffect(() => {
-    const verifyToken = async (verifyToken: string) => {
-      setStatus('verifying');
-      setError('');
-      try {
-        const response = await api.get('/auth/verify-email', {
-          params: {
-            token: verifyToken,
-          },
-        });
-
-        const userToken = response.data.token || response.data.data?.token;
-        const user = response.data.user || response.data.data?.user || { email };
+    if (token) {
+      if (verifyQuery.isLoading) {
+        setStatus('verifying');
+      } else if (verifyQuery.isSuccess) {
+        const responseData = verifyQuery.data;
+        const userToken = responseData?.token || responseData?.data?.token;
+        const user = responseData?.user || responseData?.data?.user || { email };
 
         if (userToken) {
-          localStorage.setItem('kredar_token', userToken);
-          localStorage.setItem('kredar_current_user', JSON.stringify(user));
+          setToken(userToken);
+          setCurrentUser(user);
         }
 
         setStatus('success');
         toast.success('Email verified successfully! Please sign in.');
-        setTimeout(() => {
+        const t = setTimeout(() => {
           router.replace('/auth/login');
         }, 1500);
-      } catch (e: any) {
+        return () => clearTimeout(t);
+      } else if (verifyQuery.isError) {
         setStatus('error');
+        const err: any = verifyQuery.error;
         const msg =
-          e.response?.data?.message ||
-          e.message ||
+          err.response?.data?.message ||
+          err.message ||
           'Email verification link is invalid or has expired.';
-        setError(msg);
+        setErrorMsg(msg);
       }
-    };
-
-    if (token) {
-      verifyToken(token);
     } else {
       setStatus('idle');
     }
-  }, [token, email, router]);
+  }, [
+    token,
+    email,
+    router,
+    verifyQuery.isLoading,
+    verifyQuery.isSuccess,
+    verifyQuery.isError,
+    verifyQuery.data,
+    verifyQuery.error,
+  ]);
 
   const handleResend = async () => {
     if (!email) {
       toast.error('Email address not found. Please sign up again.');
       return;
     }
-    setResending(true);
     try {
-      await api.post('/auth/resend-verification', { email });
+      await resendMutation.mutateAsync({ email });
       toast.success('Verification link resent successfully!');
     } catch (e: any) {
       const msg = e.response?.data?.message || e.message || 'Failed to resend verification link.';
       toast.error(msg);
-    } finally {
-      setResending(false);
     }
   };
 
@@ -95,7 +94,7 @@ function VerifyEmailForm() {
       <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
         <CheckCircle2 className="w-12 h-12 text-[#0f8b4b]" />
         <h3 className="text-lg font-bold text-[#081b10]">Verification Successful!</h3>
-        <p className="text-sm text-[#45504b]">Taking you to onboarding...</p>
+        <p className="text-sm text-[#45504b]">Taking you to login...</p>
       </div>
     );
   }
@@ -105,7 +104,7 @@ function VerifyEmailForm() {
       <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
         <AlertCircle className="w-12 h-12 text-[#ef4444]" />
         <h3 className="text-lg font-bold text-[#ef4444]">Verification Failed</h3>
-        <p className="text-sm text-[#45504b] max-w-xs">{error}</p>
+        <p className="text-sm text-[#45504b] max-w-xs">{errorMsg}</p>
         <button
           onClick={() => router.replace('/auth/signup')}
           className="kredar-btn-primary w-full max-w-xs mt-2"
@@ -115,6 +114,8 @@ function VerifyEmailForm() {
       </div>
     );
   }
+
+  const resending = resendMutation.isPending;
 
   return (
     <div className="flex flex-col items-center py-4 text-center space-y-5">

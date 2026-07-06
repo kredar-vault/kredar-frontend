@@ -80,29 +80,37 @@ export default function TeamTab({ team, onAddMember, onSaveMember, onDeleteMembe
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#f0f4f1]">
-                {team.map((m) => (
-                  <tr key={m.id} className="text-sm hover:bg-[#f7faf6]/40 transition-colors">
-                    <td className="py-3.5">
-                      <div className="font-semibold text-[#081b10]">{m.name}</div>
-                      <div className="text-xs text-[#667085] font-medium mt-0.5">{m.email}</div>
-                    </td>
-                    <td className="py-3.5 text-[#45504b] font-medium">{m.role}</td>
-                    <td className="py-3.5 text-[#45504b] font-medium">{m.dateAdded}</td>
-                    <td className="py-3.5 text-right">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => startEditMember(m)}
-                          className="text-[#45504b] hover:text-[#0f8b4b] p-1.5 hover:bg-[#f3f4f6] rounded-lg transition-colors"
-                        >
-                          <Edit2 size={15} />
-                        </button>
-                        <button className="text-[#45504b] p-1.5 hover:bg-[#f3f4f6] rounded-lg">
-                          <MoreVertical size={16} />
-                        </button>
-                      </div>
+                {team.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="py-8 text-center text-sm text-[#45504b]">
+                      No team members added yet.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  team.map((m) => (
+                    <tr key={m.id} className="text-sm hover:bg-[#f7faf6]/40 transition-colors">
+                      <td className="py-3.5">
+                        <div className="font-semibold text-[#081b10]">{m.name}</div>
+                        <div className="text-xs text-[#667085] font-medium mt-0.5">{m.email}</div>
+                      </td>
+                      <td className="py-3.5 text-[#45504b] font-medium">{m.role}</td>
+                      <td className="py-3.5 text-[#45504b] font-medium">{m.dateAdded}</td>
+                      <td className="py-3.5 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <button
+                            onClick={() => startEditMember(m)}
+                            className="text-[#45504b] hover:text-[#0f8b4b] p-1.5 hover:bg-[#f3f4f6] rounded-lg transition-colors"
+                          >
+                            <Edit2 size={15} />
+                          </button>
+                          <button className="text-[#45504b] p-1.5 hover:bg-[#f3f4f6] rounded-lg">
+                            <MoreVertical size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

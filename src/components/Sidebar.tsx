@@ -12,11 +12,13 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Loader2,
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import SidebarNavList from './SidebarNavList';
+import LogoutConfirmModal from './auth/LogoutConfirmModal';
 import { cn } from '@/lib/utils';
+import { useTenantProfile } from '@/api/tenant/hooks';
+import { getCurrentUser, clearAuthCookies } from '@/lib/cookies';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -48,8 +50,26 @@ export default function Sidebar({
   const pathname = usePathname();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Simulate mount skeleton loader
+  const { data: profile } = useTenantProfile();
+
+  const getInitials = () => {
+    if (profile?.businessName) {
+      return profile.businessName.substring(0, 2).toUpperCase();
+    }
+    const user = getCurrentUser();
+    if (user && user.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return 'ME';
+  };
+
+  const getDisplayName = () => {
+    return profile?.businessName || 'Merchant';
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(timer);
@@ -62,18 +82,13 @@ export default function Sidebar({
     }
   };
 
-  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
-
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
   const handleLogout = () => {
     setIsLoggingOut(true);
     setTimeout(() => {
-      localStorage.removeItem('kredar_token');
-      localStorage.removeItem('kredar_current_user');
-      localStorage.removeItem('kredar_onboarding_complete');
+      clearAuthCookies();
       router.replace('/auth/login');
     }, 1200);
   };
@@ -102,7 +117,7 @@ export default function Sidebar({
             onItemClick={handleItemClick}
           />
 
-          {/* Bottom Settings/Help Links (brought up, below main links) */}
+          {/* Bottom Settings/Help Links */}
           <div className="pt-4 border-t border-[#f0f4f1]">
             <SidebarNavList
               items={bottomNavItems}
@@ -123,12 +138,12 @@ export default function Sidebar({
               isCollapsed && 'justify-center px-0',
             )}
           >
-            <div className="w-9 h-9 rounded-full bg-[#ebebeb] flex items-center justify-center font-bold text-[#081b10] text-sm flex-shrink-0 border border-[#d8e1da]">
-              AV
+            <div className="w-9 h-9 rounded-full bg-[#ebebeb] flex items-center justify-center font-bold text-[#081b10] text-sm flex-shrink-0 border border-[#d8e1da] uppercase">
+              {getInitials()}
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#081b10] truncate">AjoVault</p>
+                <p className="text-sm font-semibold text-[#081b10] truncate">{getDisplayName()}</p>
                 <p className="text-xs text-[#667085] font-medium truncate">Merchant Account</p>
               </div>
             )}
@@ -191,42 +206,12 @@ export default function Sidebar({
       </aside>
 
       {/* Confirmation Modal */}
-      {showLogoutConfirm && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          {isLoggingOut ? (
-            <div className="bg-white border border-[#d8e1da] rounded-2xl shadow-xl max-w-xs w-full p-8 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in duration-200">
-              <Loader2 className="w-10 h-10 text-[#0f8b4b] animate-spin" />
-              <p className="text-sm font-semibold text-[#081b10]">Logging out</p>
-            </div>
-          ) : (
-            <div className="bg-white border border-[#d8e1da] rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-6 animate-in fade-in zoom-in duration-200">
-              <div className="space-y-2">
-                <h3 className="text-lg font-bold text-[#081b10]">Confirm Log Out</h3>
-                <p className="text-sm text-[#45504b]">
-                  Are you sure you want to log out? You will need to sign in again to access your
-                  account.
-                </p>
-              </div>
-              <div className="flex items-center gap-3 justify-end">
-                <button
-                  type="button"
-                  onClick={() => setShowLogoutConfirm(false)}
-                  className="px-4 py-2 border border-[#d8e1da] rounded-xl text-xs font-semibold text-[#45504b] hover:bg-[#f7faf6] transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleLogout}
-                  className="px-4 py-2 bg-[#ef4444] hover:bg-red-700 text-white rounded-xl text-xs font-semibold transition-colors"
-                >
-                  Log out
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirm}
+        isLoggingOut={isLoggingOut}
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </>
   );
 }

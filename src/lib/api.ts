@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { getToken, clearAuthCookies } from './cookies';
 
 const getBaseURL = () => {
   if (typeof window !== 'undefined') {
@@ -19,11 +20,9 @@ export const api = axios.create({
 // Inject authentication token automatically into all outgoing requests
 api.interceptors.request.use(
   (config) => {
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('kredar_token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    const token = getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
   },
@@ -38,9 +37,7 @@ api.interceptors.response.use(
   (error) => {
     if (error.response && error.response.status === 401) {
       if (typeof window !== 'undefined') {
-        localStorage.removeItem('kredar_token');
-        localStorage.removeItem('kredar_current_user');
-        localStorage.removeItem('kredar_onboarding_complete');
+        clearAuthCookies();
         window.location.href = '/auth/login?expired=true';
       }
     }
