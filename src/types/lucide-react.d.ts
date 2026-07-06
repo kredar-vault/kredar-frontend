@@ -58,4 +58,6 @@ declare module 'lucide-react' {
   export const Mail: LucideIcon;
   export const Copy: LucideIcon;
   export const Check: LucideIcon;
+  export const ArrowRight: LucideIcon;
+  export const Globe: LucideIcon;
 }
