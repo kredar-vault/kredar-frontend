@@ -50,7 +50,7 @@ export default function Step1BusinessInfo({ defaultValues, onNext, onBack }: Pro
     handleSubmit,
     formState: { errors },
   } = useForm<Step1Data>({
-    resolver: zodResolver(),
+    resolver: zodResolver(schema),
     defaultValues: defaultValues ?? {
       countryCode: '+000',
     },
