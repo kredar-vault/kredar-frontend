@@ -40,9 +40,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#f7faf6] text-[#081b10] font-sans selection:bg-[#0f8b4b]/20 selection:text-[#10422a]">
-      {/* ─── NAVBAR (Transparent bg, Collapsible) ─── */}
-      <header className="fixed top-0 inset-x-0 z-50 px-6 md:px-12 py-5 bg-transparent">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
+      {/* ─── NAVBAR (Capsule UI, Collapsible) ─── */}
+      <header className="fixed top-0 inset-x-0 z-50 px-4 md:px-8 py-4 bg-transparent">
+        <div className="max-w-6xl mx-auto backdrop-blur-md bg-black/40 border border-white/10 rounded-full py-2 px-4 md:px-6 flex items-center justify-between shadow-2xl transition-all duration-300">
           {/* Logo */}
           <Link href="/">
             <KredarLogo light={true} />
