@@ -1,8 +1,13 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
+import { Menu, X } from 'lucide-react';
+import KredarLogo from '@/components/KredarLogo';
 
 export default function LandingHero() {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
     <section className="px-4 py-4 md:px-6 md:py-6">
       <div className="max-w-[1392px] min-h-[940px] mx-auto bg-[#030A03] rounded-[32px] p-6 md:p-12 flex flex-col justify-between text-white relative overflow-hidden shadow-2xl">
@@ -15,27 +20,9 @@ export default function LandingHero() {
         </div>
 
         {/* CAPSULE NAVBAR */}
-        <header className="w-full max-w-6xl mx-auto bg-white/5 border border-white/10 rounded-full px-6 py-3 flex items-center justify-between backdrop-blur-md z-20">
+        <header className="relative w-full max-w-6xl mx-auto bg-white/5 border border-white/10 rounded-full px-6 py-3 flex items-center justify-between backdrop-blur-md z-20">
           <Link href="/" className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded flex items-center justify-center flex-shrink-0">
-              <img
-                src="/images/logo-icon.ico"
-                alt="Kredar"
-                className="w-3.5 h-3.5 brightness-0 invert"
-              />
-            </div>
-            <span
-              style={{
-                color: '#FFF',
-                fontFamily: 'var(--font-lexend-zetta)',
-                fontSize: '11px',
-                fontWeight: 400,
-                letterSpacing: '1.2px',
-              }}
-              className="uppercase tracking-[0.11em] select-none"
-            >
-              KREDAR
-            </span>
+            <KredarLogo light />
           </Link>
 
           {/* Nav Links */}
@@ -66,13 +53,67 @@ export default function LandingHero() {
             </a>
           </nav>
 
-          {/* CTA Button */}
-          <Link
-            href="/auth/signup"
-            className="bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-xs px-4 py-2 rounded-full transition-colors font-inter font-bold"
-          >
-            Get Started
-          </Link>
+          <div className="flex items-center gap-3">
+            {/* CTA Button */}
+            <Link
+              href="/auth/signup"
+              className="hidden md:block bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-xs px-4 py-2 rounded-full transition-colors font-inter font-bold"
+            >
+              Get Started
+            </Link>
+
+            {/* Mobile Navigation Toggle Button Icon */}
+            <button
+              type="button"
+              onClick={() => setMenuOpen(!menuOpen)}
+              className="md:hidden p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all border border-white/10"
+              aria-label="Toggle navigation menu"
+            >
+              {menuOpen ? <X size={16} /> : <Menu size={16} />}
+            </button>
+          </div>
+
+          {/* Mobile Dropdown Menu Overlay */}
+          {menuOpen && (
+            <div className="absolute top-[60px] left-0 right-0 bg-[#0A160E]/95 border border-white/10 rounded-3xl p-6 flex flex-col gap-4 text-sm animate-in fade-in slide-in-from-top-4 duration-200 z-50 md:hidden shadow-xl">
+              <a
+                href="#features"
+                onClick={() => setMenuOpen(false)}
+                className="text-white/85 hover:text-white transition-colors py-1"
+              >
+                Features
+              </a>
+              <a
+                href="#how-it-works"
+                onClick={() => setMenuOpen(false)}
+                className="text-white/85 hover:text-white transition-colors py-1"
+              >
+                Use Cases
+              </a>
+              <a
+                href="#infrastructure"
+                onClick={() => setMenuOpen(false)}
+                className="text-white/85 hover:text-white transition-colors py-1"
+              >
+                Developers
+              </a>
+              <a
+                href="#faq"
+                onClick={() => setMenuOpen(false)}
+                className="text-white/85 hover:text-white transition-colors py-1"
+              >
+                API Docs
+              </a>
+              <hr className="border-white/10 my-1" />
+              <Link
+                href="/auth/signup"
+                onClick={() => setMenuOpen(false)}
+                className="bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-center py-2.5 rounded-full font-bold text-xs"
+              >
+                Get Started
+              </Link>
+            </div>
+          )}
         </header>
 
         {/* Core Content Grid */}
@@ -108,7 +149,7 @@ export default function LandingHero() {
             {/* Background Glow behind the hand */}
             <div className="hero-gradient absolute pointer-events-none select-none z-0 opacity-50 scale-50" />
             <img
-              src="images/hand-atm.png"
+              src="images/minidb.png"
               alt="Kredar ATM cards"
               className="max-w-full max-h-full object-contain pointer-events-none absolute z-10"
               onError={(e) => {

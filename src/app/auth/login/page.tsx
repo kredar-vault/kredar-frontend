@@ -1,138 +1,216 @@
 'use client';
 
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { Eye, EyeOff } from 'lucide-react';
+import { Suspense, useEffect, useState } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 import AuthPageShell from '@/components/auth/AuthPageShell';
-import { cn } from '@/lib/utils';
+import AuthLoadingModal from '@/components/auth/AuthLoadingModal';
+import LoginCredentialsForm, { LoginValues } from '@/components/auth/LoginCredentialsForm';
+import LoginOtpForm from '@/components/auth/LoginOtpForm';
+import { useLogin, useVerifyOtp } from '@/api/auth/hooks';
+import { setToken, setCurrentUser, setOnboardingComplete, clearAuthCookies } from '@/lib/cookies';
+import { api } from '@/lib/api';
 
-const loginSchema = z.object({
-  email: z.string().email('Enter a valid email'),
-  password: z.string().min(1, 'Password is required'),
-});
-
-type LoginValues = z.infer<typeof loginSchema>;
-
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('expired') === 'true') {
+      const t = setTimeout(() => {
+        toast.error('Your session has expired. Please sign in again.');
+      }, 100);
+      router.replace('/auth/login');
+      return () => clearTimeout(t);
+    }
+  }, [searchParams, router]);
+
+  const [step, setStep] = useState<'credentials' | 'otp'>('credentials');
+  const [emailVal, setEmailVal] = useState('');
+  const [passwordVal, setPasswordVal] = useState('');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpError, setOtpError] = useState('');
   const [rootError, setRootError] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<LoginValues>({ resolver: zodResolver(loginSchema) });
+  const loginMutation = useLogin();
+  const verifyOtpMutation = useVerifyOtp();
 
-  const onSubmit = async (values: LoginValues) => {
+  const handleCredentialsSubmit = async (values: LoginValues) => {
     setRootError('');
+    setEmailVal(values.email);
+    setPasswordVal(values.password);
+
     try {
-      const users: { id: number; email: string; password: string; verified?: boolean }[] =
-        JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
-      const user = users.find((u) => u.email === values.email && u.password === values.password);
-      if (!user) {
-        setRootError('Invalid email or password.');
-        return;
+      const data = await loginMutation.mutateAsync({
+        email: values.email,
+        password: values.password,
+      });
+
+      if (data && data.isSuccess === false) {
+        throw new Error(data.message || 'Invalid email or password.');
       }
 
-      if (user.verified === false) {
-        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-        const { sendVerificationEmail } = await import('@/lib/email');
-        await sendVerificationEmail(values.email, verificationCode);
-        router.push(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
-        return;
-      }
-
-      localStorage.setItem('kredar_token', `mock-token-${user.id}-${Date.now()}`);
-      localStorage.setItem('kredar_current_user', JSON.stringify(user));
-
-      // If onboarding already complete, go dashboard; otherwise resume onboarding
-      const onboardingDone = localStorage.getItem('kredar_onboarding_complete') === 'true';
-      router.replace(onboardingDone ? '/dashboard' : '/onboarding');
-    } catch (e) {
-      setRootError('Something went wrong. Please try again.');
+      setStep('otp');
+      toast.success('Login code sent successfully!');
+    } catch (e: any) {
+      const msg = e.response?.data?.message || e.message || 'Invalid email or password.';
+      setRootError(msg);
     }
   };
 
+  const executeOtpVerification = async (codeToSubmit: string) => {
+    setOtpError('');
+    setIsLoggingIn(true);
+    try {
+      const data = await verifyOtpMutation.mutateAsync({
+        email: emailVal,
+        otp: codeToSubmit,
+      });
+
+      if (data && data.isSuccess === false) {
+        throw new Error(data.message || 'Verification failed. Please check the code.');
+      }
+
+      const token = data.token || data.data?.token;
+      const user = data.user || data.data?.user || { email: emailVal };
+
+      if (!token) {
+        throw new Error('Authentication token not received.');
+      }
+
+      clearAuthCookies();
+      setToken(token);
+      setCurrentUser(user);
+
+      // Inject token into Axios headers for immediate profile fetch
+      api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      toast.success('Logged in successfully!');
+
+      // Dynamically verify onboarding completion from backend status and profile
+      let onboardingDone = false;
+      try {
+        const onboardingRes = await api.get('/onboarding');
+        const onboarding = onboardingRes.data?.data || onboardingRes.data;
+        if (
+          onboarding &&
+          (onboarding.status === 'UnderReview' || onboarding.status === 'Approved')
+        ) {
+          onboardingDone = true;
+        } else {
+          const profileRes = await api.get('/tenants/profile');
+          const profile = profileRes.data?.data || profileRes.data;
+          onboardingDone = !!(profile?.legalName || profile?.businessName || profile?.isOnboarded);
+        }
+      } catch (err) {
+        console.error('Failed to fetch onboarding/profile status during login:', err);
+      }
+
+      setOnboardingComplete(onboardingDone);
+
+      if (onboardingDone) {
+        router.replace('/dashboard');
+      } else {
+        router.replace('/onboarding');
+      }
+    } catch (e: any) {
+      const msg =
+        e.response?.data?.message || e.message || 'Verification failed. Please check the code.';
+      setOtpError(msg);
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleOtpSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (otpCode.length !== 6) {
+      setOtpError('Please enter a valid 6-digit login code.');
+      return;
+    }
+    await executeOtpVerification(otpCode);
+  };
+
+  const handleOtpChange = (val: string) => {
+    setOtpCode(val);
+    if (val.length === 6) {
+      executeOtpVerification(val);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      await loginMutation.mutateAsync({
+        email: emailVal,
+        password: passwordVal,
+      });
+      toast.success('A new login code has been sent to your email.');
+    } catch (e: any) {
+      toast.error('Failed to resend code. Please try again.');
+    }
+  };
+
+  const shellTitle = step === 'credentials' ? 'Sign in' : 'Security verification';
+  const shellSubtitle =
+    step === 'credentials'
+      ? 'Enter your email below to sign in'
+      : 'Confirm your identity to complete sign in';
+
+  const isMutating = loginMutation.isPending || verifyOtpMutation.isPending || isLoggingIn;
+
   return (
     <AuthPageShell
-      title="Sign in"
-      subtitle="Enter your email below to sign in"
+      title={shellTitle}
+      subtitle={shellSubtitle}
       bottomCtaHref="/auth/signup"
       bottomCtaLabel="Sign up"
     >
-      <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
-        <div className="space-y-5">
-          {/* Email */}
-          <div>
-            <label htmlFor="email" className="kredar-label">
-              E-mail
-            </label>
-            <input
-              id="email"
-              type="email"
-              placeholder="name@example.com"
-              {...register('email')}
-              className={cn('kredar-input', errors.email && 'input-error')}
-            />
-            {errors.email && <p className="kredar-error-text">{errors.email.message}</p>}
-          </div>
+      {isMutating && (
+        <AuthLoadingModal
+          message={
+            loginMutation.isPending
+              ? 'Sending login code...'
+              : isLoggingIn
+                ? 'Signing you in...'
+                : 'Verifying login code...'
+          }
+        />
+      )}
 
-          {/* Password */}
-          <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label htmlFor="password" className="block text-sm font-medium text-[#081b10]">
-                Password
-              </label>
-              <Link
-                href="/auth/forgot-password"
-                className="text-xs text-[#0f8b4b] hover:underline font-medium"
-              >
-                Forgot password?
-              </Link>
-            </div>
-            <div className="relative mt-0">
-              <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                {...register('password')}
-                className={cn('kredar-input pr-12', errors.password && 'input-error')}
-                placeholder="Enter your password"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword((p) => !p)}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#45504b]"
-              >
-                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
-              </button>
-            </div>
-            {errors.password && <p className="kredar-error-text">{errors.password.message}</p>}
-          </div>
-
-          {rootError && <p className="text-sm text-[#ef4444] text-center">{rootError}</p>}
-
-          <button type="submit" disabled={isSubmitting} className="kredar-btn-primary w-full">
-            {isSubmitting ? 'Signing in…' : 'Sign in with Email'}
-          </button>
-        </div>
-
-        <div className="mt-auto pt-8 text-center text-sm text-[#45504b]">
-          By clicking continue, you agree to our{' '}
-          <Link href="/terms" className="underline text-[#0f8b4b]">
-            Terms of Service
-          </Link>{' '}
-          and{' '}
-          <Link href="/privacy" className="underline text-[#0f8b4b]">
-            Privacy Policy
-          </Link>
-          .
-        </div>
-      </form>
+      {step === 'credentials' ? (
+        <LoginCredentialsForm
+          onSubmit={handleCredentialsSubmit}
+          isSubmitting={loginMutation.isPending}
+          rootError={rootError}
+        />
+      ) : (
+        <LoginOtpForm
+          email={emailVal}
+          otpCode={otpCode}
+          onOtpChange={handleOtpChange}
+          onSubmit={handleOtpSubmit}
+          onResend={handleResendOtp}
+          onBack={() => setStep('credentials')}
+          verifyingOtp={verifyOtpMutation.isPending || isLoggingIn}
+          resendingOtp={loginMutation.isPending}
+          otpError={otpError}
+        />
+      )}
     </AuthPageShell>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex items-center justify-center bg-[#FFF]">
+          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-full animate-spin" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

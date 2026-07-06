@@ -8,7 +8,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Eye, EyeOff } from 'lucide-react';
 import AuthPageShell from '@/components/auth/AuthPageShell';
+import AuthLoadingModal from '@/components/auth/AuthLoadingModal';
 import { cn } from '@/lib/utils';
+import { useSignup } from '@/api/auth/hooks';
+import { setRegisteredEmail, clearAuthCookies } from '@/lib/cookies';
 
 const signupSchema = z
   .object({
@@ -29,47 +32,40 @@ export default function SignupPage() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [rootError, setRootError] = useState('');
 
+  const signupMutation = useSignup();
+
   const {
     register,
     handleSubmit,
     setError,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<SignupValues>({ resolver: zodResolver(signupSchema) });
 
   const onSubmit = async (values: SignupValues) => {
     setRootError('');
     try {
-      const users: { id: number; email: string; password: string; verified?: boolean }[] =
-        JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
+      clearAuthCookies();
+      setRegisteredEmail(values.email);
 
-      if (users.find((u) => u.email === values.email)) {
-        setError('email', { message: 'An account with this email already exists.' });
-        return;
-      }
-
-      // Generate a 6-digit verification code
-      const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-      // Save user with verified = false
-      const newUser = {
-        id: Date.now(),
+      await signupMutation.mutateAsync({
         email: values.email,
         password: values.password,
-        verified: false,
-      };
-      users.push(newUser);
-      localStorage.setItem('kredar_users', JSON.stringify(users));
+        confirmPassword: values.confirmPassword,
+      });
 
-      // Import the helper dynamically or call it directly
-      const { sendVerificationEmail } = await import('@/lib/email');
-      await sendVerificationEmail(values.email, verificationCode);
-
-      // Redirect to verification page
       router.push(`/auth/verify-email?email=${encodeURIComponent(values.email)}`);
-    } catch (e) {
-      setRootError('Something went wrong. Please try again.');
+    } catch (e: any) {
+      const msg =
+        e.response?.data?.message || e.message || 'Something went wrong. Please try again.';
+      if (msg.toLowerCase().includes('email') || msg.toLowerCase().includes('exists')) {
+        setError('email', { message: msg });
+      } else {
+        setRootError(msg);
+      }
     }
   };
+
+  const isSubmitting = signupMutation.isPending;
 
   return (
     <AuthPageShell
@@ -78,6 +74,7 @@ export default function SignupPage() {
       bottomCtaHref="/auth/login"
       bottomCtaLabel="Sign in"
     >
+      {isSubmitting && <AuthLoadingModal message="Creating your account..." />}
       <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
         <div className="space-y-5">
           {/* Email */}

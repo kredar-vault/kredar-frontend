@@ -7,15 +7,33 @@ import { AlertCircle } from 'lucide-react';
 import BusinessInfoFormFields from './BusinessInfoFormFields';
 
 const schema = z.object({
-  businessName: z.string().min(1, 'Business name is required'),
-  registrationNumber: z.string().optional(),
+  businessName: z
+    .string()
+    .min(1, 'Business name is required')
+    .regex(/^[a-zA-Z\s-&.']+$/, 'Business name must only contain letters (no numbers allowed)'),
+  registrationNumber: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^[a-zA-Z0-9\s-]+$/.test(val),
+      'Registration number must contain only letters and numbers',
+    ),
   businessType: z.string().min(1, 'Please select a business type'),
   industry: z.string().min(1, 'Please select an industry'),
   country: z.string().min(1, 'Please select a country'),
   businessAddress: z.string().min(1, 'Business address is required'),
   countryCode: z.string().min(1, 'Required'),
-  phoneNumber: z.string().min(1, 'Phone number is required'),
-  website: z.string().optional(),
+  phoneNumber: z
+    .string()
+    .min(1, 'Phone number is required')
+    .regex(/^\d{7,15}$/, 'Phone number must contain only numbers'),
+  website: z
+    .string()
+    .optional()
+    .refine(
+      (val) => !val || /^(https?:\/\/)?([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,6}(\/.*)?$/.test(val),
+      'Enter a valid website URL',
+    ),
 });
 
 export type Step1Data = z.infer<typeof schema>;

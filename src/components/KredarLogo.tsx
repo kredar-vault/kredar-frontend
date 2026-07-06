@@ -1,4 +1,10 @@
-export default function KredarLogo({ hideText = false }: { hideText?: boolean }) {
+export default function KredarLogo({
+  hideText = false,
+  light = false,
+}: {
+  hideText?: boolean;
+  light?: boolean;
+}) {
   return (
     <div className="flex items-center gap-2.5">
       {/* Icon mark */}
@@ -9,8 +15,8 @@ export default function KredarLogo({ hideText = false }: { hideText?: boolean })
       {!hideText && (
         <span
           style={{
-            color: '#169E5C',
-            fontFamily: 'var(--font-lexend-zetta)',
+            color: light ? '#FFF' : 'var(--Kredar-Primary-500, #169E5C)',
+            fontFamily: 'var(--font-lexend-zetta), "Lexend Zetta", sans-serif',
             fontSize: '12.278px',
             fontStyle: 'normal',
             fontWeight: 400,

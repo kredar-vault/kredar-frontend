@@ -15,7 +15,10 @@ import {
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import SidebarNavList from './SidebarNavList';
+import LogoutConfirmModal from './auth/LogoutConfirmModal';
 import { cn } from '@/lib/utils';
+import { useTenantProfile } from '@/api/tenant/hooks';
+import { getCurrentUser, clearAuthCookies } from '@/lib/cookies';
 
 const mainNavItems = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
@@ -34,6 +37,7 @@ interface SidebarProps {
   onToggleCollapse: () => void;
   isMobileOpen: boolean;
   onCloseMobile: () => void;
+  onNavigate?: () => void;
 }
 
 export default function Sidebar({
@@ -41,24 +45,52 @@ export default function Sidebar({
   onToggleCollapse,
   isMobileOpen,
   onCloseMobile,
+  onNavigate,
 }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
-  // Simulate mount skeleton loader
+  const { data: profile } = useTenantProfile();
+
+  const getInitials = () => {
+    if (profile?.businessName) {
+      return profile.businessName.substring(0, 2).toUpperCase();
+    }
+    const user = getCurrentUser();
+    if (user && user.email) {
+      return user.email.substring(0, 2).toUpperCase();
+    }
+    return 'ME';
+  };
+
+  const getDisplayName = () => {
+    return profile?.businessName || 'Merchant';
+  };
+
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(timer);
   }, []);
 
+  const handleItemClick = (href: string) => {
+    onCloseMobile();
+    if (pathname !== href && onNavigate) {
+      onNavigate();
+    }
+  };
+
   const isActive = (href: string, exact?: boolean) =>
     exact ? pathname === href : pathname.startsWith(href);
 
   const handleLogout = () => {
-    localStorage.removeItem('kredar_token');
-    localStorage.removeItem('kredar_current_user');
-    router.replace('/auth/login');
+    setIsLoggingOut(true);
+    setTimeout(() => {
+      clearAuthCookies();
+      router.replace('/auth/login');
+    }, 1200);
   };
 
   const sidebarContent = (
@@ -82,15 +114,17 @@ export default function Sidebar({
             isCollapsed={isCollapsed}
             loading={loading}
             isActive={isActive}
+            onItemClick={handleItemClick}
           />
 
-          {/* Bottom Settings/Help Links (brought up, below main links) */}
+          {/* Bottom Settings/Help Links */}
           <div className="pt-4 border-t border-[#f0f4f1]">
             <SidebarNavList
               items={bottomNavItems}
               isCollapsed={isCollapsed}
               loading={loading}
               isActive={isActive}
+              onItemClick={handleItemClick}
             />
           </div>
         </div>
@@ -104,12 +138,12 @@ export default function Sidebar({
               isCollapsed && 'justify-center px-0',
             )}
           >
-            <div className="w-9 h-9 rounded-full bg-[#ebebeb] flex items-center justify-center font-bold text-[#081b10] text-sm flex-shrink-0 border border-[#d8e1da]">
-              AV
+            <div className="w-9 h-9 rounded-full bg-[#ebebeb] flex items-center justify-center font-bold text-[#081b10] text-sm flex-shrink-0 border border-[#d8e1da] uppercase">
+              {getInitials()}
             </div>
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-[#081b10] truncate">AjoVault</p>
+                <p className="text-sm font-semibold text-[#081b10] truncate">{getDisplayName()}</p>
                 <p className="text-xs text-[#667085] font-medium truncate">Merchant Account</p>
               </div>
             )}
@@ -117,7 +151,7 @@ export default function Sidebar({
 
           {/* Logout Button */}
           <button
-            onClick={handleLogout}
+            onClick={() => setShowLogoutConfirm(true)}
             className={cn(
               'flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm text-[#45504b] hover:bg-[#fff0f0] hover:text-red-600 transition-colors',
               isCollapsed && 'justify-center px-0',
@@ -170,6 +204,14 @@ export default function Sidebar({
       >
         {sidebarContent}
       </aside>
+
+      {/* Confirmation Modal */}
+      <LogoutConfirmModal
+        isOpen={showLogoutConfirm}
+        isLoggingOut={isLoggingOut}
+        onConfirm={handleLogout}
+        onCancel={() => setShowLogoutConfirm(false)}
+      />
     </>
   );
 }
