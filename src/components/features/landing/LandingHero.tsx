@@ -149,7 +149,7 @@ export default function LandingHero() {
             {/* Background Glow behind the hand */}
             <div className="hero-gradient absolute pointer-events-none select-none z-0 opacity-50 scale-50" />
             <img
-              src="images/hand-atm.png"
+              src="images/minidb.png"
               alt="Kredar ATM cards"
               className="max-w-full max-h-full object-contain pointer-events-none absolute z-10"
               onError={(e) => {
