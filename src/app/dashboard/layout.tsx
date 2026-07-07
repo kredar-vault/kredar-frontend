@@ -11,7 +11,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [isMobileOpen, setIsMobileOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50/50 flex">
+    <div className="min-h-screen bg-zinc-100/70 flex">
       <Sidebar
         isCollapsed={isCollapsed}
         onToggleCollapse={() => setIsCollapsed((prev) => !prev)}
