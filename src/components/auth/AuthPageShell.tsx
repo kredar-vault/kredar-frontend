@@ -47,7 +47,7 @@ export default function AuthPageShell({
             - On mobile: Translucent glassmorphism background (bg-white/90 backdrop-blur-md).
             - On desktop: Solid white card background (lg:bg-white).
           */}
-          <div className="flex min-h-[560px] w-full max-w-[420px] flex-col rounded-2xl bg-white/95 backdrop-blur-md border border-white/20 px-6 sm:px-10 py-8 shadow-xl lg:bg-white lg:border-none lg:shadow-sm">
+          <div className="flex min-h-[560px] w-full max-w-[420px] flex-col rounded-md bg-white/95 backdrop-blur-md border border-white/20 px-6 sm:px-10 py-8 shadow-xl lg:bg-white lg:border-none lg:">
             {/* HEADER */}
             <div className="text-center">
               <h1 className="text-[2.25rem] font-semibold text-slate-900 leading-tight">{title}</h1>

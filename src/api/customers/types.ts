@@ -1,26 +1,58 @@
 export interface Customer {
   id: string;
-  name: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
   email: string;
-  phone: string;
+  phoneNumber: string;
   status: string;
-  registrationDate: string;
-  avatar: string;
+  createdAt: string;
+  dedicatedAccountNumber: string;
+  bankName: string;
+}
+
+export interface DedicatedAccount {
+  id: string;
+  accountRef: string;
+  accountNumber: string;
+  bankName: string;
+  accountName: string;
+  expectedAmountKobo: number;
+  amountPaidKobo: number;
+  deficitKobo: number;
+  overpaymentKobo: number;
+  status: string;
+  paymentState: string;
+  subMerchantId: string;
+  expiryDateUtc: string;
+  createdAtUtc: string;
 }
 
 export interface CustomerTransaction {
   id: string;
+  amount: string;
   date: string;
-  amount: number | string;
   status: string;
-  currency?: string;
+}
+
+export interface CustomerTransactionStats {
+  totalTransactions: number;
+  successfulTransactions: number;
+  pendingTransactions: number;
+  failedTransactions: number;
+  totalAmount: number;
 }
 
 export interface CreateCustomerPayload {
   firstName: string;
   lastName: string;
   email: string;
-  phoneNumber?: string;
+  phoneNumber: string;
+}
+
+export interface DedicatedAccountPayload {
+  customerId: string;
+  expectedAmount: number;
 }
 
 export interface CustomerStats {

@@ -1,4 +1,4 @@
-import '../styles/globals.css';
+import '@/app/globals.css';
 import { ReactNode } from 'react';
 import QueryProvider from '@/providers/QueryProvider';
 import ThemeProvider from '@/providers/ThemeProvider';

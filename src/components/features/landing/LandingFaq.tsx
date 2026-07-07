@@ -1,76 +1,97 @@
 'use client';
 
 import { useState } from 'react';
-import { ChevronDown, ChevronUp } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const faqItems = [
   {
-    question: 'Who is Kredar built for?',
+    question: 'Why is Kredar right for me?',
     answer:
-      'Kredar is designed for businesses that receive frequent bank transfer payments, including savings and investment platforms, schools, property management companies, donation platforms, and other organizations that need accurate payment tracking.',
+      'Kredar is engineered for businesses that manage high-volume transfers. By automating tracking and settlements, we help you eliminate administrative overhead, scale transaction capabilities seamlessly, and keep records completely accurate with zero manual tracking required.',
   },
   {
-    question: 'How does Kredar simplify payment collection?',
+    question: 'How does Kredar handle payment matching?',
     answer:
-      'Kredar automates account assignment and payment matching. By provisioning dedicated virtual accounts for each customer, incoming transfers are instantly matched to the right customer and settled in real time, eliminating manual reconciliation.',
+      'Kredar provisions unique virtual bank transfer accounts for each customer. When a payment is made into an account, our core engine instantly pairs it with the correct entity, triggering instant background matching and balance settlements within seconds.',
   },
   {
-    question: 'Can Kredar integrate with our existing systems?',
+    question: 'Can Kredar integrate with my existing platform?',
     answer:
-      'Yes, Kredar is built developer-first. You can integrate Kredar with your existing ledger, back-office, or web platform using our secure REST APIs, webhooks, and sandbox environments.',
+      'Yes. Kredar is built developer-first. You can seamlessly link our infrastructure to your current ledger frameworks, web platforms, or custom back-offices using our enterprise REST APIs, event-driven webhooks, and sandbox testing environments.',
   },
   {
-    question: 'Is Kredar suitable for growing businesses?',
+    question: 'Is Kredar compatible with all Nigerian banks?',
     answer:
-      'Absolutely. Whether you are handling hundreds or millions of transactions, Kredar’s cloud-native infrastructure auto-scales to support high-volume payment processing without any lag.',
+      'Absolutely. Our modern banking partner layer channels routing across all major commercial financial institutions, ensuring incoming local transfers reconcile accurately no matter which bank your client initiates from.',
+  },
+  {
+    question: 'Is Kredar compliant with my existing platform?',
+    answer:
+      'Yes, Kredar is designed to complement your setup. We adhere strictly to institutional compliance standards and secure ledger data handling frameworks, keeping your financial stack fully secure and operationally aligned.',
   },
 ];
 
 export default function LandingFaq() {
-  const [openFaq, setOpenFaq] = useState<number | null>(0);
+  const [openFaq, setOpenFaq] = useState<number | null>(null);
 
   return (
     <section
       id="faq"
-      className="bg-[#FFF] px-6 py-[80px] min-h-[744px] flex flex-col items-center justify-center align-self-stretch border-t border-[#f0f4f1]"
+      className="bg-[#FAFDFB] px-4 py-16 md:py-20 flex flex-col items-center justify-center border-t border-[#f0f4f1] font-sans selection:bg-[#006C49]/10"
     >
-      <div className="max-w-4xl w-full space-y-12">
-        <div className="text-center space-y-4">
-          <span className="text-xs font-bold text-[#0f8b4b] uppercase tracking-[0.2em]">FAQ</span>
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#081b10]">
+      <div className="max-w-3xl w-full space-y-10">
+        {/* ── SECTION HEADER ── */}
+        <div className="text-center space-y-2.5 max-w-xl mx-auto">
+          <span className="text-[10px] font-bold text-[#006C49] uppercase tracking-[0.2em] block">
+            FAQ
+          </span>
+          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 leading-tight">
             Frequently asked questions
           </h2>
-          <p className="text-sm text-[#45504b] leading-relaxed">
+          <p className="text-xs md:text-sm text-gray-500 leading-relaxed font-normal">
             Find answers to common questions about our platform, pricing, and features.
           </p>
         </div>
 
-        {/* Accordion Questions List */}
-        <div className="space-y-4">
+        {/* ── ACCORDION LIST ── */}
+        <div className="space-y-3">
           {faqItems.map((item, index) => {
             const isOpen = openFaq === index;
             return (
               <div
                 key={index}
-                className="border border-[#d8e1da] rounded-2xl bg-white overflow-hidden transition-all duration-200"
+                className="border border-[#e4ebe6] rounded-xl bg-white overflow-hidden transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
               >
                 <button
                   type="button"
                   onClick={() => setOpenFaq(isOpen ? null : index)}
-                  className="w-full flex items-center justify-between p-6 text-left font-bold text-base text-[#081b10] hover:text-[#0f8b4b] transition-colors"
+                  className="w-full flex items-center justify-between p-4 md:p-5 text-left font-bold text-xs md:text-sm text-gray-900 hover:text-[#006C49] transition-colors group"
                 >
-                  <span>{item.question}</span>
-                  {isOpen ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                  <span className="pr-4 tracking-tight">{item.question}</span>
+                  <ChevronDown
+                    size={16}
+                    className={cn(
+                      'text-gray-400 transition-transform duration-300 ease-in-out shrink-0 group-hover:text-gray-600',
+                      isOpen && 'rotate-180 text-[#006C49]',
+                    )}
+                  />
                 </button>
 
+                {/* Smooth Max-Height Transition Container */}
                 <div
                   className={cn(
-                    'transition-all duration-200 ease-in-out px-6 pb-6 text-sm text-[#45504b] leading-relaxed border-t border-slate-50 pt-4',
-                    isOpen ? 'block animate-fadeIn' : 'hidden',
+                    'grid transition-all duration-300 ease-in-out border-gray-100',
+                    isOpen
+                      ? 'grid-rows-[1fr] border-t opacity-100'
+                      : 'grid-rows-[0fr] opacity-0 pointer-events-none',
                   )}
                 >
-                  {item.answer}
+                  <div className="overflow-hidden">
+                    <div className="p-4 md:p-5 text-[11px] md:text-xs text-gray-500 leading-relaxed font-normal bg-[#FAFDFB]/50">
+                      {item.answer}
+                    </div>
+                  </div>
                 </div>
               </div>
             );

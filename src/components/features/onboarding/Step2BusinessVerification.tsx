@@ -142,7 +142,7 @@ export default function Step2BusinessVerification({ defaultValues, onNext, onBac
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm px-10 py-8 space-y-6">
+    <div className="bg-white rounded-md  px-10 py-8 space-y-6">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-semibold text-[#081b10]">Business Verification</h1>

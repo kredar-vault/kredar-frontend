@@ -1,183 +1,168 @@
 'use client';
 
-import { useState } from 'react';
+import React from 'react';
 import Link from 'next/link';
-import { Menu, X } from 'lucide-react';
-import KredarLogo from '@/components/KredarLogo';
+import Navbar from './Landingnavbar';
 
-export default function LandingHero() {
-  const [menuOpen, setMenuOpen] = useState(false);
-
+export default function HeroSection() {
   return (
-    <section className="px-4 py-4 md:px-6 md:py-6">
-      <div className="max-w-[1392px] min-h-[940px] mx-auto bg-[#030A03] rounded-[32px] p-6 md:p-12 flex flex-col justify-between text-white relative overflow-hidden shadow-2xl">
-        {/* Top Radial Glow */}
-        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-gradient-to-bl from-[#169e5c]/10 to-transparent blur-[140px] pointer-events-none" />
+    <section className="relative overflow-hidden bg-[#030A05] text-white">
+      {/* Background Ambience */}
 
-        {/* Gold Four-pointed Star ✦ */}
-        <div className="absolute top-16 right-16 text-[#C5A85A] opacity-60 pointer-events-none select-none text-xl animate-pulse">
-          ✦
-        </div>
+      <Navbar />
+      <div className="absolute inset-0">
+        <div className="absolute left-1/2 top-[-220px] h-[650px] w-[1100px] -translate-x-1/2 rounded-full bg-[linear-gradient(180deg,rgba(22,158,92,0.38)_0%,rgba(22,158,92,0.18)_35%,rgba(22,158,92,0.05)_70%,transparent_100%)] blur-[120px]" />
+        <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#169E5C]/30 to-transparent" />
+        <div className="absolute left-[-120px] top-[180px] h-[420px] w-[420px] rounded-full bg-[#169E5C]/10 blur-[150px]" />
+        <div className="absolute right-[-150px] top-[120px] h-[460px] w-[460px] rounded-full bg-[#169E5C]/10 blur-[170px]" />
+      </div>
 
-        {/* CAPSULE NAVBAR */}
-        <header className="relative w-full max-w-6xl mx-auto bg-white/5 border border-white/10 rounded-full px-6 py-3 flex items-center justify-between backdrop-blur-md z-20">
-          <Link href="/" className="flex items-center gap-2">
-            <KredarLogo light />
+      {/* Main Hero Showcase */}
+      <main className="relative z-20 mx-auto flex max-w-7xl flex-col items-center px-6 pt-16 text-center">
+        <span className="mb-5 rounded-full border border-[#21462D] bg-[#08120D]/70 px-4 py-2 text-[11px] font-medium text-[#D6ECDD] backdrop-blur">
+          Modern payment infrastructure for businesses
+        </span>
+
+        <h1 className="max-w-4xl text-5xl font-bold leading-[0.95] tracking-[-0.05em] md:text-6xl">
+          Never wonder
+          <br />
+          who paid again.
+        </h1>
+
+        <p className="mt-6 max-w-2xl text-sm leading-7 text-gray-400 md:text-base">
+          Dedicated virtual accounts, instant reconciliation, real-time verification and payment
+          infrastructure built for modern African businesses.
+        </p>
+
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/docs"
+            className="flex h-12 items-center justify-center rounded-full bg-white px-7 text-sm font-semibold text-[#030A05] transition hover:bg-gray-100"
+          >
+            Get Started
           </Link>
 
-          {/* Nav Links */}
-          <nav className="hidden md:flex items-center gap-8 text-xs">
-            <a
-              href="#features"
-              className="text-white hover:text-[#169E5C] transition-colors duration-150"
-            >
-              Features
-            </a>
-            <a
-              href="#how-it-works"
-              className="text-white hover:text-[#169E5C] transition-colors duration-150"
-            >
-              Use Cases
-            </a>
-            <a
-              href="#infrastructure"
-              className="text-white hover:text-[#169E5C] transition-colors duration-150"
-            >
-              Developers
-            </a>
-            <a
-              href="#faq"
-              className="text-white hover:text-[#169E5C] transition-colors duration-150"
-            >
-              API Docs
-            </a>
-          </nav>
+          <Link
+            href="/docs"
+            className="flex h-12 items-center justify-center rounded-full border border-[#21462D] bg-[#07130B]/70 px-7 text-sm text-gray-300 transition hover:bg-[#0B1810]"
+          >
+            View API Docs
+          </Link>
+        </div>
 
-          <div className="flex items-center gap-3">
-            {/* CTA Button */}
-            <Link
-              href="/auth/signup"
-              className="hidden md:block bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-xs px-4 py-2 rounded-full transition-colors font-inter font-bold"
-            >
-              Get Started
-            </Link>
-
-            {/* Mobile Navigation Toggle Button Icon */}
-            <button
-              type="button"
-              onClick={() => setMenuOpen(!menuOpen)}
-              className="md:hidden p-2 rounded-full bg-white/10 text-white hover:bg-white/20 transition-all border border-white/10"
-              aria-label="Toggle navigation menu"
-            >
-              {menuOpen ? <X size={16} /> : <Menu size={16} />}
-            </button>
-          </div>
-
-          {/* Mobile Dropdown Menu Overlay */}
-          {menuOpen && (
-            <div className="absolute top-[60px] left-0 right-0 bg-[#0A160E]/95 border border-white/10 rounded-3xl p-6 flex flex-col gap-4 text-sm animate-in fade-in slide-in-from-top-4 duration-200 z-50 md:hidden shadow-xl">
-              <a
-                href="#features"
-                onClick={() => setMenuOpen(false)}
-                className="text-white/85 hover:text-white transition-colors py-1"
-              >
-                Features
-              </a>
-              <a
-                href="#how-it-works"
-                onClick={() => setMenuOpen(false)}
-                className="text-white/85 hover:text-white transition-colors py-1"
-              >
-                Use Cases
-              </a>
-              <a
-                href="#infrastructure"
-                onClick={() => setMenuOpen(false)}
-                className="text-white/85 hover:text-white transition-colors py-1"
-              >
-                Developers
-              </a>
-              <a
-                href="#faq"
-                onClick={() => setMenuOpen(false)}
-                className="text-white/85 hover:text-white transition-colors py-1"
-              >
-                API Docs
-              </a>
-              <hr className="border-white/10 my-1" />
-              <Link
-                href="/auth/signup"
-                onClick={() => setMenuOpen(false)}
-                className="bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-center py-2.5 rounded-full font-bold text-xs"
-              >
-                Get Started
-              </Link>
+        {/* Visual Showcase Interface */}
+        <div className="relative mt-14 flex h-[470px] w-full items-end justify-center overflow-hidden">
+          {/* Left floating cards */}
+          <div className="absolute left-[6%] top-6 hidden flex-col gap-5 lg:flex">
+            <div className="-rotate-2 rounded-full border border-[#21462D] bg-[#09160E]/90 px-3 py-2 text-[11px] backdrop-blur-xl">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-[#22C76A]" />
+                Account Created
+              </div>
             </div>
-          )}
-        </header>
 
-        {/* Core Content Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center flex-1 py-10">
-          {/* Left: Heading Details */}
-          <div className="space-y-8 z-10 max-w-xl animate-fade-in-up">
-            <h1 className="text-4xl md:text-[52px] font-bold tracking-tight text-white leading-[1.1] font-sans">
-              Never wonder who paid again
-            </h1>
-            <p className="text-sm md:text-base text-white leading-relaxed font-medium">
-              Managing bank transfers shouldn't slow your business down. Kredar gives you a simpler
-              way to collect payments, keep records accurate, and know exactly who has paid—all in
-              real time.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 pt-2">
-              <Link
-                href="/auth/signup"
-                className="bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-sm px-6 py-3.5 rounded-full text-center transition-colors shadow-lg font-inter font-bold"
-              >
-                Get Started
-              </Link>
-              <Link
-                href="/docs"
-                className="border border-white/20 hover:border-white/40 hover:bg-white/5 text-white text-sm px-6 py-3.5 rounded-full text-center transition-all font-inter font-bold"
-              >
-                View API Docs
-              </Link>
+            <div className="-rotate-3 rounded-2xl border border-[#21462D] bg-[#09160E]/90 p-5 shadow-[0_30px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition duration-300 hover:rotate-0">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">
+                Total Virtual Accounts
+              </p>
+              <h3 className="mt-2 text-3xl font-black">12</h3>
+              <p className="mt-5 text-[10px] uppercase tracking-[0.18em] text-gray-500">
+                Funds Managed
+              </p>
+              <div className="mt-2 text-xl font-bold text-[#22C76A]">₦2.1M</div>
             </div>
           </div>
 
-          {/* Right: Gold Hand holding transparent ATM cards */}
-          <div className="relative w-full h-[460px] flex items-center justify-center z-10 animate-scale-in">
-            {/* Background Glow behind the hand */}
-            <div className="hero-gradient absolute pointer-events-none select-none z-0 opacity-50 scale-50" />
-            <img
-              src="images/minidb.png"
-              alt="Kredar ATM cards"
-              className="max-w-full max-h-full object-contain pointer-events-none absolute z-10"
-              onError={(e) => {
-                e.currentTarget.style.display = 'none';
-              }}
-            />
-          </div>
-        </div>
+          {/* Right floating cards */}
+          <div className="absolute right-[6%] top-2 hidden flex-col gap-5 lg:flex">
+            <div className="rotate-2 rounded-full border border-[#21462D] bg-[#09160E]/90 px-3 py-2 text-[11px] backdrop-blur-xl">
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-[#22C76A]" />
+                Real-time Verification
+              </div>
+            </div>
 
-        {/* Bottom Information Grids styled like Figma screen */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-20 gap-y-8 pt-8 border-t border-white/10 z-10">
-          <div className="space-y-1.5">
-            <span className="text-[#C5A85A] font-bold text-xs tracking-wider block">01</span>
-            <h4 className="font-bold text-[#C5A85A] text-base leading-snug">
-              Instant Payment Matching
-            </h4>
-            <p className="text-white/70 text-[13px] leading-relaxed max-w-sm">
-              Automatically identify every incoming payment without manual verification.
-            </p>
+            <div className="rotate-3 rounded-2xl border border-[#21462D] bg-[#09160E]/90 p-5 text-left shadow-[0_30px_60px_rgba(0,0,0,0.45)] backdrop-blur-xl transition duration-300 hover:rotate-0">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-gray-500">
+                Recent Transaction
+              </p>
+              <p className="mt-3 text-sm font-semibold text-white">
+                <span className="font-bold text-[#22C76A]">+₦120,000</span> from Account #392
+              </p>
+              <div className="mt-4 h-[3px] overflow-hidden rounded-full bg-[#183622]">
+                <div className="h-full w-3/4 rounded-full bg-[#22C76A]" />
+              </div>
+            </div>
           </div>
-          <div className="space-y-1.5">
-            <span className="text-[#C5A85A] font-bold text-xs tracking-wider block">02</span>
-            <h4 className="font-bold text-[#C5A85A] text-base leading-snug">Smarter Operations</h4>
-            <p className="text-white/70 text-[13px] leading-relaxed max-w-sm">
-              Spend less time reconciling and more time growing your business
-            </p>
+
+          {/* Phone Glow Effect */}
+          <div className="absolute bottom-0 left-1/2 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-[#169E5C]/30 blur-[120px]" />
+
+          {/* Phone Frame */}
+          <div className="relative z-20 w-[270px] overflow-hidden rounded-[40px] border-[6px] border-[#16271C] bg-[#030A05] p-2 shadow-[0_35px_90px_rgba(0,0,0,0.75)] md:w-[295px]">
+            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/5 to-transparent" />
+            <div className="absolute left-1/2 top-2 z-30 h-4 w-24 -translate-x-1/2 rounded-full bg-[#182C20]" />
+
+            <div className="rounded-[32px] border border-[#14291B] bg-[#050D07] px-4 pb-4 pt-7">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <div className="flex h-5 w-5 items-center justify-center rounded bg-[#22C76A]">
+                    <span className="text-[8px] font-black text-[#030A05]">K</span>
+                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-[0.18em] text-gray-300">
+                    Kredar
+                  </span>
+                </div>
+                <div className="h-3 w-3 rounded-full bg-[#173822]" />
+              </div>
+
+              <div className="mt-5 rounded-xl border border-[#173822] bg-[#09160E] p-3">
+                <p className="text-[9px] text-gray-500">Current Wallet Balance</p>
+                <h2 className="mt-1 text-xl font-black">₦540,000</h2>
+              </div>
+
+              <div className="mt-3 grid grid-cols-2 gap-2">
+                <div className="rounded-lg border border-[#245534] bg-[#102216] py-2 text-center text-[9px] font-bold text-[#22C76A]">
+                  Dedicated Core
+                </div>
+                <div className="rounded-lg border border-[#173822] bg-[#07130B] py-2 text-center text-[9px] text-gray-400">
+                  Virtual Router
+                </div>
+              </div>
+
+              <div className="mt-5 space-y-2">
+                {[
+                  { id: 'Wema Circle', num: '902****211' },
+                  { id: 'Providus Main', num: '102****582' },
+                  { id: 'Sterling Pool', num: '818****034' },
+                ].map((item, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between rounded-lg border border-[#173822]/50 bg-[#07130B]/70 p-2"
+                  >
+                    <div>
+                      <p className="text-[10px] font-semibold">{item.id}</p>
+                      <p className="text-[8px] text-gray-500">{item.num}</p>
+                    </div>
+                    <span className="rounded bg-[#102216] px-2 py-1 text-[7px] font-bold uppercase text-[#22C76A]">
+                      Active
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
+
+          {/* Bottom structural crop */}
+          <div className="pointer-events-none absolute bottom-0 left-0 z-30 h-8 w-full bg-[#030A05]" />
         </div>
+      </main>
+
+      {/* Structural Ambient Green Blurs */}
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 flex justify-center overflow-hidden">
+        <div className="absolute bottom-[-120px] h-[420px] w-[1200px] rounded-full bg-[linear-gradient(180deg,#7CF59A_0%,#4ADE80_30%,#22C55E_55%,transparent_100%)] opacity-90 blur-[90px]" />
+        <div className="absolute bottom-[-40px] h-[220px] w-[700px] rounded-full bg-white opacity-70 blur-[80px]" />
+        <div className="absolute bottom-[-140px] h-[500px] w-[1600px] rounded-full bg-[#22C55E] opacity-25 blur-[180px]" />
       </div>
     </section>
   );

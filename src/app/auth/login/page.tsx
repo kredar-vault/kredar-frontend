@@ -10,6 +10,7 @@ import LoginCredentialsForm, { LoginValues } from '@/components/auth/LoginCreden
 import LoginOtpForm from '@/components/auth/LoginOtpForm';
 import { useLogin, useVerifyOtp } from '@/api/auth/hooks';
 import { setToken, setCurrentUser, setOnboardingComplete, clearAuthCookies } from '@/lib/cookies';
+import { setOnboardingCompleteFlag } from '@/lib/onboarding-status';
 import { api } from '@/lib/api';
 
 function LoginForm() {
@@ -89,32 +90,31 @@ function LoginForm() {
 
       toast.success('Logged in successfully!');
 
-      // Dynamically verify onboarding completion from backend status and profile
+      // We still check onboarding completeness here — not to decide where to
+      // redirect (that's always /dashboard now), but to feed the "complete
+      // your profile" banner shown on the dashboard.
+      //
+      // Confirmed shape from GET /api/v1/onboarding:
+      // { isSuccess, message, data: { status: "NotStarted" | ..., legalName, ... } }
+      // Treating anything other than "NotStarted" as "don't nag them anymore" —
+      // once they've submitted, the banner's job is done. If Rejected should
+      // still show the banner (to prompt a resubmit), tell me and I'll add
+      // that case back in explicitly.
       let onboardingDone = false;
       try {
         const onboardingRes = await api.get('/onboarding');
-        const onboarding = onboardingRes.data?.data || onboardingRes.data;
-        if (
-          onboarding &&
-          (onboarding.status === 'UnderReview' || onboarding.status === 'Approved')
-        ) {
-          onboardingDone = true;
-        } else {
-          const profileRes = await api.get('/tenants/profile');
-          const profile = profileRes.data?.data || profileRes.data;
-          onboardingDone = !!(profile?.legalName || profile?.businessName || profile?.isOnboarded);
-        }
+        const onboarding = onboardingRes.data?.data;
+        onboardingDone = onboarding?.status !== 'NotStarted';
       } catch (err) {
-        console.error('Failed to fetch onboarding/profile status during login:', err);
+        console.error('Failed to fetch onboarding status during login:', err);
       }
 
       setOnboardingComplete(onboardingDone);
+      setOnboardingCompleteFlag(onboardingDone);
 
-      if (onboardingDone) {
-        router.replace('/dashboard');
-      } else {
-        router.replace('/onboarding');
-      }
+      // Always land on the dashboard now. The banner (driven by the flag
+      // above) is what nudges incomplete profiles, not a hard redirect.
+      router.replace('/dashboard');
     } catch (e: any) {
       const msg =
         e.response?.data?.message || e.message || 'Verification failed. Please check the code.';
@@ -206,7 +206,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center bg-[#FFF]">
-          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-md animate-spin" />
         </div>
       }
     >
