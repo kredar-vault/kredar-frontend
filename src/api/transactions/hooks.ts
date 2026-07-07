@@ -2,7 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { TransactionItem, CreateTransactionPayload, CustomerTransactionStats } from './types';
 
-// Query to get all transactions
+// 1. Query to get all transactions
 export function useTransactions(status?: string) {
   return useQuery<TransactionItem[], Error>({
     queryKey: ['transactions', status],
@@ -10,17 +10,16 @@ export function useTransactions(status?: string) {
       const res = await api.get('/transactions', {
         params: status ? { status } : {},
       });
-      const raw = Array.isArray(res.data)
+      return Array.isArray(res.data)
         ? res.data
         : Array.isArray(res.data?.data)
           ? res.data.data
           : [];
-      return raw;
     },
   });
 }
 
-// Query to get transaction details by ID
+// 2. Query to get transaction details by ID
 export function useTransactionDetails(id: string) {
   return useQuery<TransactionItem, Error>({
     queryKey: ['transaction', id],
@@ -32,7 +31,23 @@ export function useTransactionDetails(id: string) {
   });
 }
 
-// Query to get customer transaction stats
+// 3. ADDED: Query to get transactions for a specific customer
+export function useCustomerTransactions(customerId: string) {
+  return useQuery<TransactionItem[], Error>({
+    queryKey: ['customer-transactions', customerId],
+    queryFn: async () => {
+      const res = await api.get(`/customers/${customerId}/transactions`);
+      return Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+    },
+    enabled: !!customerId,
+  });
+}
+
+// 4. Query to get customer transaction stats
 export function useCustomerTransactionStats(customerId: string) {
   return useQuery<CustomerTransactionStats, Error>({
     queryKey: ['customer-transaction-stats', customerId],
@@ -44,7 +59,7 @@ export function useCustomerTransactionStats(customerId: string) {
   });
 }
 
-// Mutation to create/post a test transaction
+// 5. Mutation to create/post a test transaction
 export function useCreateTransaction() {
   const queryClient = useQueryClient();
   return useMutation<TransactionItem, Error, CreateTransactionPayload>({

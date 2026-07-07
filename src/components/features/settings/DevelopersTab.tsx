@@ -53,7 +53,7 @@ export default function DevelopersTab({
                 key={key.id}
                 className="flex items-center justify-between p-4 border border-[#d8e1da] rounded-xl bg-white text-sm"
               >
-                <span className="font-semibold text-[#081b10]">{key.name}:</span>
+                <span className="font-semibold text-[#081b10]">{key.label || 'API Key'}:</span>
                 <code className="text-xs text-[#45504b] font-mono select-all bg-[#f7faf6] px-2.5 py-1 rounded border border-[#ebebeb] max-w-[240px] truncate">
                   {key.keyString}
                 </code>

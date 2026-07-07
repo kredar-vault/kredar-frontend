@@ -95,6 +95,13 @@ function VerifyEmailForm() {
         <CheckCircle2 className="w-12 h-12 text-[#0f8b4b]" />
         <h3 className="text-lg font-bold text-[#081b10]">Verification Successful!</h3>
         <p className="text-sm text-[#45504b]">Taking you to login...</p>
+        <button
+          type="button"
+          onClick={() => router.replace('/auth/login')}
+          className="kredar-btn-primary w-full max-w-xs mt-2"
+        >
+          Go to login
+        </button>
       </div>
     );
   }
@@ -119,7 +126,7 @@ function VerifyEmailForm() {
 
   return (
     <div className="flex flex-col items-center py-4 text-center space-y-5">
-      <div className="w-16 h-16 bg-[#effaf2] rounded-full flex items-center justify-center text-[#0f8b4b] mb-2">
+      <div className="w-16 h-16 bg-[#effaf2] rounded-md flex items-center justify-center text-[#0f8b4b] mb-2">
         <Mail size={32} />
       </div>
       <p className="text-sm text-[#45504b] leading-relaxed">
@@ -153,7 +160,7 @@ export default function VerifyEmailPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-md animate-spin" />
         </div>
       }
     >

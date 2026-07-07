@@ -20,12 +20,12 @@ export default function LogoutConfirmModal({
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 animate-in fade-in duration-200">
       {isLoggingOut ? (
-        <div className="bg-white border border-[#d8e1da] rounded-2xl shadow-xl max-w-xs w-full p-8 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in duration-200">
+        <div className="bg-white border border-[#d8e1da] rounded-md shadow-xl max-w-xs w-full p-8 flex flex-col items-center justify-center text-center space-y-4 animate-in fade-in zoom-in duration-200">
           <Loader2 className="w-10 h-10 text-[#0f8b4b] animate-spin" />
           <p className="text-sm font-semibold text-[#081b10]">Logging out</p>
         </div>
       ) : (
-        <div className="bg-white border border-[#d8e1da] rounded-2xl shadow-xl max-w-sm w-full p-6 space-y-6 animate-in fade-in zoom-in duration-200">
+        <div className="bg-white border border-[#d8e1da] rounded-md shadow-xl max-w-sm w-full p-6 space-y-6 animate-in fade-in zoom-in duration-200">
           <div className="space-y-2">
             <h3 className="text-lg font-bold text-[#081b10]">Confirm Log Out</h3>
             <p className="text-sm text-[#45504b]">

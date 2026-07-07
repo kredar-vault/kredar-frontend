@@ -1,12 +1,13 @@
+'use client';
+
 import { ChevronDown, Filter } from 'lucide-react';
 import {
   ResponsiveContainer,
-  LineChart,
-  Line,
+  AreaChart,
+  Area,
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   CartesianGrid,
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
@@ -25,7 +26,6 @@ export default function TransactionFlowChart() {
     },
   });
 
-  // Setup monthly buckets
   const chartData = [
     { name: 'Jan', Incoming: 0, Outgoing: 0 },
     { name: 'Feb', Incoming: 0, Outgoing: 0 },
@@ -44,89 +44,83 @@ export default function TransactionFlowChart() {
   transactions.forEach((tx: any) => {
     const txDate = tx.createdAt || tx.date;
     if (!txDate) return;
-    const dateObj = new Date(txDate);
-    const monthIndex = dateObj.getMonth();
+    const monthIndex = new Date(txDate).getMonth();
     if (monthIndex >= 0 && monthIndex < 12) {
       const amount = tx.amount || 0;
-      const type = (tx.type || '').toLowerCase();
-      // Outgoing is identified by transfers or payouts
-      const isOutgoing = type.includes('transfer') || type.includes('payout');
-      if (isOutgoing) {
-        chartData[monthIndex].Outgoing += amount;
-      } else {
-        chartData[monthIndex].Incoming += amount;
-      }
+      const isOutgoing =
+        (tx.type || '').toLowerCase().includes('transfer') ||
+        (tx.type || '').toLowerCase().includes('payout');
+      if (isOutgoing) chartData[monthIndex].Outgoing += amount;
+      else chartData[monthIndex].Incoming += amount;
     }
   });
 
   return (
-    <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm space-y-6">
+    <div className="bg-white border border-[#eef2ef] rounded-md p-6  space-y-6">
       <div className="flex items-center justify-between">
-        <h3 className="text-lg font-bold text-[#081b10]">Transaction flow</h3>
+        <div>
+          <h3 className="text-base font-bold text-[#081b10]">Transaction flow</h3>
+          <p className="text-[11px] text-[#667085] font-medium mt-0.5">
+            Analytics breakdown for your ledger flow
+          </p>
+        </div>
 
-        <div className="flex items-center gap-3">
-          {/* Date Select Dropdown */}
+        <div className="flex items-center gap-2">
           <div className="relative">
-            <select className="kredar-select h-9 text-xs pl-3 pr-8 w-32 border-[#d8e1da]">
-              <option>Date</option>
-              <option>This Week</option>
-              <option>This Month</option>
+            <select className="h-8 text-[11px] font-semibold text-[#45504b] bg-[#f7faf6] pl-3 pr-7 rounded-lg border border-[#eef2ef] appearance-none cursor-pointer outline-none">
               <option>This Year</option>
             </select>
             <ChevronDown
-              size={14}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-[#45504b] pointer-events-none"
+              size={12}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[#45504b] pointer-events-none"
             />
           </div>
 
-          {/* Filter Toggle */}
-          <button className="h-9 px-3 border border-[#d8e1da] rounded-lg text-xs font-semibold flex items-center gap-1.5 text-[#45504b] hover:bg-[#f7faf6]">
-            <Filter size={14} />
+          <button className="h-8 px-2.5 bg-white border border-[#eef2ef] rounded-lg text-[11px] font-semibold flex items-center gap-1.5 text-[#45504b] hover:bg-[#f7faf6] transition-colors">
+            <Filter size={12} />
             <span>Filters</span>
-            <ChevronDown size={12} />
           </button>
         </div>
       </div>
 
-      {/* Recharts chart area */}
-      <div className="h-[320px] w-full">
+      <div className="h-[280px] w-full">
         {isLoading ? (
-          <div className="w-full h-full bg-gray-100 rounded-xl animate-pulse" />
+          <div className="w-full h-full bg-[#f7faf6]/60 rounded-xl animate-pulse" />
         ) : (
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f4f1" />
+            <AreaChart data={chartData} margin={{ top: 10, right: 5, left: -25, bottom: 0 }}>
+              <defs>
+                <linearGradient id="incomeGrad" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="5%" stopColor="#0f8b4b" stopOpacity={0.15} />
+                  <stop offset="95%" stopColor="#0f8b4b" stopOpacity={0} />
+                </linearGradient>
+              </defs>
+              <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="#f0f4f1" />
               <XAxis
                 dataKey="name"
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#45504b', fontSize: 11 }}
+                tick={{ fill: '#667085', fontSize: 10, fontWeight: 500 }}
               />
               <YAxis
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: '#45504b', fontSize: 11 }}
-                tickFormatter={(value) => {
-                  if (value >= 1000) {
-                    return `₦${(value / 1000).toFixed(0)}k`;
-                  }
-                  return `₦${value}`;
-                }}
+                tick={{ fill: '#667085', fontSize: 10, fontWeight: 500 }}
+                tickFormatter={(v) => (v >= 1000 ? `₦${(v / 1000).toFixed(0)}k` : `₦${v}`)}
               />
               <Tooltip
                 content={({ active, payload }) => {
-                  if (active && payload && payload.length) {
+                  if (active && payload?.length) {
                     return (
-                      <div className="bg-white p-2 rounded-lg border border-[#d8e1da] shadow-md text-xs font-semibold text-[#081b10] space-y-1">
-                        {payload.map((entry) => (
+                      <div className="bg-white p-3 rounded-xl border border-[#eef2ef] shadow-md text-xs space-y-1.5 font-medium">
+                        {payload.map((entry: any) => (
                           <p key={entry.name} style={{ color: entry.color }}>
                             {entry.name}:{' '}
                             {new Intl.NumberFormat('en-NG', {
                               style: 'currency',
                               currency: 'NGN',
                               minimumFractionDigits: 0,
-                              maximumFractionDigits: 0,
-                            }).format(entry.value as number)}
+                            }).format(entry.value)}
                           </p>
                         ))}
                       </div>
@@ -135,32 +129,25 @@ export default function TransactionFlowChart() {
                   return null;
                 }}
               />
-              <Legend
-                verticalAlign="bottom"
-                height={36}
-                iconType="square"
-                iconSize={10}
-                formatter={(value) => (
-                  <span className="text-xs text-[#45504b] font-medium ml-1 mr-4">{value}</span>
-                )}
-              />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="Incoming"
                 stroke="#0f8b4b"
-                strokeWidth={2.5}
+                strokeWidth={2}
+                fillOpacity={1}
+                fill="url(#incomeGrad)"
                 dot={false}
-                activeDot={{ r: 5, fill: '#0f8b4b', strokeWidth: 0 }}
               />
-              <Line
+              <Area
                 type="monotone"
                 dataKey="Outgoing"
                 stroke="#10422a"
-                strokeWidth={2.5}
+                strokeWidth={2}
+                fill="none"
                 dot={false}
-                activeDot={{ r: 5, fill: '#10422a', strokeWidth: 0 }}
+                strokeDasharray="4 4"
               />
-            </LineChart>
+            </AreaChart>
           </ResponsiveContainer>
         )}
       </div>

@@ -38,7 +38,7 @@ export default function DashboardHome() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="bg-white border border-[#d8e1da] rounded-2xl p-6 min-h-[140px] flex flex-col justify-between shadow-sm"
+                className="bg-white border border-[#d8e1da] rounded-md p-6 min-h-[140px] flex flex-col justify-between "
               >
                 <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
                 <div className="h-8 bg-gray-200 rounded animate-pulse w-24 mt-2" />
@@ -48,7 +48,7 @@ export default function DashboardHome() {
           </div>
 
           {/* Skeleton: Graph */}
-          <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm h-[380px] flex flex-col justify-between">
+          <div className="bg-white border border-[#d8e1da] rounded-md p-6  h-[380px] flex flex-col justify-between">
             <div className="flex justify-between items-center">
               <div className="h-5 bg-gray-200 rounded animate-pulse w-40" />
               <div className="h-8 bg-gray-200 rounded animate-pulse w-24" />
@@ -57,18 +57,18 @@ export default function DashboardHome() {
           </div>
 
           {/* Skeleton: Table */}
-          <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm space-y-4">
+          <div className="bg-white border border-[#d8e1da] rounded-md p-6  space-y-4">
             <div className="h-5 bg-gray-200 rounded animate-pulse w-48" />
             <div className="space-y-2.5 pt-2">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex justify-between items-center py-2.5">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-gray-200 animate-pulse" />
+                    <div className="w-8 h-8 rounded-md bg-gray-200 animate-pulse" />
                     <div className="h-4 bg-gray-200 rounded animate-pulse w-32" />
                   </div>
                   <div className="h-4 bg-gray-200 rounded animate-pulse w-20" />
                   <div className="h-4 bg-gray-200 rounded animate-pulse w-16" />
-                  <div className="h-6 bg-gray-200 rounded-full animate-pulse w-24" />
+                  <div className="h-6 bg-gray-200 rounded-md animate-pulse w-24" />
                 </div>
               ))}
             </div>

@@ -4,15 +4,15 @@ export default function DocsSystem() {
   return (
     <div className="space-y-6 max-w-4xl font-sans text-slate-800 animate-fade-in-up">
       <section className="space-y-2">
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#0c1e13]">System</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-[#0c1e13]">System</h1>
         <p className="text-xs text-[#5d6b60] font-mono">/api/health</p>
       </section>
 
       {/* Health check */}
       <section id="health" className="space-y-4 pt-6 border-t border-[#e2ebd9]">
-        <h2 className="text-xl font-extrabold text-[#0c1e13]">Health Check</h2>
+        <h2 className="text-xl font-bold text-[#0c1e13]">Health Check</h2>
         <div className="flex items-center gap-3">
-          <span className="bg-blue-100 text-blue-800 text-[10px] font-mono px-2 py-0.5 rounded font-extrabold uppercase">
+          <span className="bg-blue-100 text-blue-800 text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase">
             GET
           </span>
           <code className="text-xs font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-700">

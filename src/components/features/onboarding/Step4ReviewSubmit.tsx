@@ -32,7 +32,7 @@ export default function Step4ReviewSubmit({ data, onBack, onSubmit }: Props) {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm px-10 py-8 space-y-8">
+    <div className="bg-white rounded-md  px-10 py-8 space-y-8">
       {/* Renders Section 1 & Section 3 details */}
       <ReviewDetailsGrid bi={bi} ad={ad} />
 

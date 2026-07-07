@@ -27,7 +27,7 @@ export default function DocsCodePanel({ snippets, activeSection }: DocsCodePanel
     activeTab === 'curl' ? codeData.curl : activeTab === 'js' ? codeData.js : codeData.python;
 
   return (
-    <div className="w-full lg:w-96 flex-shrink-0 bg-[#030A03] border border-white/10 rounded-2xl overflow-hidden shadow-xl self-start lg:sticky lg:top-24">
+    <div className="w-full lg:w-96 flex-shrink-0 bg-[#030A03] border border-white/10 rounded-md overflow-hidden shadow-xl self-start lg:sticky lg:top-24">
       {/* Header Tabs list */}
       <div className="bg-white/5 border-b border-white/10 px-4 py-2 flex items-center justify-between text-xs">
         <div className="flex gap-2.5">

@@ -1,100 +1,109 @@
 'use client';
 
-import { MoreVertical } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { ArrowRight, ArrowLeft } from 'lucide-react';
 
-interface TransactionItem {
-  id: string;
-  date: string;
-  amount: string;
-  status: string;
-  reference?: string;
-  fee?: string;
-  currency?: string;
-  method?: string;
-  time?: string;
-  customerName?: string;
-  accountNumber?: string;
-  narration?: string;
-  expectedAmount?: string;
-  receivedAmount?: string;
-  difference?: string;
-}
+import { TransactionItem } from '@/api/transactions/types';
 
 interface TransactionsTableProps {
   transactions: TransactionItem[];
-  onRowClick: (tx: TransactionItem) => void;
+  onRowClick: (tx: any) => void;
   statusColors: Record<string, string>;
 }
 
-export default function TransactionsTable({
-  transactions,
-  onRowClick,
-  statusColors,
-}: TransactionsTableProps) {
+export default function TransactionsTable({ transactions, onRowClick }: TransactionsTableProps) {
+  // Helper to render slick dynamic transaction icons matching the screenshot flavor
+  const getTransactionIcon = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'reconciled':
+        return (
+          <div className="w-10 h-10 rounded-full bg-[#0f8b4b]/10 flex items-center justify-center text-[#0f8b4b]">
+            <ArrowLeft size={18} />
+          </div>
+        );
+      case 'failed':
+        return (
+          <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center text-red-500">
+            <ArrowRight size={18} />
+          </div>
+        );
+      default:
+        return (
+          <div className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-400"></div>
+        );
+    }
+  };
+
   return (
-    <div className="space-y-4">
-      {/* Transactions Table list */}
-      <div className="overflow-x-auto pt-2">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="border-b border-[#f0f4f1] text-[#45504b] text-xs font-semibold">
-              <th className="pb-3 font-semibold">Transaction ID</th>
-              <th className="pb-3 font-semibold">Date</th>
-              <th className="pb-3 font-semibold">Amount</th>
-              <th className="pb-3 font-semibold">Status</th>
-              <th className="pb-3 text-right"></th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-[#f0f4f1]">
-            {transactions.map((tx) => (
-              <tr
-                key={tx.id}
-                onClick={() => onRowClick(tx)}
-                className="text-sm hover:bg-[#f7faf6]/40 cursor-pointer transition-colors"
-              >
-                <td className="py-3.5 font-bold text-[#081b10]">{tx.id}</td>
-                <td className="py-3.5 text-[#45504b] font-medium">{tx.date}</td>
-                <td className="py-3.5 font-bold text-[#081b10]">{tx.amount}</td>
-                <td className="py-3.5">
-                  <span
-                    className={cn(
-                      'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border',
-                      statusColors[tx.status],
-                    )}
-                  >
-                    {tx.status}
-                  </span>
-                </td>
-                <td className="py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
-                  <button className="text-[#45504b] hover:text-[#081b10] p-1.5 rounded-lg hover:bg-[#f3f4f6]">
-                    <MoreVertical size={16} />
-                  </button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="w-full bg-white rounded-2xl p-6 border border-[#f0f4f1]/60 shadow-sm">
+      {/* Header Container */}
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-bold text-[#081b10] tracking-tight">Recent transactions</h3>
+        <button className="flex items-center gap-1 text-xs font-semibold px-3 py-1.5 border border-gray-200 rounded-xl hover:bg-gray-50 text-gray-600 transition-all">
+          Recent
+        </button>
       </div>
 
-      {/* Pagination Footer */}
-      <div className="flex justify-center pt-6 pb-2">
-        <nav className="flex items-center gap-1 text-sm font-semibold text-[#45504b]">
-          <button className="px-3 py-1.5 rounded-lg hover:bg-[#f7faf6] transition-colors">
-            Previous
+      {/* Transaction Rows */}
+      <div className="divide-y divide-gray-100">
+        {transactions.map((tx) => {
+          // Normalize names or types safely based on your mixed types
+          const titleName = tx.narration || tx.customerName || tx.customer?.name || 'Transaction';
+          const subtitleInfo = tx.date || tx.createdAt || 'Just now';
+
+          return (
+            <div
+              key={tx.id}
+              onClick={() => onRowClick(tx)}
+              className="flex items-center justify-between py-4 cursor-pointer hover:bg-gray-50/60 px-2 rounded-xl transition-all group"
+            >
+              {/* Left Side: Icon + Label Info */}
+              <div className="flex items-center gap-4">
+                {getTransactionIcon(tx.status)}
+                <div>
+                  <p className="text-sm font-semibold text-gray-900 group-hover:text-[#0f8b4b] transition-colors">
+                    {titleName}
+                  </p>
+                  <p className="text-xs text-gray-400 mt-0.5">{subtitleInfo}</p>
+                </div>
+              </div>
+
+              {/* Right Side: Price + Actions */}
+              <div className="flex items-center gap-6">
+                <span className="text-sm font-bold text-gray-900">
+                  {typeof tx.amount === 'number' ? `₦${tx.amount.toLocaleString()}` : tx.amount}
+                </span>
+                <button
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1.5 rounded-lg text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors"
+                >
+                  :
+                </button>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Sleek Minimalist Pagination */}
+      <div className="flex items-center justify-between pt-6 mt-4 border-t border-gray-100">
+        <button className="text-xs font-semibold px-3 py-1.5 text-gray-500 hover:text-gray-900 transition-colors">
+          Previous
+        </button>
+        <div className="flex items-center gap-1">
+          <button className="w-8 h-8 rounded-lg bg-[#0f8b4b]/10 text-[#0f8b4b] text-xs font-bold">
+            1
           </button>
-          <button className="w-9 h-9 rounded-lg bg-[#0f8b4b]/10 text-[#0f8b4b]">1</button>
-          <button className="w-9 h-9 rounded-lg hover:bg-[#f7faf6] transition-colors">2</button>
-          <button className="w-9 h-9 rounded-lg hover:bg-[#f7faf6] transition-colors">3</button>
-          <button className="w-9 h-9 rounded-lg hover:bg-[#f7faf6] transition-colors">4</button>
-          <span className="px-2">...</span>
-          <button className="w-9 h-9 rounded-lg hover:bg-[#f7faf6] transition-colors">10</button>
-          <button className="px-3 py-1.5 rounded-lg hover:bg-[#f7faf6] transition-colors">
-            Next
+          <button className="w-8 h-8 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-50">
+            2
           </button>
-        </nav>
+          <button className="w-8 h-8 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-50">
+            3
+          </button>
+        </div>
+        <button className="text-xs font-semibold px-3 py-1.5 text-gray-500 hover:text-gray-900 transition-colors">
+          Next
+        </button>
       </div>
     </div>
   );
 }
-export type { TransactionItem };

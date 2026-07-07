@@ -205,13 +205,13 @@ export default function OnboardingWizard() {
       </div>
 
       <div className="mx-auto max-w-[680px] px-4 pb-12 relative">
-        <div className="bg-white/70 backdrop-blur-sm border border-[#d8e1da] rounded-2xl px-8 py-6 mb-4">
+        <div className="bg-white/70 backdrop-blur-sm border border-[#d8e1da] rounded-md px-8 py-6 mb-4">
           <StepIndicator steps={STEPS} currentStep={currentStep} />
         </div>
 
         {transitioning && (
           <div className="absolute inset-0 bg-[#f5f5f5]/60 z-30 flex items-center justify-center min-h-[300px]">
-            <div className="bg-white p-6 rounded-2xl shadow-md flex flex-col items-center gap-3">
+            <div className="bg-white p-6 rounded-md shadow-md flex flex-col items-center gap-3">
               <Loader2 className="w-8 h-8 text-[#0f8b4b] animate-spin" />
               <span className="text-sm font-semibold text-[#081b10]">Processing...</span>
             </div>
