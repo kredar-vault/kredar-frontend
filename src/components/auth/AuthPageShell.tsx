@@ -30,9 +30,9 @@ export default function AuthPageShell({
         <div className="absolute inset-0 bg-[#0a2e1f]/20 mix-blend-multiply" />
       </div>
 
-      <div className="relative z-10 w-full min-h-screen grid grid-cols-1 lg:grid-cols-2">
+      <div className="relative z-10 w-full min-h-screen grid grid-cols-1 lg:grid-cols-2 p-5">
         {/* DESKTOP LEFT PANEL (visible only on lg and up) */}
-        <div className="relative hidden lg:block overflow-hidden">
+        <div className="relative hidden lg:block overflow-hidden rounded-md">
           <img
             src="/images/Left.png"
             alt="Kredar Desktop"
@@ -47,7 +47,7 @@ export default function AuthPageShell({
             - On mobile: Translucent glassmorphism background (bg-white/90 backdrop-blur-md).
             - On desktop: Solid white card background (lg:bg-white).
           */}
-          <div className="flex min-h-[560px] w-full max-w-[420px] flex-col rounded-md bg-white/95 backdrop-blur-md border border-white/20 px-6 sm:px-10 py-8 shadow-xl lg:bg-white lg:border-none lg:">
+          <div className="flex min-h-[560px] w-full max-w-[420px] flex-col rounded-lg bg-white lg:bg-white/70  border border-white/5 px-6 sm:px-10 py-8 lg:border-none">
             {/* HEADER */}
             <div className="text-center">
               <h1 className="text-[2.25rem] font-semibold text-slate-900 leading-tight">{title}</h1>
