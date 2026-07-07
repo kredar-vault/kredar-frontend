@@ -1,8 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 import { api } from '@/lib/api';
 import { ProfileData, OnboardingStatus, OnboardingSubmitPayload } from './types';
+import { getErrorMessage } from '@/lib/get-error-message';
 
-// Query to get the tenant's current profile
 export function useTenantProfile() {
   return useQuery<ProfileData | null, Error>({
     queryKey: ['tenant-profile'],
@@ -26,7 +27,6 @@ export function useTenantProfile() {
   });
 }
 
-// Query to check onboarding status
 export function useOnboardingStatus() {
   return useQuery<OnboardingStatus | null, Error>({
     queryKey: ['onboarding-status'],
@@ -37,12 +37,10 @@ export function useOnboardingStatus() {
   });
 }
 
-// Mutation to update profile in Settings
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   return useMutation<any, Error, Partial<ProfileData>>({
     mutationFn: async (payload) => {
-      // Map to correct API keys for business registration number
       const mappedPayload = {
         businessName: payload.businessName,
         businessRegistrationNumber: payload.registrationNumber,
@@ -57,12 +55,16 @@ export function useUpdateProfile() {
       return res.data;
     },
     onSuccess: () => {
+      toast.success('Business profile updated successfully!');
       queryClient.invalidateQueries({ queryKey: ['tenant-profile'] });
+    },
+    onError: (error: any) => {
+      console.error('[useUpdateProfile] error', error);
+      toast.error(getErrorMessage(error, 'Failed to update profile.'));
     },
   });
 }
 
-// Mutation to submit the onboarding details
 export function useSubmitOnboarding() {
   const queryClient = useQueryClient();
   return useMutation<any, Error, OnboardingSubmitPayload>({
@@ -73,6 +75,10 @@ export function useSubmitOnboarding() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['onboarding-status'] });
       queryClient.invalidateQueries({ queryKey: ['tenant-profile'] });
+    },
+    onError: (error: any) => {
+      console.error('[useSubmitOnboarding] error', error);
+      toast.error(getErrorMessage(error, 'Onboarding submission failed.'));
     },
   });
 }

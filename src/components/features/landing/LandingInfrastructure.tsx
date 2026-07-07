@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function InfrastructureSection() {
   return (
-    <section className="w-full bg-[#030A05] text-white py-12 md:py-14 font-sans selection:bg-[#006C49]/30 relative overflow-hidden">
+    <section className="w-full bg-[#030A05] text-white py-12 md:py-14  selection:bg-[#006C49]/30 relative overflow-hidden">
       {/* Background radial glow behind the mockups */}
       <div className="absolute right-0 bottom-0 w-[400px] h-[400px] bg-[radial-gradient(circle_closest-side,#006C49,transparent)] opacity-[0.12] blur-[80px] pointer-events-none" />
 
@@ -13,7 +13,7 @@ export default function InfrastructureSection() {
             Built for growth
           </span>
 
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white leading-none">
+          <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-white leading-none">
             Infrastructure that <br />
             <span className="text-[#00FF9D]">Scales with your</span> <br />
             Business
@@ -63,7 +63,7 @@ export default function InfrastructureSection() {
                 {/* Brand Header */}
                 <div className="flex items-center gap-1 mb-2">
                   <div className="w-2.5 h-2.5 flex items-center justify-center bg-[#00FF9D] rounded-[1.5px]">
-                    <span className="text-[4px] font-black text-[#030A05]">K</span>
+                    <span className="text-[4px] font-bold text-[#030A05]">K</span>
                   </div>
                   <span className="text-[5.5px] font-bold tracking-wider uppercase text-gray-400">
                     Kredar
@@ -106,7 +106,7 @@ export default function InfrastructureSection() {
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1">
                     <div className="w-3 h-3 flex items-center justify-center bg-[#00FF9D] rounded-[2px]">
-                      <span className="text-[5px] font-black text-[#030A05]">K</span>
+                      <span className="text-[5px] font-bold text-[#030A05]">K</span>
                     </div>
                     <span className="text-[6.5px] font-bold tracking-wider uppercase text-gray-200">
                       Kredar
@@ -119,7 +119,7 @@ export default function InfrastructureSection() {
                 <span className="text-[5.5px] text-gray-500 uppercase tracking-wider block">
                   Total Pool
                 </span>
-                <span className="text-sm font-black text-white tracking-tight block mb-1.5">
+                <span className="text-sm font-bold text-white tracking-tight block mb-1.5">
                   ₦2,400,000
                 </span>
 

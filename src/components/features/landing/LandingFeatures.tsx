@@ -2,17 +2,14 @@ import React from 'react';
 
 export default function FeaturesSection() {
   return (
-    <section
-      id="features"
-      className="w-full bg-[#FAFDFB] py-16 md:py-20 font-sans selection:bg-[#006C49]/10"
-    >
+    <section id="features" className="w-full bg-[#FAFDFB] py-16 md:py-20 selection:bg-[#006C49]/10">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         {/* ── SECTION HEADER ── */}
         <div className="text-center max-w-xl mx-auto mb-12 md:mb-14">
           <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#006C49] block mb-2">
             Features
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-3 leading-tight">
             Built for better payment operations
           </h2>
           <p className="text-xs md:text-sm text-gray-500 font-normal leading-relaxed">

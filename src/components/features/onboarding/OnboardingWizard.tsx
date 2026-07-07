@@ -180,6 +180,27 @@ export default function OnboardingWizard() {
         settlementAccountNumber: data.accountDetails?.accountNumber,
       });
 
+      // Also sync the same data into /tenants/profile so Settings reflects it immediately
+      try {
+        await api.patch('/tenants/profile', {
+          businessName: data.businessInfo?.businessName,
+          businessRegistrationNumber: data.businessInfo?.registrationNumber || null,
+          businessType: data.businessInfo?.businessType,
+          industry: data.businessInfo?.industry,
+          country: data.businessInfo?.country,
+          businessAddress: data.businessInfo?.businessAddress,
+          phoneNumber: contactPhone,
+          website: data.businessInfo?.website
+            ? data.businessInfo.website.startsWith('http')
+              ? data.businessInfo.website
+              : `https://${data.businessInfo.website}`
+            : null,
+        });
+      } catch (syncErr) {
+        console.error('Failed to sync onboarding data to tenant profile:', syncErr);
+        // Don't block success flow if this secondary sync fails
+      }
+
       const user = getCurrentUser();
       clearOnboardingDraft(user?.email);
       setOnboardingComplete(true);
@@ -194,7 +215,6 @@ export default function OnboardingWizard() {
       setTransitioning(false);
     }
   };
-
   if (isComplete) return <SuccessScreen />;
 
   // Prevent UI flashing or jumpiness while validating response state on initial load
@@ -207,7 +227,7 @@ export default function OnboardingWizard() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5f5] relative font-sans selection:bg-[#006C49]/10">
+    <div className="min-h-screen bg-[#f5f5f5] relative selection:bg-[#006C49]/10">
       <div className="px-8 py-5">
         <KredarLogo />
       </div>

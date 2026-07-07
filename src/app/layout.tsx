@@ -2,19 +2,13 @@ import '@/app/globals.css';
 import { ReactNode } from 'react';
 import QueryProvider from '@/providers/QueryProvider';
 import ThemeProvider from '@/providers/ThemeProvider';
-import { GeistSans } from 'geist/font/sans';
-import { Lexend_Zetta, Inter } from 'next/font/google';
+import { Plus_Jakarta_Sans } from 'next/font/google';
 import { Toaster } from 'sonner';
 
-const lexendZetta = Lexend_Zetta({
+const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-lexend-zetta',
-});
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-jakarta',
+  display: 'swap',
 });
 
 export const metadata = {
@@ -29,23 +23,23 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className={`${GeistSans.variable} ${lexendZetta.variable} ${inter.variable}`}>
-      <body>
+    <html lang="en" className={jakarta.variable} suppressHydrationWarning>
+      <body className="antialiased bg-[#F8FAF8] text-[#081B10]">
         <QueryProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </QueryProvider>
+
         <Toaster
           position="top-center"
+          richColors
           toastOptions={{
             style: {
-              width: '100%',
-              maxWidth: '100vw',
-              background: '#081b10',
-              color: '#ffffff',
-              border: '1px solid #1f2e26',
+              background: '#081B10',
+              color: '#FFFFFF',
+              border: '1px solid #1F2E26',
+              borderRadius: '12px',
             },
           }}
-          style={{ width: '60%', margin: 'auto' }}
         />
       </body>
     </html>

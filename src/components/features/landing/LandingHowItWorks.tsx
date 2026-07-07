@@ -25,17 +25,14 @@ export default function ProcessSection() {
   ];
 
   return (
-    <section
-      id="process"
-      className="w-full bg-white py-16 md:py-20 font-sans selection:bg-[#006C49]/10"
-    >
+    <section id="process" className="w-full bg-white py-16 md:py-20  selection:bg-[#006C49]/10">
       <div className="max-w-6xl mx-auto px-4 md:px-6">
         {/* ── SECTION HEADER ── */}
         <div className="text-center max-w-xl mx-auto mb-12 md:mb-14">
           <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#006C49] block mb-2">
             Process
           </span>
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 leading-tight">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold tracking-tight text-gray-900 mb-3 leading-tight">
             How it works
           </h2>
           <p className="text-xs md:text-sm text-gray-500 font-normal leading-relaxed">
@@ -52,7 +49,7 @@ export default function ProcessSection() {
               className="rounded-2xl bg-white border border-gray-100 p-5 md:p-6 flex flex-col justify-start shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,108,73,0.04)] transition-all duration-300 group"
             >
               {/* Step Sequence Counter Bubble */}
-              <span className="text-3xl md:text-4xl font-black text-[#006C49]/10 block mb-4 group-hover:text-[#00FF9D]/30 transition-colors duration-300 select-none">
+              <span className="text-3xl md:text-4xl font-bold text-[#006C49]/10 block mb-4 group-hover:text-[#00FF9D]/30 transition-colors duration-300 select-none">
                 {step.num}
               </span>
 

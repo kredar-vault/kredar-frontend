@@ -61,3 +61,26 @@ export interface CustomerStats {
   inactiveCustomers: number;
   restrictedCustomers: number;
 }
+
+export interface CustomerKyc {
+  customerId: string;
+  status: string; // e.g. 'NotSubmitted' | 'Pending' | 'Approved' | 'Rejected'
+  documents: KycDocument[];
+}
+
+export type KycDocumentType =
+  'ProofOfAddress' | 'IdCard' | 'UtilityBill' | 'BusinessCertificate' | string;
+export type KycDocumentStatus = 'Pending' | 'Verified' | 'Rejected' | string;
+
+export interface KycDocument {
+  id: string;
+  documentType: KycDocumentType;
+  fileUrl: string;
+  status: KycDocumentStatus;
+  createdAt?: string;
+}
+
+export interface SubmitKycPayload {
+  documentType: KycDocumentType;
+  fileUrl: string;
+}
