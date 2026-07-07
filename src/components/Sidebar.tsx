@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -20,14 +20,21 @@ import { cn } from '@/lib/utils';
 import { useTenantProfile } from '@/api/tenant/hooks';
 import { getCurrentUser, clearAuthCookies } from '@/lib/cookies';
 
-const mainNavItems = [
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  exact?: boolean;
+}
+
+const mainNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/balances', label: 'Balances', icon: Wallet },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
 ];
 
-const bottomNavItems = [
+const bottomNavItems: NavItem[] = [
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
   { href: '/dashboard/help', label: 'Help', icon: HelpCircle },
 ];

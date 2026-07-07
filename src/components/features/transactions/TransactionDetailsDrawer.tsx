@@ -4,27 +4,12 @@ import { useEffect, useState } from 'react';
 import { X, Download } from 'lucide-react';
 import DrawerReconciliation from './DrawerReconciliation';
 import { cn } from '@/lib/utils';
+import { TransactionItem } from '@/api/transactions/types';
 
 interface TransactionDetailsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  transaction: {
-    id: string;
-    date: string;
-    amount: string;
-    status: string;
-    reference?: string;
-    fee?: string;
-    currency?: string;
-    method?: string;
-    time?: string;
-    customerName?: string;
-    accountNumber?: string;
-    narration?: string;
-    expectedAmount?: string;
-    receivedAmount?: string;
-    difference?: string;
-  } | null;
+  transaction: TransactionItem | null;
 }
 
 const statusColors: Record<string, string> = {
