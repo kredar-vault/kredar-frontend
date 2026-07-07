@@ -76,6 +76,14 @@ function VerifyEmailForm() {
           </button>
         </div>
 
+        <button
+          type="button"
+          onClick={() => router.replace('/auth/login')}
+          className="kredar-btn-outline w-full"
+        >
+          Verified on another device? Go to login
+        </button>
+
         <p className="text-xs text-[#45504b] mt-6">
           Didn't receive the email? Check your spam folder or{' '}
           <button

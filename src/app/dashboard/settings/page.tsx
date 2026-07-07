@@ -8,12 +8,13 @@ import TeamTab from '@/components/features/settings/TeamTab';
 import DevelopersTab from '@/components/features/settings/DevelopersTab';
 import SecurityTab from '@/components/features/settings/SecurityTab';
 import { useTenantProfile, useUpdateProfile } from '@/api/tenant/hooks';
-import { useApiKeys, useCreateApiKey, useDeleteApiKey } from '@/api/api-keys/hooks';
 import {
-  useWebhookEndpoints,
-  useCreateWebhookEndpoint,
-  useDeleteWebhookEndpoint,
-} from '@/api/webhooks/hooks';
+  useApiKeys,
+  useCreateApiKey,
+  useDeleteApiKey,
+  useRotateApiKey,
+} from '@/api/api-keys/use-api-keys';
+import { useDeleteWebhook, useSaveWebhook, useWebhooks } from '@/api/api-keys/use-webhooks';
 
 const emptyProfile: ProfileData = {
   businessName: '',
@@ -40,10 +41,12 @@ export default function SettingsPage() {
   const { data: apiKeys = [], isLoading: isKeysLoading } = useApiKeys();
   const createKeyMutation = useCreateApiKey();
   const deleteKeyMutation = useDeleteApiKey();
+  const rotateKeyMutation = useRotateApiKey();
 
-  const { data: webhooks = [], isLoading: isWebhooksLoading } = useWebhookEndpoints();
-  const createWebhookMutation = useCreateWebhookEndpoint();
-  const deleteWebhookMutation = useDeleteWebhookEndpoint();
+  const { data: webhooks = [], isLoading: isWebhooksLoading } = useWebhooks();
+  const saveWebhookMutation = useSaveWebhook();
+  const deleteWebhookMutation = useDeleteWebhook();
+  const [newKeySecret, setNewKeySecret] = useState<string | null>(null);
 
   useEffect(() => {
     if (serverProfile) {
@@ -69,16 +72,15 @@ export default function SettingsPage() {
 
   const handleCreateApiKey = async () => {
     try {
-      await createKeyMutation.mutateAsync({
+      const created = await createKeyMutation.mutateAsync({
         label: profile.businessName || 'Kredar API Key',
         mode: 'live',
       });
-      toast.success('New API Key created successfully!');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || err.message || 'Failed to create API key.');
+      setNewKeySecret(created?.clientSecret ?? created?.keyString ?? null);
+    } catch (err) {
+      // error toast already handled in useCreateApiKey
     }
   };
-
   const handleDeleteApiKey = async (id: string) => {
     try {
       await deleteKeyMutation.mutateAsync(id);
@@ -90,7 +92,7 @@ export default function SettingsPage() {
 
   const handleSaveWebhook = async (url: string) => {
     try {
-      await createWebhookMutation.mutateAsync({ url });
+      await saveWebhookMutation.mutateAsync(url);
       toast.success('Webhook registered successfully!');
     } catch (err: any) {
       toast.error(err.response?.data?.message || err.message || 'Failed to register webhook.');
@@ -117,8 +119,6 @@ export default function SettingsPage() {
       </div>
 
       <div className="bg-white border border-[#d8e1da] rounded-md p-4 sm:p-6 min-h-[500px]">
-        {/* Tab row: horizontally scrollable on narrow screens instead of
-            wrapping/overflowing the card. */}
         <div className="border-b border-[#f0f4f1] mb-6 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto">
           <div className="flex gap-6 sm:gap-8 w-max sm:w-auto min-w-full">
             {(['profile', 'team', 'developers', 'security'] as const).map((tab) => (
@@ -161,8 +161,11 @@ export default function SettingsPage() {
                 webhooks={webhooks}
                 onCreateKey={handleCreateApiKey}
                 onDeleteKey={handleDeleteApiKey}
+                onRotateKey={(id) => rotateKeyMutation.mutate(id)}
                 onSaveWebhook={handleSaveWebhook}
                 onDeleteWebhook={handleDeleteWebhook}
+                newKeySecret={newKeySecret}
+                onCloseNewKeyModal={() => setNewKeySecret(null)}
               />
             )}
             {activeTab === 'security' && <SecurityTab />}
