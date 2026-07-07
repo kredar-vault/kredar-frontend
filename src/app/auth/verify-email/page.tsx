@@ -84,8 +84,6 @@ function VerifyEmailForm() {
           Verified on another device? Go to login
         </button>
 
-        <p className="text-xs text-[#8c9c94] mt-2">
-          Didn't receive the email? Check your spam folder or click above to request a new link.
         <p className="text-xs text-[#45504b] mt-6">
           Didn't receive the email? Check your spam folder or{' '}
           <button
