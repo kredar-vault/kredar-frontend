@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 
 interface DrawerReconciliationProps {
   status: string;
-  expectedAmount: string;
-  receivedAmount: string;
-  difference: string;
+  expectedAmount?: string | number;
+  receivedAmount?: string | number;
+  difference?: string | number;
   statusColors: Record<string, string>;
 }
 

@@ -7,25 +7,7 @@ import { api } from '@/lib/api';
 import TransactionDetailsDrawer from '@/components/features/transactions/TransactionDetailsDrawer';
 import TransactionsTable from '@/components/features/transactions/TransactionsTable';
 import TransactionsFilters from '@/components/features/transactions/TransactionsFilters';
-
-// Explicitly define TransactionItem interface locally to resolve the TS import error
-export interface TransactionItem {
-  id: string;
-  date: string;
-  amount: string;
-  status: string;
-  reference?: string;
-  fee?: string;
-  currency?: string;
-  method?: string;
-  time?: string;
-  customerName?: string;
-  accountNumber?: string;
-  narration?: string;
-  expectedAmount?: string;
-  receivedAmount?: string;
-  difference?: string;
-}
+import { TransactionItem } from '@/api/transactions/types';
 
 const statusColors: Record<string, string> = {
   Reconciled: 'bg-[#effaf2] text-[#0f8b4b] border-[#d4eedb]',
