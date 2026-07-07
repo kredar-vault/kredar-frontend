@@ -1,85 +1,175 @@
-'use client';
+import React from 'react';
 
-import { Zap } from 'lucide-react';
-
-export default function LandingFeatures() {
+export default function FeaturesSection() {
   return (
     <section
       id="features"
-      className="px-6 py-[90px] max-w-7xl mx-auto flex flex-col items-center gap-[10px]"
+      className="w-full bg-[#FAFDFB] py-16 md:py-20 font-sans selection:bg-[#006C49]/10"
     >
-      <div className="text-center max-w-3xl space-y-4 mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-[#081b10]">
-          Built for better payment operations
-        </h2>
-        <p className="text-base text-[#45504b] leading-relaxed">
-          From collecting payments to keeping records accurate, Kredar simplifies the work behind
-          every bank transfer so your business can operate with confidence.
-        </p>
-      </div>
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        {/* ── SECTION HEADER ── */}
+        <div className="text-center max-w-xl mx-auto mb-12 md:mb-14">
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#006C49] block mb-2">
+            Features
+          </span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 leading-tight">
+            Built for better payment operations
+          </h2>
+          <p className="text-xs md:text-sm text-gray-500 font-normal leading-relaxed">
+            From collecting payment to always-accurate records, Kredar helps your team move faster
+            with total confidence.
+          </p>
+        </div>
 
-      {/* Feature Split Block */}
-      <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Card 1: Dedicated Virtual Accounts */}
-        <div className="bg-[#052214] rounded-3xl p-10 text-white flex flex-col justify-between min-h-[380px] shadow-sm">
-          <div className="space-y-4">
-            <div className="w-12 h-12 bg-white/10 rounded-2xl flex items-center justify-center">
-              <Zap size={22} className="text-[#169E5C]" />
+        {/* ── BENTO GRID LAYOUT ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+          {/* Main Showcase Card: Dedicated Virtual Accounts (Spans 2 columns) */}
+          <div className="md:col-span-2 rounded-2xl bg-[#05130A] p-5 md:p-7 flex flex-col justify-between min-h-[280px] md:min-h-[310px] shadow-sm relative overflow-hidden group">
+            {/* Subtle premium glow overlay */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-[radial-gradient(circle_closest-side,#006C49,transparent)] opacity-[0.12] blur-3xl pointer-events-none" />
+
+            <div>
+              {/* Icon Badging */}
+              <div className="w-8 h-8 rounded-lg bg-[#0E2416] border border-[#1A3A25] flex items-center justify-center mb-4 text-[#00FF9D]">
+                <svg
+                  width="15"
+                  height="15"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+              </div>
+
+              <h3 className="text-lg md:text-xl font-bold text-white tracking-tight mb-2">
+                Dedicated Virtual Accounts
+              </h3>
+              <p className="text-[11px] md:text-xs text-gray-400 font-normal leading-relaxed max-w-lg">
+                Collect bank transfers through dedicated payment accounts and confirm payment
+                automatically the moment it arrives. No manual checking, no missed payments, no
+                reconciliation headaches.
+              </p>
             </div>
-            <h3 className="text-2xl font-bold">Dedicated Virtual Accounts</h3>
-            <p className="text-white/80 leading-relaxed text-sm">
-              Collect bank transfers through dedicated payment accounts and keep every payment
-              organized from the moment it arrives.
+
+            {/* Inner Dashboard Component Simulation */}
+            <div className="mt-6 w-full rounded-xl bg-[#091C10] border border-[#142E1B] p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2 transform group-hover:translate-y-[-1px] transition-transform duration-300">
+              <div className="space-y-0.5">
+                <span className="text-[9px] font-semibold text-[#00FF9D]/60 uppercase tracking-wider block">
+                  Account assigned to
+                </span>
+                <p className="text-xs font-bold text-white">Chidi Enterprises Ltd.</p>
+                <p className="text-[10px] text-gray-400 font-mono">0123456789 • Access Bank</p>
+              </div>
+              <div className="self-start sm:self-center">
+                <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-[#0E2416] border border-[#1A3A25] text-[9px] font-bold text-[#00FF9D] uppercase tracking-wide">
+                  <span className="w-1 h-1 rounded-full bg-[#00FF9D] animate-pulse" />
+                  Active
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Secondary Card: Built to Scale */}
+          <div className="rounded-2xl bg-[#F6F9F7] border border-gray-100 p-5 md:p-7 flex flex-col justify-start min-h-[280px] md:min-h-[310px] shadow-sm">
+            <div className="w-8 h-8 rounded-lg bg-[#E6EFEA] flex items-center justify-center mb-4 text-[#006C49]">
+              <svg
+                width="15"
+                height="15"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+            </div>
+
+            <h3 className="text-base font-bold text-gray-900 tracking-tight mb-2">
+              Built to scale
+            </h3>
+            <p className="text-[11px] md:text-xs text-gray-500 font-normal leading-relaxed">
+              Manage thousands of virtual accounts in real-time across every major bank without
+              risking server dropouts or verification bottlenecks.
             </p>
           </div>
         </div>
 
-        {/* Card 2: Image Box (Mock laptop worker) */}
-        <div className="relative rounded-3xl overflow-hidden min-h-[380px] bg-slate-100 shadow-sm border border-[#d8e1da]">
-          <img
-            src="images/merchant.png"
-            alt="Merchant working"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-        </div>
-      </div>
+        {/* ── BASE ROW TRIPLE CARDS ── */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {/* Base Card 1: Payments verified */}
+          <div className="rounded-xl bg-[#F6F9F7] border border-gray-100 p-4 md:p-5 flex flex-col shadow-sm">
+            <div className="w-7 h-7 rounded-md bg-[#E6EFEA] flex items-center justify-center mb-3.5 text-[#006C49]">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <h4 className="text-xs font-bold text-gray-900 mb-1">Payments verified</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              Every payment is automatically reconciled and confirmed instantly.
+            </p>
+          </div>
 
-      {/* Grid sub-items */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-6">
-        {/* Card 3: Scale */}
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm space-y-4">
-          <h4 className="font-bold text-[#081b10] text-base">Built for scale</h4>
-          <p className="text-xs text-[#45504b] leading-relaxed">
-            Whether you’re serving hundreds or thousands of customers, Kredar scales with your
-            payment operations.
-          </p>
-        </div>
+          {/* Base Card 2: Real-time visibility */}
+          <div className="rounded-xl bg-[#F6F9F7] border border-gray-100 p-4 md:p-5 flex flex-col shadow-sm">
+            <div className="w-7 h-7 rounded-md bg-[#E6EFEA] flex items-center justify-center mb-3.5 text-[#006C49]">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="20" x2="18" y2="10" />
+                <line x1="12" y1="20" x2="12" y2="4" />
+                <line x1="6" y1="20" x2="6" y2="14" />
+              </svg>
+            </div>
+            <h4 className="text-xs font-bold text-gray-900 mb-1">Real-time visibility</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              Complete insight into all your payment flows, always on.
+            </p>
+          </div>
 
-        {/* Card 4: Verified */}
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm space-y-4">
-          <h4 className="font-bold text-[#081b10] text-base">Payments verified</h4>
-          <p className="text-xs text-[#45504b] leading-relaxed">
-            Every incoming transfer is matched to the right customer, reducing manual checks and
-            reconciliation work.
-          </p>
-        </div>
-
-        {/* Card 5: Visibility */}
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm space-y-4">
-          <h4 className="font-bold text-[#081b10] text-base">Real-time visibility</h4>
-          <p className="text-xs text-[#45504b] leading-relaxed">
-            Monitor payment activity as it happens and stay up to date without refreshing
-            spreadsheets.
-          </p>
-        </div>
-
-        {/* Card 6: Insights (Green box) */}
-        <div className="bg-[#052214] rounded-2xl p-6 text-white space-y-4 flex flex-col justify-between">
-          <div className="space-y-2">
-            <h4 className="font-bold text-white text-base">Insights that matter</h4>
-            <p className="text-xs text-white/70 leading-relaxed">
-              Understand payment activity through clear transaction records and reporting that
-              supports better operational decisions.
+          {/* Base Card 3: Insights that matter */}
+          <div className="rounded-xl bg-[#F6F9F7] border border-gray-100 p-4 md:p-5 flex flex-col shadow-sm">
+            <div className="w-7 h-7 rounded-md bg-[#E6EFEA] flex items-center justify-center mb-3.5 text-[#006C49]">
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+              </svg>
+            </div>
+            <h4 className="text-xs font-bold text-gray-900 mb-1">Insights that matter</h4>
+            <p className="text-[11px] text-gray-500 leading-relaxed">
+              Smart alerts and analytics keep you fully informed.
             </p>
           </div>
         </div>

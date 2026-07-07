@@ -1,59 +1,64 @@
-'use client';
+import React from 'react';
 
-import { Users, CheckCircle, CreditCard, Bell } from 'lucide-react';
+export default function ProcessSection() {
+  const steps = [
+    {
+      num: '01',
+      title: 'Create Customer Accounts',
+      desc: 'From customer onboarding to real-time reconciliation, Kredar provides unique virtual payment accounts for each of your customers.',
+    },
+    {
+      num: '02',
+      title: 'Automatic Matching',
+      desc: 'Every inbound transfer is automatically matched and reconciled with zero manual effort required from your team.',
+    },
+    {
+      num: '03',
+      title: 'Receive Payments',
+      desc: 'Payments are confirmed, settled and available for your customers within seconds of arrival.',
+    },
+    {
+      num: '04',
+      title: 'Stay Updated',
+      desc: 'Get real-time notifications and powerful analytics on every transaction across your entire business.',
+    },
+  ];
 
-export default function LandingHowItWorks() {
   return (
     <section
-      id="how-it-works"
-      className="bg-[#091C09] px-6 py-[125px] flex flex-col items-center gap-[101px] align-self-stretch text-white"
+      id="process"
+      className="w-full bg-white py-16 md:py-20 font-sans selection:bg-[#006C49]/10"
     >
-      <div className="max-w-7xl w-full flex flex-col items-center">
-        <div className="text-center max-w-3xl space-y-4">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight">How it works</h2>
-          <p className="text-base text-white/70 leading-relaxed">
-            From collecting payments to keeping records accurate, Kredar simplifies the work behind
-            every bank transfer so your business can operate with confidence.
+      <div className="max-w-6xl mx-auto px-4 md:px-6">
+        {/* ── SECTION HEADER ── */}
+        <div className="text-center max-w-xl mx-auto mb-12 md:mb-14">
+          <span className="text-[10px] font-bold tracking-[0.2em] uppercase text-[#006C49] block mb-2">
+            Process
+          </span>
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold tracking-tight text-gray-900 mb-3 leading-tight">
+            How it works
+          </h2>
+          <p className="text-xs md:text-sm text-gray-500 font-normal leading-relaxed">
+            From collecting payment to always-accurate records — Kredar helps you operate with total
+            confidence.
           </p>
         </div>
 
-        {/* 4 Steps Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 w-full mt-16">
-          {[
-            {
-              title: 'Create Customer Accounts',
-              description: 'Provision dedicated payment accounts for every customer.',
-              icon: Users,
-            },
-            {
-              title: 'Automatic Matching',
-              description:
-                'Every incoming payment is automatically linked to the correct customer.',
-              icon: CheckCircle,
-            },
-            {
-              title: 'Receive Payments',
-              description: 'Customers pay using their assigned account details.',
-              icon: CreditCard,
-            },
-            {
-              title: 'Stay Updated',
-              description:
-                'Transactions appear instantly with accurate payment records and notifications.',
-              icon: Bell,
-            },
-          ].map((step, idx) => (
+        {/* ── CARD PROCESS FLOW GRID ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {steps.map((step, index) => (
             <div
-              key={step.title}
-              className="bg-white/5 border border-white/10 rounded-2xl p-6 shadow-sm flex flex-col justify-between min-h-[220px]"
+              key={index}
+              className="rounded-2xl bg-white border border-gray-100 p-5 md:p-6 flex flex-col justify-start shadow-[0_4px_20px_rgba(0,0,0,0.01)] hover:shadow-[0_8px_30px_rgba(0,108,73,0.04)] transition-all duration-300 group"
             >
-              <div className="space-y-4">
-                <div className="w-10 h-10 rounded-xl bg-[#169E5C]/15 border border-[#169E5C]/20 flex items-center justify-center text-[#169E5C]">
-                  <step.icon size={18} />
-                </div>
-                <h3 className="font-bold text-white text-base">{step.title}</h3>
-                <p className="text-xs text-white/70 leading-relaxed">{step.description}</p>
-              </div>
+              {/* Step Sequence Counter Bubble */}
+              <span className="text-3xl md:text-4xl font-black text-[#006C49]/10 block mb-4 group-hover:text-[#00FF9D]/30 transition-colors duration-300 select-none">
+                {step.num}
+              </span>
+
+              <h3 className="text-xs font-bold text-gray-900 mb-2 tracking-tight">{step.title}</h3>
+
+              <p className="text-[11px] text-gray-500 leading-relaxed font-normal">{step.desc}</p>
             </div>
           ))}
         </div>

@@ -24,7 +24,7 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
     <div className="space-y-10 max-w-4xl font-sans text-slate-800 animate-fade-in-up">
       {/* Introduction */}
       <section id="introduction" className="space-y-4">
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#0c1e13]">Introduction</h1>
+        <h1 className="text-3xl font-bold tracking-tight text-[#0c1e13]">Introduction</h1>
         <p className="text-sm text-[#4e5b52] leading-relaxed">
           Join the ranks of businesses using Kredar to accept payments through dedicated virtual
           accounts. Explore this documentation to start creating accounts, tracking transactions,
@@ -39,8 +39,8 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
 
       {/* Grid Callouts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="p-6 bg-white border border-[#e2ebd9] rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-shadow">
-          <h3 className="font-extrabold text-sm text-[#0c1e13] flex items-center gap-2">
+        <div className="p-6 bg-white border border-[#e2ebd9] rounded-md space-y-3  hover:shadow-md transition-shadow">
+          <h3 className="font-bold text-sm text-[#0c1e13] flex items-center gap-2">
             <BookOpen size={16} className="text-[#0f8b4b]" /> Getting started
           </h3>
           <p className="text-xs text-[#5d6b60] leading-relaxed">
@@ -55,8 +55,8 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
           </button>
         </div>
 
-        <div className="p-6 bg-white border border-[#e2ebd9] rounded-2xl space-y-3 shadow-sm hover:shadow-md transition-shadow">
-          <h3 className="font-extrabold text-sm text-[#0c1e13] flex items-center gap-2">
+        <div className="p-6 bg-white border border-[#e2ebd9] rounded-md space-y-3  hover:shadow-md transition-shadow">
+          <h3 className="font-bold text-sm text-[#0c1e13] flex items-center gap-2">
             <Sparkles size={16} className="text-[#0f8b4b]" /> Not a developer?
           </h3>
           <p className="text-xs text-[#5d6b60] leading-relaxed">
@@ -74,7 +74,7 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
 
       {/* Base URL */}
       <section id="base-url" className="space-y-3 pt-6 border-t border-[#e2ebd9]">
-        <h2 className="text-xl font-extrabold text-[#0c1e13]">Base URL</h2>
+        <h2 className="text-xl font-bold text-[#0c1e13]">Base URL</h2>
         <p className="text-xs text-[#4e5b52] leading-relaxed">
           All API requests should be made to the base URL below. Use your deployed URL if you are
           self-hosting.
@@ -86,7 +86,7 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
 
       {/* Authentication */}
       <section id="authentication" className="space-y-4 pt-6 border-t border-[#e2ebd9]">
-        <h2 className="text-xl font-extrabold text-[#0c1e13]">Authentication</h2>
+        <h2 className="text-xl font-bold text-[#0c1e13]">Authentication</h2>
         <p className="text-xs text-[#4e5b52] leading-relaxed">
           All endpoints require a valid{' '}
           <code className="font-mono bg-[#f4f7f4] px-1 py-0.5 rounded text-emerald-800 font-bold">

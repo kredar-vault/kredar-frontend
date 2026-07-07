@@ -21,7 +21,7 @@ export default function DocsHeader() {
 
         {/* Brand logo wordmark */}
         <Link href="/" className="flex items-center gap-2">
-          <span className="font-extrabold text-[14px] tracking-wider text-[#0c1e13] font-sans">
+          <span className="font-bold text-[14px] tracking-wider text-[#0c1e13] font-sans">
             API-DOC
           </span>
         </Link>

@@ -132,7 +132,7 @@ export default function Step3Account({ defaultValues, onNext, onBack }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-2xl shadow-sm px-10 py-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-md  px-10 py-8">
       {/* Header */}
       <div className="mb-7">
         <h1 className="text-2xl font-semibold text-[#081b10]">Account details</h1>

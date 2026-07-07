@@ -26,9 +26,9 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
               {/* Circle */}
               <div
                 className={cn(
-                  'w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold transition-all duration-200 border-2',
+                  'w-8 h-8 rounded-md flex items-center justify-center text-sm font-semibold transition-all duration-200 border-2',
                   isCompleted
-                    ? 'bg-[#0f8b4b] border-[#0f8b4b] text-white shadow-sm'
+                    ? 'bg-[#0f8b4b] border-[#0f8b4b] text-white '
                     : isActive
                       ? 'bg-white border-[#0f8b4b] text-[#0f8b4b] shadow-[0_0_0_4px_rgba(15,139,75,0.15)] font-bold'
                       : 'bg-white border-[#d8e1da] text-[#45504b]',
@@ -52,7 +52,7 @@ export default function StepIndicator({ steps, currentStep }: StepIndicatorProps
               <div className="flex-1 h-[2px] mt-4 min-w-[24px]">
                 <div
                   className={cn(
-                    'h-full w-full rounded-full transition-colors duration-300',
+                    'h-full w-full rounded-md transition-colors duration-300',
                     isLineActive ? 'bg-[#0f8b4b]' : 'bg-[#e2e8f0]',
                   )}
                 />

@@ -1,18 +1,19 @@
-export interface TeamMemberItem {
+export interface TeamMember {
   id: string;
   fullName: string;
   email: string;
-  role: 'Admin' | 'Employee' | 'Developer' | string;
-  createdAt?: string;
+  role: string;
+  createdAt: string;
 }
 
-export interface InviteTeamMemberPayload {
+export interface CreateTeamMemberPayload {
   fullName: string;
   email: string;
-  role: 'Admin' | 'Employee' | 'Developer' | string;
+  role: string;
 }
 
 export interface UpdateTeamMemberPayload {
-  fullName?: string;
-  role: 'Admin' | 'Employee' | 'Developer' | string;
+  fullName: string;
+  email: string;
+  role: string;
 }

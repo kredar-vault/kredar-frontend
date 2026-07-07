@@ -16,9 +16,9 @@ export default function SuccessScreen() {
 
       {/* Centered card */}
       <div className="flex-1 flex items-center justify-center px-4">
-        <div className="w-full max-w-[640px] bg-white rounded-2xl shadow-sm px-10 py-20 flex flex-col items-center text-center gap-4">
+        <div className="w-full max-w-[640px] bg-white rounded-md  px-10 py-20 flex flex-col items-center text-center gap-4">
           {/* Success icon */}
-          <div className="w-14 h-14 rounded-full bg-[#0f8b4b]/10 flex items-center justify-center">
+          <div className="w-14 h-14 rounded-md bg-[#0f8b4b]/10 flex items-center justify-center">
             <CheckCircle2 size={28} className="text-[#0f8b4b]" strokeWidth={1.8} />
           </div>
 
