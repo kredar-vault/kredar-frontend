@@ -8,6 +8,7 @@ import { z } from 'zod';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useForgotPassword } from '@/api/auth/hooks';
 
 const forgotSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -19,37 +20,36 @@ export default function ForgotPasswordPage() {
   const router = useRouter();
   const [rootError, setRootError] = useState('');
 
+  const forgotMutation = useForgotPassword();
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ForgotValues>({ resolver: zodResolver(forgotSchema) });
 
   const onSubmit = async (values: ForgotValues) => {
     setRootError('');
     try {
-      const users: any[] = JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
-      const exists = users.find((u) => u.email === values.email);
+      const response = await forgotMutation.mutateAsync({
+        email: values.email,
+      });
 
-      if (!exists) {
-        // For security reasons, we can show generic success or show an error.
-        // The user requested that we connect it to localStorage database, so we will validate if email exists.
-        setRootError('No account found with this email address.');
+      if (response && response.isSuccess === false) {
+        setRootError(response.message || 'Failed to send reset code. Please try again.');
         return;
       }
 
-      // Generate verification reset code
-      const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-
-      // Send password reset email
-      const { sendPasswordResetEmail } = await import('@/lib/email');
-      await sendPasswordResetEmail(values.email, resetCode);
-
+      toast.success('Password reset code sent to your email.');
       router.push(`/auth/reset-password?email=${encodeURIComponent(values.email)}`);
-    } catch {
-      setRootError('Something went wrong. Please try again.');
+    } catch (e: any) {
+      const msg =
+        e.response?.data?.message || e.message || 'Something went wrong. Please try again.';
+      setRootError(msg);
     }
   };
+
+  const isSubmitting = forgotMutation.isPending;
 
   return (
     <AuthPageShell

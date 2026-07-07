@@ -11,26 +11,26 @@ interface BusinessInfoFormFieldsProps {
 }
 
 const BUSINESS_TYPES = [
-  'Sole Proprietorship',
-  'Partnership',
-  'Limited Liability Company (LLC)',
-  'Limited Liability Partnership (LLP)',
-  'Corporation',
-  'Non-Profit Organisation',
+  { value: 'SoleProprietorship', label: 'Sole Proprietorship' },
+  { value: 'Partnership', label: 'Partnership' },
+  { value: 'LimitedLiabilityCompany', label: 'Limited Liability Company (LLC)' },
+  { value: 'LimitedLiabilityPartnership', label: 'Limited Liability Partnership (LLP)' },
+  { value: 'Corporation', label: 'Corporation' },
+  { value: 'NonProfit', label: 'Non-Profit Organisation' },
 ];
 
 const INDUSTRIES = [
-  'Finance',
-  'Technology',
-  'Healthcare',
-  'Retail',
-  'Education',
-  'Manufacturing',
-  'Logistics',
-  'Real Estate',
-  'Media & Entertainment',
-  'Agriculture',
-  'Other',
+  { value: 'Finance', label: 'Finance' },
+  { value: 'Technology', label: 'Technology' },
+  { value: 'Healthcare', label: 'Healthcare' },
+  { value: 'Retail', label: 'Retail' },
+  { value: 'Education', label: 'Education' },
+  { value: 'Manufacturing', label: 'Manufacturing' },
+  { value: 'Logistics', label: 'Logistics' },
+  { value: 'RealEstate', label: 'Real Estate' },
+  { value: 'MediaAndEntertainment', label: 'Media & Entertainment' },
+  { value: 'Agriculture', label: 'Agriculture' },
+  { value: 'Other', label: 'Other' },
 ];
 
 const COUNTRIES = [
@@ -82,8 +82,8 @@ export default function BusinessInfoFormFields({ register, errors }: BusinessInf
           >
             <option value="">Select business type</option>
             {BUSINESS_TYPES.map((t) => (
-              <option key={t} value={t}>
-                {t}
+              <option key={t.value} value={t.value}>
+                {t.label}
               </option>
             ))}
           </select>
@@ -103,8 +103,8 @@ export default function BusinessInfoFormFields({ register, errors }: BusinessInf
           >
             <option value="">Select industry</option>
             {INDUSTRIES.map((i) => (
-              <option key={i} value={i}>
-                {i}
+              <option key={i.value} value={i.value}>
+                {i.label}
               </option>
             ))}
           </select>

@@ -5,6 +5,14 @@ const nextConfig = {
   // Don't fail the container build on lint/type issues (CI already checks these).
   eslint: { ignoreDuringBuilds: true },
   typescript: { ignoreBuildErrors: true },
+  async rewrites() {
+    return [
+      {
+        source: '/api/v1/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'https://api.staging.kredar.xyz'}/api/v1/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;

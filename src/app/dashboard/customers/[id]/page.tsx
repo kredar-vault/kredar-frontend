@@ -1,112 +1,65 @@
 'use client';
 
 import { use } from 'react';
-import { MoreVertical, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { cn } from '@/lib/utils';
-import CustomerSummaryCard, { Customer } from '@/components/features/customers/CustomerSummaryCard';
-import CustomerTabs from '@/components/features/customers/CustomerTabs';
+import { ArrowLeft } from 'lucide-react';
+
+import { useCustomer } from '@/api/customers/hooks';
+import CustomerSummaryCard from '@/components/customer/SummaryCard';
+import CustomerTabs from '@/components/customer/CustomersTab';
 
 interface PageProps {
-  params: Promise<{ id: string }>;
+  params: Promise<{
+    id: string;
+  }>;
 }
 
-// Mock Transactions data for the customer
-const transactionsData = [
-  { id: 'TRX2026002', date: '2026-02-23', amount: '$48,000', status: 'Reconciled' },
-  { id: 'TRX2026003', date: '2026-02-19', amount: '$48,000', status: 'Overpaid' },
-  { id: 'TRX2026004', date: '2026-02-17', amount: '₦45,750', status: 'Failed' },
-  { id: 'TRX2026005', date: '2026-02-16', amount: '₦100,000', status: 'Reconciled' },
-  { id: 'TRX2026006', date: '2026-02-15', amount: '$48,000', status: 'Pending' },
-  { id: 'TRX2026007', date: '2026-02-11', amount: '₦35,200', status: 'Overpaid' },
-  { id: 'TRX2026008', date: '2026-02-10', amount: '₦250,000', status: 'Reconciled' },
-  { id: 'TRX2026009', date: '2026-02-10', amount: '₦30,500', status: 'Failed' },
-  { id: 'TRX2026010', date: '2026-02-09', amount: '₦25,150', status: 'Underpaid' },
-  { id: 'TRX2026011', date: '2026-02-08', amount: '₦20,000', status: 'Reversed' },
-];
-
-// Status styling mapping
-const statusColors: Record<string, string> = {
-  Reconciled: 'bg-[#effaf2] text-[#0f8b4b] border-[#d4eedb]',
-  Overpaid: 'bg-[#eff6ff] text-[#2563eb] border-[#dbeafe]',
-  Failed: 'bg-[#fef2f2] text-[#ef4444] border-[#fee2e2]',
-  Pending: 'bg-[#fff7ed] text-[#ea580c] border-[#ffedd5]',
-  Underpaid: 'bg-[#fefce8] text-[#ca8a04] border-[#fef9c3]',
-  Reversed: 'bg-[#f3f4f6] text-[#4b5563] border-[#e5e7eb]',
-};
-
 export default function CustomerDetailsPage({ params }: PageProps) {
-  const resolvedParams = use(params);
-  const id = resolvedParams.id;
+  const { id } = use(params);
 
-  // Mocked Customer Info based on id
-  const customer: Customer = {
-    id: id || 'CUST-3920-18',
-    name: 'Chinonso Okeke',
-    email: 'chinonso.okeke@gmail.com',
-    phone: '+234 812 345 6789',
-    status: 'Verified',
-    registrationDate: '2026-02-23',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&fit=crop&auto=format&q=80',
-  };
+  const { data: customer, isLoading, isError } = useCustomer(id);
 
-  return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* Back to customers list */}
-      <div className="flex items-center gap-2">
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-7xl space-y-6 pb-12">
+        <div className="h-10 w-40 animate-pulse rounded-lg bg-[#F2F4F7]" />
+
+        <div className="h-40 animate-pulse rounded-md bg-[#F2F4F7]" />
+
+        <div className="h-[500px] animate-pulse rounded-md bg-[#F2F4F7]" />
+      </div>
+    );
+  }
+
+  if (isError || !customer) {
+    return (
+      <div className="mx-auto max-w-7xl py-20 text-center">
+        <h2 className="text-2xl font-semibold text-[#101828]">Customer not found</h2>
+
         <Link
           href="/dashboard/customers"
-          className="flex items-center gap-1.5 text-sm font-semibold text-[#45504b] hover:text-[#081b10] transition-colors"
+          className="mt-6 inline-flex items-center gap-2 rounded-lg bg-[#0F8B4B] px-5 py-3 text-sm font-medium text-white hover:bg-[#0C7640]"
         >
-          <ArrowLeft size={16} />
-          Back to customers
+          <ArrowLeft size={18} />
+          Back to Customers
         </Link>
       </div>
+    );
+  }
 
-      {/* Summary Profile Header Card */}
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+      <Link
+        href="/dashboard/customers"
+        className="inline-flex items-center gap-2 text-sm font-medium text-[#475467] transition hover:text-[#101828]"
+      >
+        <ArrowLeft size={18} />
+        Back to Customers
+      </Link>
+
       <CustomerSummaryCard customer={customer} />
 
-      {/* Grid tabs detail panels */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
-        {/* Left side: subtabs */}
-        <div className="lg:col-span-2 space-y-6">
-          <CustomerTabs customer={customer} />
-        </div>
-
-        {/* Right side: Transactions list history for the customer */}
-        <div className="bg-white border border-[#d8e1da] rounded-2xl p-5 shadow-sm space-y-4">
-          <div className="flex items-center justify-between border-b border-[#f0f4f1] pb-3">
-            <h3 className="text-base font-bold text-[#081b10]">Customer transactions</h3>
-            <span className="text-xs text-[#45504b] font-medium">History</span>
-          </div>
-
-          <div className="divide-y divide-[#f0f4f1]">
-            {transactionsData.slice(0, 5).map((tx) => (
-              <div key={tx.id} className="py-3 flex items-center justify-between text-sm">
-                <div>
-                  <p className="font-bold text-[#081b10]">{tx.id}</p>
-                  <p className="text-[11px] text-[#45504b] font-medium mt-0.5">{tx.date}</p>
-                </div>
-                <div className="flex items-center gap-3">
-                  <span className="font-semibold text-[#081b10]">{tx.amount}</span>
-                  <span
-                    className={cn(
-                      'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold border',
-                      statusColors[tx.status],
-                    )}
-                  >
-                    {tx.status}
-                  </span>
-                  <button className="text-[#45504b] hover:text-[#081b10] p-1">
-                    <MoreVertical size={14} />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <CustomerTabs customer={customer} />
     </div>
   );
 }

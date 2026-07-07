@@ -47,7 +47,7 @@ export default function DocsSidebar({ groups, activeSection, setActiveSection }:
               {/* Group Toggle Header */}
               <button
                 onClick={() => toggleGroup(group.id)}
-                className="w-full flex items-center justify-between py-2 text-xs font-extrabold text-[#0c1e13] uppercase tracking-wider hover:text-[#0f8b4b] transition-colors"
+                className="w-full flex items-center justify-between py-2 text-xs font-bold text-[#0c1e13] uppercase tracking-wider hover:text-[#0f8b4b] transition-colors"
               >
                 <span>{group.title}</span>
                 {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}

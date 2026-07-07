@@ -16,6 +16,7 @@ interface SidebarNavListProps {
   isCollapsed: boolean;
   loading: boolean;
   isActive: (href: string, exact?: boolean) => boolean;
+  onItemClick?: (href: string) => void;
 }
 
 export default function SidebarNavList({
@@ -23,6 +24,7 @@ export default function SidebarNavList({
   isCollapsed,
   loading,
   isActive,
+  onItemClick,
 }: SidebarNavListProps) {
   return (
     <nav className="space-y-1">
@@ -32,21 +34,16 @@ export default function SidebarNavList({
           <Link
             key={item.href}
             href={item.href}
+            onClick={() => onItemClick?.(item.href)}
             className={cn(
-              'flex items-center gap-3 px-3 py-3 rounded-xl text-sm transition-all duration-150',
+              'flex items-center px-3 py-2.5 rounded-xl text-sm transition-all duration-150',
               isCollapsed && 'justify-center px-0',
               active
-                ? 'bg-[#0a2e1f] text-white font-medium shadow-sm'
+                ? 'bg-green-900 text-white font-semibold '
                 : 'text-[#45504b] hover:bg-[#f7faf6] hover:text-[#081b10]',
             )}
             title={isCollapsed ? item.label : undefined}
           >
-            {loading ? (
-              <div className="w-5 h-5 rounded bg-gray-200 animate-pulse flex-shrink-0" />
-            ) : (
-              <item.icon size={18} className={active ? 'text-[#0f8b4b]' : 'text-[#45504b]'} />
-            )}
-
             {!isCollapsed && (
               <span className="flex-1 truncate">
                 {loading ? (

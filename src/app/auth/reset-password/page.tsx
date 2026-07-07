@@ -9,6 +9,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import AuthPageShell from '@/components/auth/AuthPageShell';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useResetPassword } from '@/api/auth/hooks';
 
 const resetSchema = z
   .object({
@@ -32,10 +33,12 @@ function ResetPasswordForm() {
   const [showConfirm, setShowConfirm] = useState(false);
   const [rootError, setRootError] = useState('');
 
+  const resetMutation = useResetPassword();
+
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors },
   } = useForm<ResetValues>({ resolver: zodResolver(resetSchema) });
 
   useEffect(() => {
@@ -48,34 +51,29 @@ function ResetPasswordForm() {
   const onSubmit = async (values: ResetValues) => {
     setRootError('');
     try {
-      const storedCode = localStorage.getItem(`otp_reset_${email}`);
-      if (!storedCode || storedCode !== values.code) {
-        setRootError('Invalid or expired reset code.');
+      const response = await resetMutation.mutateAsync({
+        token: values.code,
+        newPassword: values.password,
+        confirmPassword: values.confirmPassword,
+      });
+
+      if (response && response.isSuccess === false) {
+        setRootError(response.message || 'Failed to reset password. Please try again.');
         return;
       }
 
-      // Update password in local database
-      const users: any[] = JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
-      const userIndex = users.findIndex((u) => u.email === email);
-
-      if (userIndex !== -1) {
-        users[userIndex].password = values.password;
-        // Automatically verify user if not verified
-        users[userIndex].verified = true;
-        localStorage.setItem('kredar_users', JSON.stringify(users));
-
-        // Clean up reset code
-        localStorage.removeItem(`otp_reset_${email}`);
-
-        toast.success('Password reset successfully! Please sign in.');
-        router.replace('/auth/login');
-      } else {
-        setRootError('User profile not found.');
-      }
-    } catch {
-      setRootError('Failed to reset password. Please try again.');
+      toast.success('Password reset successfully! Please sign in.');
+      router.replace('/auth/login');
+    } catch (e: any) {
+      const msg =
+        e.response?.data?.message ||
+        e.message ||
+        'Failed to reset password. Please check the code.';
+      setRootError(msg);
     }
   };
+
+  const isSubmitting = resetMutation.isPending;
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
@@ -169,7 +167,7 @@ export default function ResetPasswordPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-md animate-spin" />
         </div>
       }
     >

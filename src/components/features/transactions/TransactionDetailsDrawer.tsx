@@ -4,27 +4,12 @@ import { useEffect, useState } from 'react';
 import { X, Download } from 'lucide-react';
 import DrawerReconciliation from './DrawerReconciliation';
 import { cn } from '@/lib/utils';
+import { TransactionItem } from '@/api/transactions/types';
 
 interface TransactionDetailsDrawerProps {
   isOpen: boolean;
   onClose: () => void;
-  transaction: {
-    id: string;
-    date: string;
-    amount: string;
-    status: string;
-    reference?: string;
-    fee?: string;
-    currency?: string;
-    method?: string;
-    time?: string;
-    customerName?: string;
-    accountNumber?: string;
-    narration?: string;
-    expectedAmount?: string;
-    receivedAmount?: string;
-    difference?: string;
-  } | null;
+  transaction: TransactionItem | null;
 }
 
 const statusColors: Record<string, string> = {
@@ -95,7 +80,7 @@ export default function TransactionDetailsDrawer({
       {/* Drawer Panel */}
       <div
         className={cn(
-          'absolute top-0 right-0 h-full w-full max-w-lg bg-white shadow-2xl flex flex-col transition-transform duration-200 ease-in-out z-10',
+          'absolute top-0 right-0 h-full w-full max-w-lg bg-white  flex flex-col transition-transform duration-200 ease-in-out z-10',
           isOpen ? 'translate-x-0' : 'translate-x-full',
         )}
       >
@@ -129,7 +114,7 @@ export default function TransactionDetailsDrawer({
               <span className="text-right">
                 <span
                   className={cn(
-                    'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border',
+                    'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border',
                     statusColors[tx.status],
                   )}
                 >

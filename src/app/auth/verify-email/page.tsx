@@ -1,135 +1,102 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import AuthPageShell from '@/components/auth/AuthPageShell';
-import { cn } from '@/lib/utils';
+import { Mail, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const verifySchema = z.object({
-  code: z.string().length(6, 'Verification code must be exactly 6 digits'),
-});
-
-type VerifyValues = z.infer<typeof verifySchema>;
+import { useResendVerification, useVerifyEmailQuery } from '@/api/auth/hooks';
+import { getRegisteredEmail } from '@/lib/cookies';
 
 function VerifyEmailForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const email = searchParams.get('email') || '';
 
-  const [rootError, setRootError] = useState('');
-  const [resending, setResending] = useState(false);
+  const token = searchParams.get('token') || '';
+  const email = searchParams.get('email') || getRegisteredEmail() || '';
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-  } = useForm<VerifyValues>({ resolver: zodResolver(verifySchema) });
+  const verifyQuery = useVerifyEmailQuery(token, email);
+  const resendMutation = useResendVerification();
 
   useEffect(() => {
-    if (!email) {
-      toast.error('Missing email address. Redirecting...');
-      router.replace('/auth/signup');
+    if (!token) return;
+
+    if (verifyQuery.isSuccess) {
+      router.replace('/auth/email-verified?verified=true');
+    } else if (verifyQuery.isError) {
+      router.replace('/auth/email-verified?verified=false');
     }
-  }, [email, router]);
+  }, [token, verifyQuery.isSuccess, verifyQuery.isError, router]);
 
-  const onSubmit = async (values: VerifyValues) => {
-    setRootError('');
-    try {
-      const storedCode = localStorage.getItem(`otp_verify_${email}`);
-      if (!storedCode || storedCode !== values.code) {
-        setRootError('Invalid or expired verification code.');
-        return;
-      }
+  // If token in URL — show spinner while verifying
+  if (token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 text-[#0f8b4b] animate-spin mx-auto" />
+          <p className="text-sm text-[#45504b]">Verifying your email address…</p>
+        </div>
+      </div>
+    );
+  }
 
-      // Mark user as verified in localStorage db
-      const users: any[] = JSON.parse(localStorage.getItem('kredar_users') ?? '[]');
-      const userIndex = users.findIndex((u) => u.email === email);
-
-      if (userIndex !== -1) {
-        users[userIndex].verified = true;
-        localStorage.setItem('kredar_users', JSON.stringify(users));
-
-        // Log in the verified user
-        const loggedUser = users[userIndex];
-        localStorage.setItem('kredar_token', `mock-token-${loggedUser.id}-${Date.now()}`);
-        localStorage.setItem('kredar_current_user', JSON.stringify(loggedUser));
-
-        // Remove code
-        localStorage.removeItem(`otp_verify_${email}`);
-
-        toast.success('Email verified successfully!');
-        router.replace('/onboarding');
-      } else {
-        setRootError('User profile not found. Please sign up again.');
-      }
-    } catch (e) {
-      setRootError('Verification failed. Please try again.');
-    }
-  };
-
+  // No token — holding page after signup
   const handleResend = async () => {
-    setResending(true);
+    if (!email) {
+      toast.error('Email not found. Please sign up again.');
+      return;
+    }
     try {
-      const newCode = Math.floor(100000 + Math.random() * 900000).toString();
-      const { sendVerificationEmail } = await import('@/lib/email');
-      await sendVerificationEmail(email, newCode);
-      toast.success('A new verification code has been simulated.');
-    } catch {
-      toast.error('Failed to resend code.');
-    } finally {
-      setResending(false);
+      await resendMutation.mutateAsync({ email });
+      toast.success('Verification link resent!');
+    } catch (e: any) {
+      toast.error(e.response?.data?.message || e.message || 'Failed to resend link.');
     }
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col">
-      <div className="space-y-5">
-        <p className="text-sm text-[#45504b] text-center">
-          We sent a 6-digit verification code to{' '}
-          <span className="font-semibold text-[#081b10]">{email}</span>
+    <div className="min-h-screen flex items-center justify-center bg-[#f7faf6] px-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-[#d8e1da] p-10 w-full max-w-md text-center">
+        <div className="w-16 h-16 bg-[#effaf2] rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <Mail size={30} className="text-[#0f8b4b]" />
+        </div>
+
+        <h1 className="text-xl font-bold text-[#081b10] mb-2">Check your email</h1>
+        <p className="text-sm text-[#45504b] leading-relaxed mb-8">
+          We sent a verification link to{' '}
+          <span className="font-semibold text-[#081b10]">{email || 'your email address'}</span>.
+          Click the link to verify your account and sign in.
         </p>
 
-        {/* Code Input */}
-        <div>
-          <label htmlFor="code" className="kredar-label">
-            Verification Code
-          </label>
-          <input
-            id="code"
-            type="text"
-            maxLength={6}
-            placeholder="000000"
-            {...register('code')}
-            className={cn(
-              'kredar-input tracking-[0.5em] text-center text-lg font-bold',
-              errors.code && 'input-error',
-            )}
-          />
-          {errors.code && <p className="kredar-error-text">{errors.code.message}</p>}
-        </div>
-
-        {rootError && <p className="text-sm text-[#ef4444] text-center">{rootError}</p>}
-
-        <button type="submit" disabled={isSubmitting} className="kredar-btn-primary w-full">
-          {isSubmitting ? 'Verifying…' : 'Verify Email'}
-        </button>
-
-        <div className="text-center pt-2">
+        <div className="space-y-3">
           <button
-            type="button"
-            disabled={resending}
-            onClick={handleResend}
-            className="text-xs text-[#0f8b4b] hover:underline font-medium disabled:opacity-50"
+            onClick={() => router.push('/auth/login')}
+            className="w-full border border-[#d8e1da] text-[#081b10] text-sm font-semibold py-3 rounded-xl hover:bg-[#f7faf6] transition-colors"
           >
-            {resending ? 'Sending…' : "Didn't receive code? Resend"}
+            Return to sign in
           </button>
         </div>
+
+        <button
+          type="button"
+          onClick={() => router.replace('/auth/login')}
+          className="kredar-btn-outline w-full"
+        >
+          Verified on another device? Go to login
+        </button>
+
+        <p className="text-xs text-[#45504b] mt-6">
+          Didn't receive the email? Check your spam folder or{' '}
+          <button
+            onClick={handleResend}
+            disabled={resendMutation.isPending}
+            className="text-[#0f8b4b] font-semibold hover:underline disabled:opacity-50"
+          >
+            {resendMutation.isPending ? 'Resending…' : 'resend verification link'}
+          </button>
+          .
+        </p>
       </div>
-    </form>
+    </div>
   );
 }
 
@@ -138,18 +105,11 @@ export default function VerifyEmailPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-full animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#0f8b4b] animate-spin" />
         </div>
       }
     >
-      <AuthPageShell
-        title="Verify email"
-        subtitle="Confirm your email to complete registration"
-        bottomCtaHref="/auth/signup"
-        bottomCtaLabel="Back to Sign up"
-      >
-        <VerifyEmailForm />
-      </AuthPageShell>
+      <VerifyEmailForm />
     </Suspense>
   );
 }

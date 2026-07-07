@@ -78,10 +78,10 @@ export default function DocUploadCard({
               )}
 
               {/* Upload Progress Bar */}
-              <div className="mt-2.5 w-full bg-slate-100 h-1.5 rounded-full overflow-hidden">
+              <div className="mt-2.5 w-full bg-slate-100 h-1.5 rounded-md overflow-hidden">
                 <div
                   className={cn(
-                    'h-full transition-all duration-150 ease-out rounded-full',
+                    'h-full transition-all duration-150 ease-out rounded-md',
                     fileState.status === 'uploading' && 'bg-[#4f46e5]',
                     fileState.status === 'complete' && 'bg-[#0f8b4b]',
                     fileState.status === 'failed' && 'bg-[#ef4444]',
@@ -114,7 +114,7 @@ export default function DocUploadCard({
             accept=".pdf,.png,.jpg,.jpeg"
             className="hidden"
           />
-          <div className="w-10 h-10 rounded-full bg-white border border-[#d8e1da] flex items-center justify-center text-[#45504b] shadow-sm">
+          <div className="w-10 h-10 rounded-md bg-white border border-[#d8e1da] flex items-center justify-center text-[#45504b] ">
             <Upload size={16} />
           </div>
           <div>
