@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Snippets {
@@ -16,15 +17,22 @@ interface DocsCodePanelProps {
 
 export default function DocsCodePanel({ snippets, activeSection }: DocsCodePanelProps) {
   const [activeTab, setActiveTab] = useState<'curl' | 'js' | 'python'>('curl');
+  const [copied, setCopied] = useState(false);
 
   const codeData = snippets[activeSection] || {
-    curl: '# No snippet available',
-    js: '// No snippet available',
-    python: '# No snippet available',
+    curl: '# No snippet available for this section',
+    js: '// No snippet available for this section',
+    python: '# No snippet available for this section',
   };
 
   const currentCode =
     activeTab === 'curl' ? codeData.curl : activeTab === 'js' ? codeData.js : codeData.python;
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(currentCode);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
 
   return (
     <div className="w-full lg:w-96 flex-shrink-0 bg-[#030A03] border border-white/10 rounded-md overflow-hidden shadow-xl self-start lg:sticky lg:top-24">
@@ -44,7 +52,21 @@ export default function DocsCodePanel({ snippets, activeSection }: DocsCodePanel
             </button>
           ))}
         </div>
-        <span className="text-white/30 font-mono text-[10px]">Response 200 OK</span>
+        <div className="flex items-center gap-1.5">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          <span className="text-white/30 font-mono text-[10px]">200 OK &middot; ~180ms</span>
+        </div>
+      </div>
+
+      {/* Request line */}
+      <div className="px-5 pt-4 pb-2 border-b border-white/5">
+        <p className="text-[10px] font-mono text-white/40 uppercase tracking-wide mb-1">Request</p>
+        <p className="text-xs font-mono text-emerald-400 break-all">
+          {activeTab === 'curl' ? 'HTTPS' : activeTab === 'js' ? 'fetch()' : 'requests'} &rarr;{' '}
+          <span className="text-white/70">
+            api.kredar.com{`/api/v1/${activeSection.replace(/-/g, '/')}`}
+          </span>
+        </p>
       </div>
 
       {/* Code Block Content */}
@@ -55,16 +77,18 @@ export default function DocsCodePanel({ snippets, activeSection }: DocsCodePanel
       </div>
 
       {/* Footer Info */}
-      <div className="bg-white/5 border-t border-white/10 p-3.5 text-[10px] text-white/40 font-mono flex justify-between">
+      <div className="bg-white/5 border-t border-white/10 p-3.5 text-[10px] text-white/40 font-mono flex justify-between items-center">
         <span>Content-Type: application/json</span>
         <button
-          onClick={() => navigator.clipboard.writeText(currentCode)}
-          className="text-white/60 hover:text-white transition-colors"
+          onClick={handleCopy}
+          className="text-white/60 hover:text-white transition-colors flex items-center gap-1.5"
         >
-          Copy Code
+          {copied ? <Check size={11} /> : <Copy size={11} />}
+          {copied ? 'Copied!' : 'Copy Code'}
         </button>
       </div>
     </div>
   );
 }
+
 export type { Snippets };

@@ -110,3 +110,21 @@ export async function updateCustomerStatus(id: string, status: string) {
   const res = await api.patch(`/customers/${id}/status`, { status });
   return extractData(res);
 }
+
+export async function getCustomerKyc(customerId: string) {
+  const res = await api.get(`/customers/${customerId}/kyc`);
+  return extractData(res);
+}
+
+export async function submitCustomerKyc(
+  customerId: string,
+  payload: { documentType: string; fileUrl: string },
+) {
+  const res = await api.post(`/customers/${customerId}/kyc`, payload);
+  return extractData(res);
+}
+
+export async function updateKycDocumentStatus(docId: string, status: string) {
+  const res = await api.patch(`/customers/kyc/${docId}/status`, { status });
+  return extractData(res);
+}
