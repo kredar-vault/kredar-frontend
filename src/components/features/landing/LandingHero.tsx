@@ -19,14 +19,10 @@ export default function HeroSection() {
 
       {/* Main Hero Showcase */}
       <main className="relative z-20 mx-auto flex max-w-7xl flex-col items-center px-6 pt-16 text-center">
-        <span className="mb-5 rounded-full border border-[#21462D] bg-[#08120D]/70 px-4 py-2 text-[11px] font-medium text-[#D6ECDD] backdrop-blur">
-          Modern payment infrastructure for businesses
-        </span>
-
         <h1 className="max-w-4xl text-5xl font-bold leading-[0.95] tracking-[-0.05em] md:text-6xl">
-          Never wonder
+          Never wonder who
           <br />
-          who paid again.
+          paid again.
         </h1>
 
         <p className="mt-6 max-w-2xl text-sm leading-7 text-gray-400 md:text-base">
