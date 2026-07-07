@@ -39,7 +39,7 @@ export default function SidebarNavList({
               'flex items-center px-3 py-2.5 rounded-xl text-sm transition-all duration-150',
               isCollapsed && 'justify-center px-0',
               active
-                ? 'bg-[#006C49] text-white font-semibold '
+                ? 'bg-green-900 text-white font-semibold '
                 : 'text-[#45504b] hover:bg-[#f7faf6] hover:text-[#081b10]',
             )}
             title={isCollapsed ? item.label : undefined}

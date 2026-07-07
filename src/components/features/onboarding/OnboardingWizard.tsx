@@ -39,6 +39,7 @@ export default function OnboardingWizard() {
   const [currentStep, setCurrentStep] = useState(1);
   const [isComplete, setIsComplete] = useState(false);
   const [transitioning, setTransitioning] = useState(false);
+  const [loadingOnmount, setLoadingOnmount] = useState(true);
   const [data, setData] = useState<OnboardingData>({
     businessInfo: null,
     businessDocs: null,
@@ -62,8 +63,11 @@ export default function OnboardingWizard() {
   useEffect(() => {
     const initOnboarding = async () => {
       try {
+        // Fetch strictly from the requested onboarding status endpoint
         const onboardingRes = await api.get('/onboarding');
         const onboarding = onboardingRes.data?.data || onboardingRes.data;
+
+        // If status shows it's already locked or verified, bounce out immediately
         if (
           onboarding &&
           (onboarding.status === 'UnderReview' || onboarding.status === 'Approved')
@@ -73,19 +77,13 @@ export default function OnboardingWizard() {
           router.replace('/dashboard');
           return;
         }
-
-        const res = await api.get('/tenants/profile');
-        const profile = res.data?.data || res.data;
-        if (profile && (profile.legalName || profile.businessName || profile.isOnboarded)) {
-          setOnboardingComplete(true);
-          toast.success('You have already completed onboarding!');
-          router.replace('/dashboard');
-          return;
-        }
       } catch (err) {
-        console.error('Failed to load profile/onboarding status on mount:', err);
+        console.error('Failed to load onboarding status on mount:', err);
+      } finally {
+        setLoadingOnmount(false);
       }
 
+      // Drop back to local storage drafts if status is NotStarted
       const user = getCurrentUser();
       const savedState = getOnboardingDraft(user?.email);
       if (savedState) {
@@ -191,29 +189,39 @@ export default function OnboardingWizard() {
       console.error('Onboarding submit error details:', e.response?.data);
       const msg = e.response?.data?.message || e.message || 'Onboarding submission failed.';
       toast.error(`Submission failed: ${msg}`);
-    } finally {
+    }
+    {
       setTransitioning(false);
     }
   };
 
   if (isComplete) return <SuccessScreen />;
 
+  // Prevent UI flashing or jumpiness while validating response state on initial load
+  if (loadingOnmount) {
+    return (
+      <div className="min-h-screen bg-[#f5f5f5] flex items-center justify-center">
+        <Loader2 className="w-8 h-8 text-[#006C49] animate-spin" />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-[#f5f5f5] relative">
+    <div className="min-h-screen bg-[#f5f5f5] relative font-sans selection:bg-[#006C49]/10">
       <div className="px-8 py-5">
         <KredarLogo />
       </div>
 
       <div className="mx-auto max-w-[680px] px-4 pb-12 relative">
-        <div className="bg-white/70 backdrop-blur-sm border border-[#d8e1da] rounded-md px-8 py-6 mb-4">
+        <div className="bg-white/70 backdrop-blur-sm border border-[#d8e1da] rounded-xl px-8 py-6 mb-4 shadow-[0_2px_10px_rgba(0,0,0,0.01)]">
           <StepIndicator steps={STEPS} currentStep={currentStep} />
         </div>
 
         {transitioning && (
           <div className="absolute inset-0 bg-[#f5f5f5]/60 z-30 flex items-center justify-center min-h-[300px]">
-            <div className="bg-white p-6 rounded-md shadow-md flex flex-col items-center gap-3">
-              <Loader2 className="w-8 h-8 text-[#0f8b4b] animate-spin" />
-              <span className="text-sm font-semibold text-[#081b10]">Processing...</span>
+            <div className="bg-white p-6 rounded-xl shadow-md flex flex-col items-center gap-3 border border-gray-100">
+              <Loader2 className="w-7 h-7 text-[#006C49] animate-spin" />
+              <span className="text-xs font-semibold text-gray-700">Processing...</span>
             </div>
           </div>
         )}

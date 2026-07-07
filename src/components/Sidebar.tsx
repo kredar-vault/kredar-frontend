@@ -52,28 +52,32 @@ export default function Sidebar({
   const [loading, setLoading] = useState(true);
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const [fallbackEmail, setFallbackEmail] = useState('');
 
   const { data: profile } = useTenantProfile();
+
+  useEffect(() => {
+    const user = getCurrentUser();
+    if (user?.email) {
+      setFallbackEmail(user.email);
+    }
+    const timer = setTimeout(() => setLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   const getInitials = () => {
     if (profile?.businessName) {
       return profile.businessName.substring(0, 2).toUpperCase();
     }
-    const user = getCurrentUser();
-    if (user && user.email) {
-      return user.email.substring(0, 2).toUpperCase();
+    if (fallbackEmail) {
+      return fallbackEmail.substring(0, 2).toUpperCase();
     }
     return 'ME';
   };
 
   const getDisplayName = () => {
-    return profile?.businessName || 'Merchant';
+    return profile?.businessName || profile?.legalName || 'Merchant';
   };
-
-  useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 400);
-    return () => clearTimeout(timer);
-  }, []);
 
   const handleItemClick = (href: string) => {
     onCloseMobile();
@@ -94,11 +98,11 @@ export default function Sidebar({
   };
 
   const sidebarContent = (
-    <div className="h-full flex bg-white overflow-hidden p-3 gap-2">
+    <div className="h-full flex bg-white overflow-hidden p-3 gap-2 border-r border-gray-100">
       {/* ── Left Green Capsule Icon Strip ── */}
-      <div className="w-12 bg-[#006C49] rounded-full flex flex-col items-center flex-shrink-0 justify-between">
+      <div className="w-12 bg-[#006C49] rounded-full flex flex-col items-center flex-shrink-0 justify-between py-4">
         {/* Main top icons wrapper */}
-        <div className="w-full flex flex-col items-center pt-[84px] space-y-1">
+        <div className="w-full flex flex-col items-center pt-16 space-y-1">
           {mainNavItems.map((item, idx) => {
             const active = isActive(item.href, item.exact);
             return (
@@ -117,7 +121,7 @@ export default function Sidebar({
         </div>
 
         {/* Bottom utility icons explicitly stacked low */}
-        <div className="w-full flex flex-col items-center mb-[124px] space-y-1">
+        <div className="w-full flex flex-col items-center mb-6 space-y-1">
           {bottomNavItems.map((item, idx) => {
             const active = isActive(item.href, item.exact);
             return (
@@ -145,7 +149,7 @@ export default function Sidebar({
               <KredarLogo hideText={isCollapsed} />
             </div>
 
-            {/* Main Upper Links - Pushed down to align with the first icon */}
+            {/* Main Upper Links */}
             <div className="mt-3">
               <SidebarNavList
                 items={mainNavItems}
@@ -170,38 +174,37 @@ export default function Sidebar({
             </div>
 
             {/* Profile block */}
-            <div className="space-y-1.5">
-              <div className="flex items-center gap-3 px-2 py-0.5">
-                <div className="w-7 h-7 rounded-full bg-[#ebebeb] flex items-center justify-center font-bold text-[#081b10] text-[11px] flex-shrink-0 border border-[#d8e1da] uppercase">
+            <div className="space-y-1.5 pt-2 border-t border-gray-50">
+              <div className="flex items-center gap-3 px-2 py-1">
+                {/* Fully Rounded Profile Disc with Pink Theme */}
+                <div className="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center font-bold text-white text-[10px] flex-shrink-0 shadow-sm uppercase">
                   {getInitials()}
                 </div>
                 {!isCollapsed && (
                   <div className="flex-1 min-w-0">
-                    <p className="text-xs font-semibold text-[#081b10] truncate">
-                      {getDisplayName()}
-                    </p>
-                    <p className="text-[10px] text-[#667085] font-medium truncate">
-                      Merchant Account
+                    <p className="text-xs font-bold text-[#030A05] truncate">{getDisplayName()}</p>
+                    <p className="text-[10px] text-gray-400 font-medium truncate mt-0.5">
+                      {fallbackEmail || 'Merchant Account'}
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Logout - Pushed down to line up with the help icon spacing line */}
+              {/* Logout Button */}
               <button
                 onClick={() => setShowLogoutConfirm(true)}
-                className="flex items-center gap-2 w-full px-3 py-2 mt-4 rounded-xl text-xs text-[#45504b] hover:bg-[#fff0f0] hover:text-red-600 transition-colors"
+                className="flex items-center gap-2 w-full px-3 py-2 mt-2 rounded-xl text-xs text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors"
               >
                 <LogOut size={14} />
-                {!isCollapsed && <span className="font-medium">Log out</span>}
+                {!isCollapsed && <span className="font-semibold">Log out</span>}
               </button>
 
               {/* Toggle Trigger */}
-              <div className="hidden lg:block">
+              <div className="hidden lg:block pt-1">
                 <button
                   type="button"
                   onClick={onToggleCollapse}
-                  className="flex items-center justify-center gap-2 px-3 py-1 w-full text-left rounded-xl text-[10px] text-[#45504b] hover:bg-[#f7faf6] transition-colors border border-[#ebebeb]"
+                  className="flex items-center justify-center gap-2 px-3 py-1.5 w-full text-left rounded-xl text-[10px] text-gray-500 hover:bg-gray-50 transition-colors border border-gray-100"
                 >
                   {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
                   {!isCollapsed && <span className="font-semibold">Collapse</span>}
