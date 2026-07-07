@@ -1,12 +1,11 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import AuthPageShell from '@/components/auth/AuthPageShell';
+import { Mail, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Mail, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
 import { useResendVerification, useVerifyEmailQuery } from '@/api/auth/hooks';
-import { getRegisteredEmail, setToken, setCurrentUser } from '@/lib/cookies';
+import { getRegisteredEmail } from '@/lib/cookies';
 
 function VerifyEmailForm() {
   const router = useRouter();
@@ -15,140 +14,78 @@ function VerifyEmailForm() {
   const token = searchParams.get('token') || '';
   const email = searchParams.get('email') || getRegisteredEmail() || '';
 
-  const [status, setStatus] = useState<'idle' | 'verifying' | 'success' | 'error'>('idle');
-  const [errorMsg, setErrorMsg] = useState('');
-
   const verifyQuery = useVerifyEmailQuery(token, email);
   const resendMutation = useResendVerification();
 
   useEffect(() => {
-    if (token) {
-      if (verifyQuery.isLoading) {
-        setStatus('verifying');
-      } else if (verifyQuery.isSuccess) {
-        const responseData = verifyQuery.data;
-        const userToken = responseData?.token || responseData?.data?.token;
-        const user = responseData?.user || responseData?.data?.user || { email };
+    if (!token) return;
 
-        if (userToken) {
-          setToken(userToken);
-          setCurrentUser(user);
-        }
-
-        setStatus('success');
-        toast.success('Email verified successfully! Please sign in.');
-        const t = setTimeout(() => {
-          router.replace('/auth/login');
-        }, 1500);
-        return () => clearTimeout(t);
-      } else if (verifyQuery.isError) {
-        setStatus('error');
-        const err: any = verifyQuery.error;
-        const msg =
-          err.response?.data?.message ||
-          err.message ||
-          'Email verification link is invalid or has expired.';
-        setErrorMsg(msg);
-      }
-    } else {
-      setStatus('idle');
+    if (verifyQuery.isSuccess) {
+      router.replace('/auth/email-verified?verified=true');
+    } else if (verifyQuery.isError) {
+      router.replace('/auth/email-verified?verified=false');
     }
-  }, [
-    token,
-    email,
-    router,
-    verifyQuery.isLoading,
-    verifyQuery.isSuccess,
-    verifyQuery.isError,
-    verifyQuery.data,
-    verifyQuery.error,
-  ]);
+  }, [token, verifyQuery.isSuccess, verifyQuery.isError, router]);
 
+  // If token in URL — show spinner while verifying
+  if (token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-10 h-10 text-[#0f8b4b] animate-spin mx-auto" />
+          <p className="text-sm text-[#45504b]">Verifying your email address…</p>
+        </div>
+      </div>
+    );
+  }
+
+  // No token — holding page after signup
   const handleResend = async () => {
     if (!email) {
-      toast.error('Email address not found. Please sign up again.');
+      toast.error('Email not found. Please sign up again.');
       return;
     }
     try {
       await resendMutation.mutateAsync({ email });
-      toast.success('Verification link resent successfully!');
+      toast.success('Verification link resent!');
     } catch (e: any) {
-      const msg = e.response?.data?.message || e.message || 'Failed to resend verification link.';
-      toast.error(msg);
+      toast.error(e.response?.data?.message || e.message || 'Failed to resend link.');
     }
   };
 
-  if (status === 'verifying') {
-    return (
-      <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
-        <Loader2 className="w-10 h-10 text-[#0f8b4b] animate-spin" />
-        <p className="text-sm font-medium text-[#45504b]">
-          Verifying your email address, please wait...
-        </p>
-      </div>
-    );
-  }
-
-  if (status === 'success') {
-    return (
-      <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
-        <CheckCircle2 className="w-12 h-12 text-[#0f8b4b]" />
-        <h3 className="text-lg font-bold text-[#081b10]">Verification Successful!</h3>
-        <p className="text-sm text-[#45504b]">Taking you to login...</p>
-        <button
-          type="button"
-          onClick={() => router.replace('/auth/login')}
-          className="kredar-btn-primary w-full max-w-xs mt-2"
-        >
-          Go to login
-        </button>
-      </div>
-    );
-  }
-
-  if (status === 'error') {
-    return (
-      <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
-        <AlertCircle className="w-12 h-12 text-[#ef4444]" />
-        <h3 className="text-lg font-bold text-[#ef4444]">Verification Failed</h3>
-        <p className="text-sm text-[#45504b] max-w-xs">{errorMsg}</p>
-        <button
-          onClick={() => router.replace('/auth/signup')}
-          className="kredar-btn-primary w-full max-w-xs mt-2"
-        >
-          Back to Sign Up
-        </button>
-      </div>
-    );
-  }
-
-  const resending = resendMutation.isPending;
-
   return (
-    <div className="flex flex-col items-center py-4 text-center space-y-5">
-      <div className="w-16 h-16 bg-[#effaf2] rounded-md flex items-center justify-center text-[#0f8b4b] mb-2">
-        <Mail size={32} />
-      </div>
-      <p className="text-sm text-[#45504b] leading-relaxed">
-        We've sent a confirmation link to{' '}
-        <span className="font-semibold text-[#081b10] break-all">
-          {email || 'your email address'}
-        </span>
-        . Please click the button in that email to confirm your account.
-      </p>
+    <div className="min-h-screen flex items-center justify-center bg-[#f7faf6] px-4">
+      <div className="bg-white rounded-2xl shadow-sm border border-[#d8e1da] p-10 w-full max-w-md text-center">
+        <div className="w-16 h-16 bg-[#effaf2] rounded-2xl flex items-center justify-center mx-auto mb-6">
+          <Mail size={30} className="text-[#0f8b4b]" />
+        </div>
 
-      <div className="w-full pt-4 space-y-3">
-        <button
-          type="button"
-          disabled={resending}
-          onClick={handleResend}
-          className="kredar-btn-primary w-full"
-        >
-          {resending ? 'Resending Link...' : 'Resend link'}
-        </button>
+        <h1 className="text-xl font-bold text-[#081b10] mb-2">Check your email</h1>
+        <p className="text-sm text-[#45504b] leading-relaxed mb-8">
+          We sent a verification link to{' '}
+          <span className="font-semibold text-[#081b10]">{email || 'your email address'}</span>.
+          Click the link to verify your account and sign in.
+        </p>
 
-        <p className="text-xs text-[#8c9c94] mt-2">
-          Didn't receive the email? Check your spam folder or click above to request a new link.
+        <div className="space-y-3">
+          <button
+            onClick={() => router.push('/auth/login')}
+            className="w-full border border-[#d8e1da] text-[#081b10] text-sm font-semibold py-3 rounded-xl hover:bg-[#f7faf6] transition-colors"
+          >
+            Return to sign in
+          </button>
+        </div>
+
+        <p className="text-xs text-[#45504b] mt-6">
+          Didn't receive the email? Check your spam folder or{' '}
+          <button
+            onClick={handleResend}
+            disabled={resendMutation.isPending}
+            className="text-[#0f8b4b] font-semibold hover:underline disabled:opacity-50"
+          >
+            {resendMutation.isPending ? 'Resending…' : 'resend verification link'}
+          </button>
+          .
         </p>
       </div>
     </div>
@@ -160,18 +97,11 @@ export default function VerifyEmailPage() {
     <Suspense
       fallback={
         <div className="min-h-screen flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-[#0f8b4b] border-t-transparent rounded-md animate-spin" />
+          <Loader2 className="w-6 h-6 text-[#0f8b4b] animate-spin" />
         </div>
       }
     >
-      <AuthPageShell
-        title="Verify email"
-        subtitle="Confirm your email to complete registration"
-        bottomCtaHref="/auth/signup"
-        bottomCtaLabel="Back to Sign up"
-      >
-        <VerifyEmailForm />
-      </AuthPageShell>
+      <VerifyEmailForm />
     </Suspense>
   );
 }

@@ -4,7 +4,11 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { X, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
-import { isBannerDismissed, dismissBanner, setOnboardingComplete } from '@/lib/onboarding-status';
+import {
+  isBannerDismissed,
+  dismissBanner,
+  setOnboardingCompleteFlag,
+} from '@/lib/onboarding-status';
 
 type OnboardingStatus = 'NotStarted' | 'UnderReview' | 'Approved' | null;
 
@@ -31,7 +35,7 @@ export default function ProfileCompletionBanner() {
         setStatus(currentStatus);
 
         if (currentStatus === 'Approved') {
-          setOnboardingComplete(true);
+          setOnboardingCompleteFlag(true);
           setVisible(false);
         } else {
           // Keep banner open for NotStarted and UnderReview states

@@ -165,7 +165,7 @@ export default function SettingsPage() {
                 onDeleteWebhook={handleDeleteWebhook}
               />
             )}
-            {activeTab === 'security' && <SecurityTab email={profile.email} />}
+            {activeTab === 'security' && <SecurityTab />}
           </>
         )}
       </div>
