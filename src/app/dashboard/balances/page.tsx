@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useBalance } from '@/api/balances/hooks';
+import { useBalance, useSimulateDeposit } from '@/api/balances/hooks';
 import { useLookupBankAccount, useCreateTransfer } from '@/api/transfers/hooks';
 import { Plus, Minus, Loader2, X } from 'lucide-react';
 
@@ -9,10 +9,21 @@ function generateMerchantTxRef() {
   return `kredar_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
 }
 
+function generateAccountReference() {
+  return `acct_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export default function BalancesPage() {
   const { data: balance = 0, isLoading } = useBalance();
-  const [withdrawOpen, setWithdrawOpen] = useState(false);
 
+  // Deposit modal state
+  const [depositOpen, setDepositOpen] = useState(false);
+  const [depositAmount, setDepositAmount] = useState('');
+  const [senderName, setSenderName] = useState('');
+  const depositMutation = useSimulateDeposit();
+
+  // Withdraw modal state
+  const [withdrawOpen, setWithdrawOpen] = useState(false);
   const [bankCode, setBankCode] = useState('');
   const [accountNumber, setAccountNumber] = useState('');
   const [amount, setAmount] = useState('');
@@ -27,6 +38,27 @@ export default function BalancesPage() {
       currency: 'NGN',
       minimumFractionDigits: 0,
     }).format(value);
+
+  const resetDepositForm = () => {
+    setDepositAmount('');
+    setSenderName('');
+  };
+
+  const handleConfirmDeposit = async () => {
+    if (!depositAmount || !senderName.trim()) return;
+    try {
+      await depositMutation.mutateAsync({
+        accountReference: generateAccountReference(),
+        amountNaira: Number(depositAmount),
+        senderName: senderName.trim(),
+        reversal: false,
+      });
+      setDepositOpen(false);
+      resetDepositForm();
+    } catch {
+      // error toast already handled in useSimulateDeposit
+    }
+  };
 
   const resetWithdrawForm = () => {
     setBankCode('');
@@ -91,7 +123,10 @@ export default function BalancesPage() {
         </div>
 
         <div className="mt-5 flex gap-2.5">
-          <button className="flex h-8 items-center gap-1.5 rounded-md bg-[#006C49] px-3.5 text-xs font-semibold text-white transition hover:bg-[#0a2e1f]">
+          <button
+            onClick={() => setDepositOpen(true)}
+            className="flex h-8 items-center gap-1.5 rounded-md bg-[#006C49] px-3.5 text-xs font-semibold text-white transition hover:bg-[#0a2e1f]"
+          >
             <Plus size={14} />
             Deposit
           </button>
@@ -106,6 +141,74 @@ export default function BalancesPage() {
         </div>
       </div>
 
+      {/* Deposit modal */}
+      {depositOpen && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full space-y-4">
+            <div className="flex items-center justify-between">
+              <h4 className="text-base font-bold text-[#081b10]">Simulate deposit</h4>
+              <button
+                onClick={() => {
+                  setDepositOpen(false);
+                  resetDepositForm();
+                }}
+                className="text-[#667085] hover:text-black"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              <div>
+                <label className="text-xs font-medium text-[#45504b]">Sender name</label>
+                <input
+                  type="text"
+                  value={senderName}
+                  onChange={(e) => setSenderName(e.target.value)}
+                  placeholder="e.g. John Doe"
+                  className="w-full mt-1 h-9 px-3 text-sm border border-[#d8e1da] rounded-lg"
+                />
+              </div>
+
+              <div>
+                <label className="text-xs font-medium text-[#45504b]">Amount (NGN)</label>
+                <input
+                  type="number"
+                  value={depositAmount}
+                  onChange={(e) => setDepositAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full mt-1 h-9 px-3 text-sm border border-[#d8e1da] rounded-lg"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-2">
+              <button
+                onClick={() => {
+                  setDepositOpen(false);
+                  resetDepositForm();
+                }}
+                className="h-9 text-xs font-semibold px-4 rounded-lg border border-[#d8e1da] text-[#45504b]"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDeposit}
+                disabled={!depositAmount || !senderName.trim() || depositMutation.isPending}
+                className="h-9 text-xs font-semibold px-4 rounded-lg bg-[#0F8B4B] text-white disabled:opacity-50 flex items-center gap-2"
+              >
+                {depositMutation.isPending ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  'Simulate deposit'
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Withdraw modal */}
       {withdrawOpen && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full space-y-4">
@@ -132,7 +235,7 @@ export default function BalancesPage() {
                     setBankCode(e.target.value);
                     setVerifiedName(null);
                   }}
-                  placeholder="e.g. 058"
+                  placeholder="e.g. 044"
                   className="w-full mt-1 h-9 px-3 text-sm border border-[#d8e1da] rounded-lg"
                 />
               </div>

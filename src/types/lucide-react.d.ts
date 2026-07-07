@@ -66,4 +66,5 @@ declare module 'lucide-react' {
   export const ScrollText: LucideIcon;
   export const RotateCw: LucideIcon;
   export const MessageCircle: LucideIcon;
+  export const LifeBuoy: LucideIcon;
 }

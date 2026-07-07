@@ -22,12 +22,9 @@ interface DocsSidebarProps {
 }
 
 export default function DocsSidebar({ groups, activeSection, setActiveSection }: DocsSidebarProps) {
-  // Store collapsed states for groups, defaulting all to true (expanded)
-  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({
-    'get-started': true,
-    guide: true,
-    'core-resources': true,
-  });
+  const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>(
+    groups.reduce((acc, group) => ({ ...acc, [group.id]: true }), {}),
+  );
 
   const toggleGroup = (groupId: string) => {
     setExpandedGroups((prev) => ({
@@ -37,25 +34,23 @@ export default function DocsSidebar({ groups, activeSection, setActiveSection }:
   };
 
   return (
-    <aside className="w-full md:w-60 flex-shrink-0 border-r border-[#e2ebd9] pr-4 md:sticky md:top-24 max-h-[calc(100vh-100px)] overflow-y-auto font-sans select-none scrollbar-thin">
+    <aside className="w-full md:w-60 flex-shrink-0 bg-[#0c1e13] rounded-md md:sticky md:top-24 max-h-[calc(100vh-100px)] overflow-y-auto select-none scrollbar-thin p-4">
       <div className="space-y-4">
         {groups.map((group) => {
           const isExpanded = expandedGroups[group.id] !== false;
 
           return (
             <div key={group.id} className="space-y-1">
-              {/* Group Toggle Header */}
               <button
                 onClick={() => toggleGroup(group.id)}
-                className="w-full flex items-center justify-between py-2 text-xs font-bold text-[#0c1e13] uppercase tracking-wider hover:text-[#0f8b4b] transition-colors"
+                className="w-full flex items-center justify-between py-2 text-xs font-bold text-white/90 uppercase tracking-wider hover:text-[#3ddc84] transition-colors"
               >
                 <span>{group.title}</span>
                 {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
               </button>
 
-              {/* Child Navigation List */}
               {isExpanded && (
-                <nav className="pl-2.5 space-y-0.5 border-l border-[#e2ebd9] ml-1">
+                <nav className="pl-2.5 space-y-0.5 border-l border-white/10 ml-1">
                   {group.items.map((item) => {
                     const isActive = activeSection === item.id;
 
@@ -66,8 +61,8 @@ export default function DocsSidebar({ groups, activeSection, setActiveSection }:
                         className={cn(
                           'w-full text-left px-3 py-1.5 rounded text-xs font-medium transition-colors',
                           isActive
-                            ? 'bg-[#0f8b4b]/10 text-[#0f8b4b] font-semibold'
-                            : 'text-[#5d6b60] hover:bg-[#f4f7f4] hover:text-[#0c1e13]',
+                            ? 'bg-[#0f8b4b]/20 text-[#3ddc84] font-semibold'
+                            : 'text-white/50 hover:bg-white/5 hover:text-white/90',
                         )}
                       >
                         {item.title}
@@ -83,4 +78,5 @@ export default function DocsSidebar({ groups, activeSection, setActiveSection }:
     </aside>
   );
 }
+
 export type { SidebarItem, SidebarGroup };

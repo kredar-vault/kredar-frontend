@@ -5,7 +5,7 @@ import KredarLogo from '@/components/KredarLogo';
 
 export default function LandingFooter() {
   return (
-    <footer className="bg-[#030A05] border-t border-white/5 px-4 md:px-6 py-12 md:py-14 text-white font-sans selection:bg-[#006C49]/30">
+    <footer className="bg-[#030A05] border-t border-white/5 px-4 md:px-6 py-12 md:py-14 text-white  selection:bg-[#006C49]/30">
       <div className="max-w-6xl mx-auto flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
         {/* BRAND COLUMN */}
         <div className="space-y-3 max-w-xs">

@@ -26,7 +26,7 @@ export default function DocsDedicatedAccounts() {
 }`;
 
   return (
-    <div className="space-y-10 max-w-4xl font-sans text-slate-800 animate-fade-in-up">
+    <div className="space-y-10 max-w-4xl text-slate-800 animate-fade-in-up">
       <section className="space-y-2">
         <h1 className="text-3xl font-bold tracking-tight text-[#0c1e13]">Dedicated Accounts</h1>
         <p className="text-xs text-[#5d6b60] font-mono">/api/v1/dedicated-accounts</p>

@@ -38,7 +38,7 @@ export default function LandingFaq() {
   return (
     <section
       id="faq"
-      className="bg-[#FAFDFB] px-4 py-16 md:py-20 flex flex-col items-center justify-center border-t border-[#f0f4f1] font-sans selection:bg-[#006C49]/10"
+      className="bg-[#FAFDFB] px-4 py-16 md:py-20 flex flex-col items-center justify-center border-t border-[#f0f4f1]  selection:bg-[#006C49]/10"
     >
       <div className="max-w-3xl w-full space-y-10">
         {/* ── SECTION HEADER ── */}
@@ -46,7 +46,7 @@ export default function LandingFaq() {
           <span className="text-[10px] font-bold text-[#006C49] uppercase tracking-[0.2em] block">
             FAQ
           </span>
-          <h2 className="text-2xl md:text-3xl font-extrabold tracking-tight text-gray-900 leading-tight">
+          <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-gray-900 leading-tight">
             Frequently asked questions
           </h2>
           <p className="text-xs md:text-sm text-gray-500 leading-relaxed font-normal">
