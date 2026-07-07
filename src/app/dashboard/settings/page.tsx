@@ -4,16 +4,17 @@ import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import ProfileTab, { ProfileData } from '@/components/features/settings/ProfileTab';
-import TeamTab, { TeamMember } from '@/components/features/settings/TeamTab';
+import TeamTab from '@/components/features/settings/TeamTab';
 import DevelopersTab from '@/components/features/settings/DevelopersTab';
 import SecurityTab from '@/components/features/settings/SecurityTab';
 import { useTenantProfile, useUpdateProfile } from '@/api/tenant/hooks';
-import { useApiKeys, useCreateApiKey, useDeleteApiKey } from '@/api/api-keys/hooks';
 import {
-  useWebhookEndpoints,
-  useCreateWebhookEndpoint,
-  useDeleteWebhookEndpoint,
-} from '@/api/webhooks/hooks';
+  useApiKeys,
+  useCreateApiKey,
+  useDeleteApiKey,
+  useRotateApiKey,
+} from '@/api/api-keys/use-api-keys';
+import { useDeleteWebhook, useSaveWebhook, useWebhooks } from '@/api/api-keys/use-webhooks';
 
 const emptyProfile: ProfileData = {
   businessName: '',
@@ -33,7 +34,6 @@ export default function SettingsPage() {
     'profile',
   );
   const [profile, setProfile] = useState<ProfileData>(emptyProfile);
-  const [team, setTeam] = useState<TeamMember[]>([]);
 
   const { data: serverProfile, isLoading: isProfileLoading } = useTenantProfile();
   const updateProfileMutation = useUpdateProfile();
@@ -41,10 +41,12 @@ export default function SettingsPage() {
   const { data: apiKeys = [], isLoading: isKeysLoading } = useApiKeys();
   const createKeyMutation = useCreateApiKey();
   const deleteKeyMutation = useDeleteApiKey();
+  const rotateKeyMutation = useRotateApiKey();
 
-  const { data: webhooks = [], isLoading: isWebhooksLoading } = useWebhookEndpoints();
-  const createWebhookMutation = useCreateWebhookEndpoint();
-  const deleteWebhookMutation = useDeleteWebhookEndpoint();
+  const { data: webhooks = [], isLoading: isWebhooksLoading } = useWebhooks();
+  const saveWebhookMutation = useSaveWebhook();
+  const deleteWebhookMutation = useDeleteWebhook();
+  const [newKeySecret, setNewKeySecret] = useState<string | null>(null);
 
   useEffect(() => {
     if (serverProfile) {
@@ -64,59 +66,36 @@ export default function SettingsPage() {
       await updateProfileMutation.mutateAsync({ ...profile, phoneNumber: phoneToSend });
       toast.success('Business profile updated successfully!');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to update profile.');
+      toast.error(err.response?.data?.message || err.message || 'Failed to update profile.');
     }
-  };
-
-  const handleAddTeamMember = (name: string, email: string, role: string) => {
-    const newM: TeamMember = {
-      id: Date.now(),
-      name,
-      email,
-      role,
-      dateAdded: new Date().toISOString().split('T')[0],
-    };
-    setTeam((prev) => [...prev, newM]);
-    toast.success('Team member added.');
-  };
-
-  const handleSaveTeamMember = (id: number, name: string, email: string, role: string) => {
-    setTeam((prev) => prev.map((m) => (m.id === id ? { ...m, name, email, role } : m)));
-    toast.success('Team member changes saved.');
-  };
-
-  const handleDeleteTeamMember = (id: number) => {
-    setTeam((prev) => prev.filter((m) => m.id !== id));
-    toast.success('Team member deleted.');
   };
 
   const handleCreateApiKey = async () => {
     try {
-      await createKeyMutation.mutateAsync({
+      const created = await createKeyMutation.mutateAsync({
         label: profile.businessName || 'Kredar API Key',
         mode: 'live',
       });
-      toast.success('New API Key created successfully!');
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to create API key.');
+      setNewKeySecret(created?.clientSecret ?? created?.keyString ?? null);
+    } catch (err) {
+      // error toast already handled in useCreateApiKey
     }
   };
-
   const handleDeleteApiKey = async (id: string) => {
     try {
       await deleteKeyMutation.mutateAsync(id);
       toast.success('API Key deleted.');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete API key.');
+      toast.error(err.response?.data?.message || err.message || 'Failed to delete API key.');
     }
   };
 
   const handleSaveWebhook = async (url: string) => {
     try {
-      await createWebhookMutation.mutateAsync({ url });
+      await saveWebhookMutation.mutateAsync(url);
       toast.success('Webhook registered successfully!');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to register webhook.');
+      toast.error(err.response?.data?.message || err.message || 'Failed to register webhook.');
     }
   };
 
@@ -125,34 +104,38 @@ export default function SettingsPage() {
       await deleteWebhookMutation.mutateAsync(id);
       toast.success('Webhook deleted.');
     } catch (err: any) {
-      toast.error(err.message || 'Failed to delete webhook.');
+      toast.error(err.response?.data?.message || err.message || 'Failed to delete webhook.');
     }
   };
 
+  // Team tab fetches and mutates its own data directly (see TeamTab.tsx),
+  // so it's not part of this page's loading gate.
   const loading = isProfileLoading || isKeysLoading || isWebhooksLoading;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 px-4 sm:px-0">
       <div>
-        <h1 className="text-3xl font-bold text-[#081b10]">Settings</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold text-[#081b10]">Settings</h1>
       </div>
 
-      <div className="bg-white border border-[#d8e1da] rounded-2xl p-6 shadow-sm min-h-[500px]">
-        <div className="border-b border-[#f0f4f1] flex gap-8 mb-6">
-          {(['profile', 'team', 'developers', 'security'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={cn(
-                'pb-3 text-sm font-bold border-b-2 transition-all capitalize relative top-[1px]',
-                activeTab === tab
-                  ? 'border-[#0f8b4b] text-[#0f8b4b]'
-                  : 'border-transparent text-[#45504b] hover:text-[#081b10]',
-              )}
-            >
-              {tab}
-            </button>
-          ))}
+      <div className="bg-white border border-[#d8e1da] rounded-md p-4 sm:p-6 min-h-[500px]">
+        <div className="border-b border-[#f0f4f1] mb-6 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto">
+          <div className="flex gap-6 sm:gap-8 w-max sm:w-auto min-w-full">
+            {(['profile', 'team', 'developers', 'security'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  'pb-3 text-sm font-bold border-b-2 transition-all capitalize relative top-[1px] whitespace-nowrap shrink-0',
+                  activeTab === tab
+                    ? 'border-[#0f8b4b] text-[#0f8b4b]'
+                    : 'border-transparent text-[#45504b] hover:text-[#081b10]',
+                )}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
         </div>
 
         {loading ? (
@@ -171,23 +154,18 @@ export default function SettingsPage() {
             {activeTab === 'profile' && (
               <ProfileTab profile={profile} setProfile={setProfile} onSave={handleSaveProfile} />
             )}
-            {activeTab === 'team' && (
-              <TeamTab
-                team={team}
-                setTeam={setTeam}
-                onAddMember={handleAddTeamMember}
-                onSaveMember={handleSaveTeamMember}
-                onDeleteMember={handleDeleteTeamMember}
-              />
-            )}
+            {activeTab === 'team' && <TeamTab />}
             {activeTab === 'developers' && (
               <DevelopersTab
                 apiKeys={apiKeys}
                 webhooks={webhooks}
                 onCreateKey={handleCreateApiKey}
                 onDeleteKey={handleDeleteApiKey}
+                onRotateKey={(id) => rotateKeyMutation.mutate(id)}
                 onSaveWebhook={handleSaveWebhook}
                 onDeleteWebhook={handleDeleteWebhook}
+                newKeySecret={newKeySecret}
+                onCloseNewKeyModal={() => setNewKeySecret(null)}
               />
             )}
             {activeTab === 'security' && <SecurityTab />}

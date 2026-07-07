@@ -57,7 +57,7 @@ export default function Step1BusinessInfo({ defaultValues, onNext, onBack }: Pro
   });
 
   return (
-    <form onSubmit={handleSubmit(onNext)} className="bg-white rounded-2xl shadow-sm px-10 py-8">
+    <form onSubmit={handleSubmit(onNext)} className="bg-white rounded-md  px-10 py-8">
       {/* Header */}
       <div className="mb-7">
         <h1 className="text-2xl font-semibold text-[#081b10]">Business Details</h1>

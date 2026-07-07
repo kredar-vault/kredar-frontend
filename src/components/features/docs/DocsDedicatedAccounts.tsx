@@ -28,19 +28,15 @@ export default function DocsDedicatedAccounts() {
   return (
     <div className="space-y-10 max-w-4xl font-sans text-slate-800 animate-fade-in-up">
       <section className="space-y-2">
-        <h1 className="text-3xl font-extrabold tracking-tight text-[#0c1e13]">
-          Dedicated Accounts
-        </h1>
+        <h1 className="text-3xl font-bold tracking-tight text-[#0c1e13]">Dedicated Accounts</h1>
         <p className="text-xs text-[#5d6b60] font-mono">/api/v1/dedicated-accounts</p>
       </section>
 
       {/* 1. Create a Dedicated Virtual Account */}
       <section id="create-dedicated-account" className="space-y-4 pt-6 border-t border-[#e2ebd9]">
-        <h2 className="text-xl font-extrabold text-[#0c1e13]">
-          Create a Dedicated Virtual Account
-        </h2>
+        <h2 className="text-xl font-bold text-[#0c1e13]">Create a Dedicated Virtual Account</h2>
         <div className="flex items-center gap-3">
-          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-mono px-2 py-0.5 rounded font-extrabold uppercase">
+          <span className="bg-emerald-100 text-emerald-800 text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase">
             POST
           </span>
           <code className="text-xs font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-700">
@@ -54,7 +50,7 @@ export default function DocsDedicatedAccounts() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
           {/* Request payload */}
           <div className="space-y-2">
-            <h4 className="font-extrabold text-xs text-slate-700">Request Body</h4>
+            <h4 className="font-bold text-xs text-slate-700">Request Body</h4>
             <div className="bg-[#24292e] rounded-xl overflow-hidden shadow border border-slate-700">
               <div className="bg-[#1f2428] border-b border-slate-700 px-4 py-1.5 flex justify-between items-center text-[10px] font-mono text-slate-400">
                 <span>JSON Payload</span>
@@ -73,7 +69,7 @@ export default function DocsDedicatedAccounts() {
 
           {/* Response Payload */}
           <div className="space-y-2">
-            <h4 className="font-extrabold text-xs text-slate-700">Response (200 OK)</h4>
+            <h4 className="font-bold text-xs text-slate-700">Response (200 OK)</h4>
             <div className="bg-[#24292e] rounded-xl overflow-hidden shadow border border-slate-700">
               <div className="bg-[#1f2428] border-b border-slate-700 px-4 py-1.5 flex justify-between items-center text-[10px] font-mono text-slate-400">
                 <span>JSON Response</span>
@@ -94,9 +90,9 @@ export default function DocsDedicatedAccounts() {
 
       {/* 2. List All Dedicated Accounts */}
       <section id="list-dedicated-accounts" className="space-y-4 pt-6 border-t border-[#e2ebd9]">
-        <h2 className="text-xl font-extrabold text-[#0c1e13]">List All Dedicated Accounts</h2>
+        <h2 className="text-xl font-bold text-[#0c1e13]">List All Dedicated Accounts</h2>
         <div className="flex items-center gap-3">
-          <span className="bg-blue-100 text-blue-800 text-[10px] font-mono px-2 py-0.5 rounded font-extrabold uppercase">
+          <span className="bg-blue-100 text-blue-800 text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase">
             GET
           </span>
           <code className="text-xs font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-700">
@@ -108,8 +104,8 @@ export default function DocsDedicatedAccounts() {
         </p>
 
         <div className="space-y-2 pt-2">
-          <h4 className="font-extrabold text-xs text-slate-700">Query Parameters</h4>
-          <div className="border border-[#e2ebd9] rounded-xl overflow-hidden shadow-sm bg-white">
+          <h4 className="font-bold text-xs text-slate-700">Query Parameters</h4>
+          <div className="border border-[#e2ebd9] rounded-xl overflow-hidden  bg-white">
             <table className="w-full text-left border-collapse text-xs">
               <thead>
                 <tr className="bg-[#f4f7f4] border-b border-[#e2ebd9] text-[#4e5b52] font-semibold text-[10px] uppercase">
@@ -142,9 +138,9 @@ export default function DocsDedicatedAccounts() {
 
       {/* 3. Get Dedicated Account by ID */}
       <section id="get-dedicated-account" className="space-y-4 pt-6 border-t border-[#e2ebd9]">
-        <h2 className="text-xl font-extrabold text-[#0c1e13]">Get Dedicated Account by ID</h2>
+        <h2 className="text-xl font-bold text-[#0c1e13]">Get Dedicated Account by ID</h2>
         <div className="flex items-center gap-3">
-          <span className="bg-blue-100 text-blue-800 text-[10px] font-mono px-2 py-0.5 rounded font-extrabold uppercase">
+          <span className="bg-blue-100 text-blue-800 text-[10px] font-mono px-2 py-0.5 rounded font-bold uppercase">
             GET
           </span>
           <code className="text-xs font-mono bg-slate-100 px-1 py-0.5 rounded text-slate-700">

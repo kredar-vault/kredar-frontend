@@ -13,6 +13,15 @@ export interface TransactionItem {
   type?: string;
   currency?: string;
   avatar?: string;
+  narration?: string;
+  reference?: string;
+  fee?: number | string;
+  time?: string;
+  accountNumber?: string;
+  method?: string;
+  expectedAmount?: number | string;
+  receivedAmount?: number | string;
+  difference?: number | string;
 }
 
 export interface CreateTransactionPayload {

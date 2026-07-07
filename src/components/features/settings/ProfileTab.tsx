@@ -2,7 +2,7 @@
 
 import { ChevronDown } from 'lucide-react';
 
-interface ProfileData {
+export interface ProfileData {
   businessName: string;
   registrationNumber: string;
   businessType: string;
@@ -25,135 +25,166 @@ export default function ProfileTab({ profile, setProfile, onSave }: ProfileTabPr
   return (
     <form onSubmit={onSave} className="space-y-6 max-w-4xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-5">
-        {/* Business Name */}
         <div>
           <label className="kredar-label">Business name</label>
           <input
             type="text"
             value={profile.businessName}
-            onChange={(e) => setProfile({ ...profile, businessName: e.target.value })}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                businessName: e.target.value,
+              })
+            }
             className="kredar-input"
           />
         </div>
 
-        {/* Business registration number */}
         <div>
           <label className="kredar-label">Business registration number</label>
           <input
             type="text"
             value={profile.registrationNumber}
-            onChange={(e) => setProfile({ ...profile, registrationNumber: e.target.value })}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                registrationNumber: e.target.value,
+              })
+            }
             className="kredar-input"
           />
         </div>
 
-        {/* Business type select */}
         <div className="relative">
           <label className="kredar-label">Business type</label>
           <select
             value={profile.businessType}
-            onChange={(e) => setProfile({ ...profile, businessType: e.target.value })}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                businessType: e.target.value,
+              })
+            }
             className="kredar-select pr-10"
           >
-            <option>{profile.businessType}</option>
+            <option>Limited Liability Company (LLP)</option>
             <option>Sole Proprietorship</option>
             <option>Partnership</option>
             <option>Corporation</option>
           </select>
+
           <ChevronDown
             size={16}
             className="pointer-events-none absolute right-3 top-[calc(50%+12px)] -translate-y-1/2 text-[#45504b]"
           />
         </div>
 
-        {/* Industry select */}
         <div className="relative">
           <label className="kredar-label">Industry</label>
           <select
             value={profile.industry}
-            onChange={(e) => setProfile({ ...profile, industry: e.target.value })}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                industry: e.target.value,
+              })
+            }
             className="kredar-select pr-10"
           >
-            <option>{profile.industry}</option>
+            <option>Finance</option>
             <option>Technology</option>
-            <option>Logistics</option>
             <option>Retail</option>
+            <option>Logistics</option>
           </select>
+
           <ChevronDown
             size={16}
             className="pointer-events-none absolute right-3 top-[calc(50%+12px)] -translate-y-1/2 text-[#45504b]"
           />
         </div>
 
-        {/* Country select */}
         <div className="relative">
           <label className="kredar-label">Country</label>
           <select
             value={profile.country}
-            onChange={(e) => setProfile({ ...profile, country: e.target.value })}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                country: e.target.value,
+              })
+            }
             className="kredar-select pr-10"
           >
-            <option>{profile.country}</option>
+            <option>Nigeria</option>
             <option>Ghana</option>
             <option>Kenya</option>
             <option>United States</option>
           </select>
+
           <ChevronDown
             size={16}
             className="pointer-events-none absolute right-3 top-[calc(50%+12px)] -translate-y-1/2 text-[#45504b]"
           />
         </div>
 
-        {/* Business address */}
         <div>
-          <label className="kredar-label">Business address*</label>
+          <label className="kredar-label">Business address</label>
           <input
             type="text"
             value={profile.businessAddress}
-            onChange={(e) => setProfile({ ...profile, businessAddress: e.target.value })}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                businessAddress: e.target.value,
+              })
+            }
             className="kredar-input"
           />
         </div>
       </div>
 
-      {/* Country code + Phone + Email */}
       <div className="grid grid-cols-1 md:grid-cols-[120px_1fr_1fr] gap-5">
         <div>
           <label className="kredar-label">Country code</label>
           <input
-            type="text"
             value={profile.countryCode}
-            onChange={(e) => setProfile({ ...profile, countryCode: e.target.value })}
-            className="kredar-input text-center"
+            readOnly
+            className="kredar-input text-center bg-gray-50"
           />
         </div>
+
         <div>
           <label className="kredar-label">Phone Number</label>
           <input
             type="text"
             value={profile.phoneNumber}
-            onChange={(e) => setProfile({ ...profile, phoneNumber: e.target.value })}
+            onChange={(e) =>
+              setProfile({
+                ...profile,
+                phoneNumber: e.target.value,
+              })
+            }
             className="kredar-input"
           />
         </div>
+
         <div>
           <label className="kredar-label">Email</label>
-          <input
-            type="email"
-            value={profile.email}
-            onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-            className="kredar-input"
-          />
+          <input value={profile.email} readOnly className="kredar-input bg-gray-50" />
         </div>
       </div>
 
-      {/* Website */}
       <div className="max-w-md">
         <label className="kredar-label">Website</label>
         <input
           type="text"
           value={profile.website}
-          onChange={(e) => setProfile({ ...profile, website: e.target.value })}
+          onChange={(e) =>
+            setProfile({
+              ...profile,
+              website: e.target.value,
+            })
+          }
           className="kredar-input"
         />
       </div>
@@ -164,4 +195,3 @@ export default function ProfileTab({ profile, setProfile, onSave }: ProfileTabPr
     </form>
   );
 }
-export type { ProfileData };

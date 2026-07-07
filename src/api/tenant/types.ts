@@ -1,5 +1,6 @@
 export interface ProfileData {
   businessName: string;
+  legalName?: string;
   registrationNumber: string;
   businessType: string;
   industry: string;

@@ -4,9 +4,9 @@ import { cn } from '@/lib/utils';
 
 interface DrawerReconciliationProps {
   status: string;
-  expectedAmount: string;
-  receivedAmount: string;
-  difference: string;
+  expectedAmount?: string | number;
+  receivedAmount?: string | number;
+  difference?: string | number;
   statusColors: Record<string, string>;
 }
 
@@ -28,7 +28,7 @@ export default function DrawerReconciliation({
         <span className="text-right">
           <span
             className={cn(
-              'inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border',
+              'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border',
               statusColors[status],
             )}
           >

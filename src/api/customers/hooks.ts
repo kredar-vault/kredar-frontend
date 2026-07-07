@@ -1,162 +1,155 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import { Customer, CustomerTransaction, CreateCustomerPayload, CustomerStats } from './types';
 
-// Helper mapper to normalize customer response objects
-function mapCustomer(c: any): Customer {
-  return {
-    id: c.id || c.customerId || '',
-    name: c.name || c.fullName || `${c.firstName || ''} ${c.lastName || ''}`.trim() || 'Anonymous',
-    email: c.email || '',
-    phone: c.phone || c.phoneNumber || '',
-    status: c.status || 'Pending',
-    registrationDate: c.registrationDate || c.createdAt?.split('T')[0] || '',
-    avatar:
-      c.avatar ||
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&fit=crop&auto=format&q=80',
-  };
+import { mapCustomer } from './mapper';
+import {
+  getCustomers,
+  getDedicatedAccounts, // Added missing import
+  getCustomer,
+  getActiveCustomers,
+  getInactiveCustomers,
+  getCustomerStats,
+  createCustomerWithDedicatedAccount,
+  updateCustomerStatus,
+  getCustomerTransactions,
+  getCustomerTransactionStats,
+  generateVirtualAccount,
+} from './service';
+
+import {
+  Customer,
+  CustomerStats,
+  CustomerTransaction,
+  CustomerTransactionStats,
+  CreateCustomerPayload,
+} from './types';
+
+// Shared helper to fetch customers and match them concurrently with their dedicated accounts
+async function fetchCustomersWithAccounts(fetchFn: () => Promise<any[]>) {
+  const [customers, accounts] = await Promise.all([fetchFn(), getDedicatedAccounts()]);
+
+  const customerList = Array.isArray(customers) ? customers : [];
+  const accountList = Array.isArray(accounts) ? accounts : [];
+
+  return customerList.map((c) => {
+    const matchedAccount = accountList.find(
+      (acc: any) => acc.customerId === c.id || acc.customerId === c.customerId,
+    );
+
+    const mapped = mapCustomer(c);
+    if (matchedAccount) {
+      mapped.dedicatedAccountNumber =
+        matchedAccount.accountNumber || matchedAccount.dedicatedAccountNumber || '';
+      mapped.bankName = matchedAccount.bankName || mapped.bankName || '';
+    }
+    return mapped;
+  });
 }
 
-// Query to get all customers
 export function useCustomers() {
-  return useQuery<Customer[], Error>({
+  return useQuery<Customer[]>({
     queryKey: ['customers'],
-    queryFn: async () => {
-      const res = await api.get('/customers');
-      const raw = Array.isArray(res.data)
-        ? res.data
-        : Array.isArray(res.data?.data)
-          ? res.data.data
-          : [];
-      return raw.map(mapCustomer);
-    },
+    queryFn: () => fetchCustomersWithAccounts(getCustomers),
   });
 }
 
-// Query to get all active customers
-export function useCustomersActive() {
-  return useQuery<Customer[], Error>({
-    queryKey: ['customers-active'],
-    queryFn: async () => {
-      const res = await api.get('/customers/active');
-      const raw = Array.isArray(res.data)
-        ? res.data
-        : Array.isArray(res.data?.data)
-          ? res.data.data
-          : [];
-      return raw.map(mapCustomer);
-    },
+export function useActiveCustomers() {
+  return useQuery<Customer[]>({
+    queryKey: ['customers', 'active'],
+    queryFn: () => fetchCustomersWithAccounts(getActiveCustomers),
   });
 }
 
-// Query to get all inactive customers
-export function useCustomersInactive() {
-  return useQuery<Customer[], Error>({
-    queryKey: ['customers-inactive'],
-    queryFn: async () => {
-      const res = await api.get('/customers/inactive');
-      const raw = Array.isArray(res.data)
-        ? res.data
-        : Array.isArray(res.data?.data)
-          ? res.data.data
-          : [];
-      return raw.map(mapCustomer);
-    },
+export function useInactiveCustomers() {
+  return useQuery<Customer[]>({
+    queryKey: ['customers', 'inactive'],
+    queryFn: () => fetchCustomersWithAccounts(getInactiveCustomers),
   });
 }
 
-// Query to get customer statistics summary
+export function useCustomer(id: string) {
+  return useQuery<Customer>({
+    queryKey: ['customers', id],
+    queryFn: async () => {
+      const [customer, accounts] = await Promise.all([getCustomer(id), getDedicatedAccounts()]);
+
+      if (!customer) throw new Error('Customer data not found');
+
+      const accountList = Array.isArray(accounts) ? accounts : [];
+      const matchedAccount = accountList.find(
+        (acc: any) => acc.customerId === id || acc.customerId === customer.id,
+      );
+
+      const mapped = mapCustomer(customer);
+      if (matchedAccount) {
+        mapped.dedicatedAccountNumber =
+          matchedAccount.accountNumber || matchedAccount.dedicatedAccountNumber || '';
+        mapped.bankName = matchedAccount.bankName || mapped.bankName || '';
+      }
+      return mapped;
+    },
+    enabled: !!id,
+  });
+}
+
 export function useCustomerStats() {
-  return useQuery<CustomerStats, Error>({
-    queryKey: ['customers-stats'],
-    queryFn: async () => {
-      const res = await api.get('/customers/stats');
-      return res.data?.data || res.data;
-    },
+  return useQuery<CustomerStats>({
+    queryKey: ['customers', 'stats'],
+    queryFn: getCustomerStats,
   });
 }
 
-// Query to get customer detail by ID
-export function useCustomerDetail(id: string) {
-  return useQuery<Customer | null, Error>({
-    queryKey: ['customer', id],
-    queryFn: async () => {
-      if (!id) return null;
-      const res = await api.get(`/customers/${id}`);
-      const data = res.data?.data || res.data;
-      if (!data) return null;
-      return mapCustomer(data);
-    },
-    enabled: !!id,
+export function useCustomerTransactions(customerId: string) {
+  return useQuery<CustomerTransaction[]>({
+    queryKey: ['customers', customerId, 'transactions'],
+    queryFn: () => getCustomerTransactions(customerId),
+    enabled: !!customerId,
   });
 }
 
-// Query to get customer transactions by ID
-export function useCustomerTransactions(id: string) {
-  return useQuery<CustomerTransaction[], Error>({
-    queryKey: ['customer-transactions', id],
-    queryFn: async () => {
-      if (!id) return [];
-      const res = await api.get(`/customers/${id}/transactions`);
-      const rawTransactions = Array.isArray(res.data)
-        ? res.data
-        : Array.isArray(res.data?.data)
-          ? res.data.data
-          : [];
-      return rawTransactions.map((tx: any) => {
-        const txStatus = tx.status || 'Pending';
-        const mappedStatus = txStatus.charAt(0).toUpperCase() + txStatus.slice(1).toLowerCase();
-        const formatCurrency = (val: number) => {
-          return new Intl.NumberFormat('en-NG', {
-            style: 'currency',
-            currency: tx.currency || 'NGN',
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0,
-          }).format(val);
-        };
-        return {
-          id: tx.id || tx.transactionId || '',
-          date: tx.date || tx.createdAt?.split('T')[0] || '',
-          amount: typeof tx.amount === 'number' ? formatCurrency(tx.amount) : tx.amount || '₦0',
-          status: mappedStatus,
-        };
-      });
-    },
-    enabled: !!id,
+export function useCustomerTransactionStats(customerId: string) {
+  return useQuery<CustomerTransactionStats>({
+    queryKey: ['customers', customerId, 'transaction-stats'],
+    queryFn: () => getCustomerTransactionStats(customerId),
+    enabled: !!customerId,
   });
 }
 
-// Mutation to create a new customer profile
 export function useCreateCustomer() {
   const queryClient = useQueryClient();
-  return useMutation<Customer, Error, CreateCustomerPayload>({
-    mutationFn: async (payload) => {
-      const res = await api.post('/customers', payload);
-      return res.data?.data || res.data;
-    },
+
+  return useMutation({
+    mutationFn: (payload: CreateCustomerPayload) => createCustomerWithDedicatedAccount(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['customers'] });
-      queryClient.invalidateQueries({ queryKey: ['customers-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['customers', 'stats'] });
     },
   });
 }
 
-// Mutation to update customer status
 export function useUpdateCustomerStatus() {
   const queryClient = useQueryClient();
-  return useMutation<
-    any,
-    Error,
-    { id: string; status: 'Active' | 'Inactive' | 'Restricted' | string }
-  >({
-    mutationFn: async ({ id, status }) => {
-      const res = await api.patch(`/customers/${id}/status`, { status });
-      return res.data;
-    },
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string; status: string }) =>
+      updateCustomerStatus(id, status),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: ['customer', variables.id] });
       queryClient.invalidateQueries({ queryKey: ['customers'] });
-      queryClient.invalidateQueries({ queryKey: ['customers-stats'] });
+      queryClient.invalidateQueries({ queryKey: ['customers', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['customers', 'stats'] });
+    },
+  });
+}
+
+export function useGenerateVirtualAccount() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (customerId: string) => generateVirtualAccount(customerId),
+    onSuccess: (_, customerId) => {
+      // Invalidate everything associated with the customer lists and details
+      // so the UI gets fresh data showing the newly tied virtual account immediately
+      queryClient.invalidateQueries({ queryKey: ['customers'] });
+      queryClient.invalidateQueries({ queryKey: ['customers', customerId] });
     },
   });
 }

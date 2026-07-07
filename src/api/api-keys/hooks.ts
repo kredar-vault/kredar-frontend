@@ -1,68 +1,72 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { api } from '@/lib/api';
-import { ApiKeyItem, CreateApiKeyPayload } from './types';
 
-// Query to get all API keys
+import { mapApiKey } from './mapper';
+import { getApiKeys, createApiKey, rotateApiKey, deleteApiKey } from './service';
+import { ApiKeyItem, CreateApiKeyPayload } from './types';
+import { toast } from 'sonner';
+
 export function useApiKeys() {
-  return useQuery<ApiKeyItem[], Error>({
+  return useQuery<ApiKeyItem[]>({
     queryKey: ['api-keys'],
     queryFn: async () => {
-      const res = await api.get('/api-keys');
-      const raw = Array.isArray(res.data)
-        ? res.data
-        : Array.isArray(res.data?.data)
-          ? res.data.data
-          : [];
-      return raw.map((k: any) => ({
-        id: k.id || '',
-        name: k.name || k.label || 'Kredar API Key',
-        label: k.label || k.name || '',
-        keyString: k.keyString || k.secretKey || k.key || '',
-        mode: k.mode || 'live',
-        createdAt: k.createdAt || '',
-      }));
+      console.log('[useApiKeys] fetching keys');
+      const keys = await getApiKeys();
+      console.log('[useApiKeys] fetched', keys);
+      return keys.map(mapApiKey);
     },
   });
 }
 
-// Mutation to create a new API key
 export function useCreateApiKey() {
   const queryClient = useQueryClient();
-  return useMutation<any, Error, CreateApiKeyPayload>({
-    mutationFn: async (payload) => {
-      const res = await api.post('/api-keys', payload);
-      return res.data;
-    },
+
+  return useMutation({
+    mutationFn: (payload: CreateApiKeyPayload) => createApiKey(payload),
     onSuccess: () => {
+      console.log('[useCreateApiKey] success');
+      toast.success('API key created');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+    },
+    onError: (error) => {
+      console.error('[useCreateApiKey] error', error);
+      toast.error('Failed to create API key');
     },
   });
 }
 
-// Mutation to rotate an existing API key
 export function useRotateApiKey() {
   const queryClient = useQueryClient();
-  return useMutation<any, Error, string>({
-    mutationFn: async (id) => {
-      const res = await api.post(`/api-keys/${id}/rotate`);
-      return res.data;
-    },
+
+  return useMutation({
+    mutationFn: (id: string) => rotateApiKey(id),
     onSuccess: () => {
+      console.log('[useRotateApiKey] success');
+      toast.success('API key rotated');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+    },
+    onError: (error) => {
+      console.error('[useRotateApiKey] error', error);
+      toast.error('Failed to rotate API key');
     },
   });
 }
 
-// Mutation to delete an API key
 export function useDeleteApiKey() {
   const queryClient = useQueryClient();
-  return useMutation<any, Error, string>({
-    mutationFn: async (id) => {
-      const res = await api.delete(`/api-keys/${id}`);
-      return res.data;
+
+  return useMutation({
+    mutationFn: (id: string) => {
+      console.log('[useDeleteApiKey] calling deleteApiKey with id:', id);
+      return deleteApiKey(id);
     },
-    onSuccess: () => {
+    onSuccess: (data, id) => {
+      console.log('[useDeleteApiKey] success for id:', id);
+      toast.success('API key deleted');
       queryClient.invalidateQueries({ queryKey: ['api-keys'] });
+    },
+    onError: (error, id) => {
+      console.error('[useDeleteApiKey] error for id:', id, error);
+      toast.error('Failed to delete API key');
     },
   });
 }

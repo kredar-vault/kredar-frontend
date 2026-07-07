@@ -19,16 +19,14 @@
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "preserve",
-    "baseUrl": "./",
+    "incremental": true,
+    "ignoreDeprecations": "5.0",
+    "baseUrl": ".",
     "paths": {
-      "lucide-react": [
-        "src/types/lucide-react.d.ts"
-      ],
       "@/*": [
         "src/*"
       ]
     },
-    "incremental": true,
     "plugins": [
       {
         "name": "next"
