@@ -36,10 +36,10 @@ export default function SidebarNavList({
             href={item.href}
             onClick={() => onItemClick?.(item.href)}
             className={cn(
-              'flex items-center px-3 py-2.5 rounded-xl text-sm transition-all duration-150',
-              isCollapsed && 'justify-center px-0',
+              'flex items-center px-3 rounded-xl text-sm transition-all duration-150 h-[36px]',
+              isCollapsed && 'justify-center px-2',
               active
-                ? 'bg-green-900 text-white font-semibold '
+                ? 'bg-[#0a2e1f] text-white font-semibold'
                 : 'text-[#45504b] hover:bg-[#f7faf6] hover:text-[#081b10]',
             )}
             title={isCollapsed ? item.label : undefined}

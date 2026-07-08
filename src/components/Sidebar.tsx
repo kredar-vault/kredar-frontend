@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -12,6 +13,7 @@ import {
   ChevronLeft,
   ChevronRight,
   LogOut,
+  Store,
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import SidebarNavList from './SidebarNavList';
@@ -32,6 +34,7 @@ const mainNavItems: NavItem[] = [
   { href: '/dashboard/balances', label: 'Balances', icon: Wallet },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
+  { href: '/dashboard/sub-merchants', label: 'Sub-merchants', icon: Store },
 ];
 
 const bottomNavItems: NavItem[] = [
@@ -110,10 +113,17 @@ export default function Sidebar({
       <div className="w-12 bg-[#006C49] rounded-full flex flex-col items-center flex-shrink-0 justify-between py-4">
         {/* Main top icons wrapper */}
         <div className="w-full flex flex-col items-center pt-16 space-y-1">
-          {mainNavItems.map((item, idx) => {
+          {mainNavItems.map((item) => {
             const active = isActive(item.href, item.exact);
             return (
-              <div key={idx} className="relative flex items-center justify-center w-full h-[36px]">
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => {
+                  onCloseMobile();
+                }}
+                className="relative flex items-center justify-center w-full h-[36px]"
+              >
                 {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
                 <item.icon
                   size={16}
@@ -122,17 +132,24 @@ export default function Sidebar({
                     active ? 'text-white' : 'text-white/60 hover:text-white',
                   )}
                 />
-              </div>
+              </Link>
             );
           })}
         </div>
 
         {/* Bottom utility icons explicitly stacked low */}
         <div className="w-full flex flex-col items-center mb-6 space-y-1">
-          {bottomNavItems.map((item, idx) => {
+          {bottomNavItems.map((item) => {
             const active = isActive(item.href, item.exact);
             return (
-              <div key={idx} className="relative flex items-center justify-center w-full h-[36px]">
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => {
+                  onCloseMobile();
+                }}
+                className="relative flex items-center justify-center w-full h-[36px]"
+              >
                 {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
                 <item.icon
                   size={16}
@@ -141,7 +158,7 @@ export default function Sidebar({
                     active ? 'text-white' : 'text-white/60 hover:text-white',
                   )}
                 />
-              </div>
+              </Link>
             );
           })}
         </div>
