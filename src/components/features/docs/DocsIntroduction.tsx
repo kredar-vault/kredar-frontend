@@ -21,7 +21,7 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
   -d limit=10`;
 
   return (
-    <div className="space-y-10 max-w-4xl font-sans text-slate-800 animate-fade-in-up">
+    <div className="space-y-10 max-w-4xl text-slate-800 animate-fade-in-up">
       {/* Introduction */}
       <section id="introduction" className="space-y-4">
         <h1 className="text-3xl font-bold tracking-tight text-[#0c1e13]">Introduction</h1>

@@ -115,10 +115,13 @@ export default function ProfileTab({ profile, setProfile, onSave }: ProfileTabPr
             }
             className="kredar-select pr-10"
           >
-            <option>Nigeria</option>
-            <option>Ghana</option>
-            <option>Kenya</option>
-            <option>United States</option>
+            <option value="" disabled>
+              Choose country
+            </option>
+            <option value="Nigeria">Nigeria</option>
+            <option value="Ghana">Ghana</option>
+            <option value="Kenya">Kenya</option>
+            <option value="United States">United States</option>
           </select>
 
           <ChevronDown

@@ -1,4 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { getCustomerKyc, submitCustomerKyc, updateKycDocumentStatus } from './service';
+import { toast } from 'sonner';
+import { getErrorMessage } from '@/lib/get-error-message';
 
 import { mapCustomer } from './mapper';
 import {
@@ -150,6 +153,47 @@ export function useGenerateVirtualAccount() {
       // so the UI gets fresh data showing the newly tied virtual account immediately
       queryClient.invalidateQueries({ queryKey: ['customers'] });
       queryClient.invalidateQueries({ queryKey: ['customers', customerId] });
+    },
+  });
+}
+
+export function useCustomerKyc(customerId: string) {
+  return useQuery({
+    queryKey: ['customers', customerId, 'kyc'],
+    queryFn: () => getCustomerKyc(customerId),
+    enabled: !!customerId,
+  });
+}
+
+export function useSubmitCustomerKyc(customerId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: any) => submitCustomerKyc(customerId, payload),
+    onSuccess: () => {
+      toast.success('KYC documents submitted');
+      queryClient.invalidateQueries({ queryKey: ['customers', customerId, 'kyc'] });
+    },
+    onError: (error: any) => {
+      console.error('[useSubmitCustomerKyc] error', error);
+      toast.error(getErrorMessage(error, 'Failed to submit KYC documents'));
+    },
+  });
+}
+
+export function useUpdateKycDocumentStatus(customerId: string) {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ docId, status }: { docId: string; status: string }) =>
+      updateKycDocumentStatus(docId, status),
+    onSuccess: () => {
+      toast.success('KYC status updated');
+      queryClient.invalidateQueries({ queryKey: ['customers', customerId, 'kyc'] });
+    },
+    onError: (error: any) => {
+      console.error('[useUpdateKycDocumentStatus] error', error);
+      toast.error(getErrorMessage(error, 'Failed to update KYC status'));
     },
   });
 }

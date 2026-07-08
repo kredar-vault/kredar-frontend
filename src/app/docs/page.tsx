@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import DocsHeader from '@/components/features/docs/DocsHeader';
 import DocsSidebar, { SidebarGroup } from '@/components/features/docs/DocsSidebar';
+import DocsCodePanel from '@/components/features/docs/DocsCodePanel';
 import DocsIntroduction from '@/components/features/docs/DocsIntroduction';
 import DocsDedicatedAccounts from '@/components/features/docs/DocsDedicatedAccounts';
 import DocsTransactions from '@/components/features/docs/DocsTransactions';
@@ -45,6 +46,8 @@ const sidebarGroups: SidebarGroup[] = [
   },
 ];
 
+const codeSnippets: Record<string, { curl: string; js: string; python: string }> = {};
+
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState<string>('introduction');
 
@@ -53,12 +56,10 @@ export default function DocsPage() {
     const targetId = id === 'auth' ? 'authentication' : id;
     const element = document.getElementById(targetId);
     if (element) {
-      // Smooth scroll to the target section
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
-  // Scroll spy to highlight active section on scroll
   useEffect(() => {
     const sections = [
       'introduction',
@@ -100,28 +101,25 @@ export default function DocsPage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-800 antialiased selection:bg-[#0f8b4b]/20">
-      {/* Platform Header */}
       <DocsHeader />
 
-      {/* Main layout frame */}
-      <div className="max-w-[1440px] mx-auto px-6 py-8 flex flex-col md:flex-row gap-8">
-        {/* Left Interactive Sidebar */}
+      <div className="mx-auto px-6 lg:px-2 py-8 flex flex-col md:flex-row gap-8 items-start">
         <DocsSidebar
           groups={sidebarGroups}
           activeSection={activeSection}
           setActiveSection={handleSectionClick}
         />
 
-        {/* Scrollable Document Details Content Column */}
         <main className="flex-1 min-w-0 pb-16 space-y-16">
           <DocsIntroduction onNavigate={handleSectionClick} />
           <DocsDedicatedAccounts />
           <DocsTransactions />
           <DocsSystem />
         </main>
+
+        <DocsCodePanel snippets={codeSnippets} activeSection={activeSection} />
       </div>
 
-      {/* Copyright info line */}
       <footer className="border-t border-[#e2ebd9] py-6 text-center text-xs text-slate-400">
         &copy; Copyright 2026 Kredar. All rights reserved.
       </footer>
