@@ -5,7 +5,7 @@ import KredarLogo from '@/components/KredarLogo';
 
 export default function LandingFooter() {
   return (
-    <footer className="bg-[#030A05] border-t border-white/5 px-4 md:px-6 py-12 md:py-14 text-white font-sans selection:bg-[#006C49]/30">
+    <footer className="bg-[#030A05] border-t border-white/5 px-4 md:px-6 py-12 md:py-14 text-white  selection:bg-[#006C49]/30">
       <div className="max-w-6xl mx-auto flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
         {/* BRAND COLUMN */}
         <div className="space-y-3 max-w-xs">
@@ -18,7 +18,7 @@ export default function LandingFooter() {
         </div>
 
         {/* COMPACT NAVIGATION NAVIGATION */}
-        <div className="flex flex-wrap gap-x-12 gap-y-8 sm:gap-x-16">
+        <div className="grid grid-cols-3 gap-x-8 sm:gap-x-16 lg:flex lg:justify-between lg:max-w-lg lg:w-full">
           {/* Platform Anchors */}
           <div className="space-y-3 min-w-[100px]">
             <h4 className="font-bold text-white text-[10px] tracking-wider uppercase opacity-40">
@@ -55,9 +55,31 @@ export default function LandingFooter() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#00FF9D] transition-colors duration-200">
+                <a href="/docs" className="hover:text-[#00FF9D] transition-colors duration-200">
                   API Reference
                 </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div className="space-y-3 min-w-[100px]">
+            <h4 className="font-bold text-white text-[10px] tracking-wider uppercase opacity-40">
+              Legal
+            </h4>
+            <ul className="space-y-2 text-[11px] md:text-xs text-gray-300 font-medium">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="hover:text-[#00FF9D] transition-colors duration-200"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-[#00FF9D] transition-colors duration-200">
+                  Terms &amp; Conditions
+                </Link>
               </li>
             </ul>
           </div>

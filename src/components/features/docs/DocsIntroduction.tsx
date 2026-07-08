@@ -16,12 +16,12 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
     setTimeout(() => setter(false), 1500);
   };
 
-  const curlCmd = `curl -G https://api.kredar.com/api/v1/dedicated-accounts \\
+  const curlCmd = `curl -G https://api.kredar.xyz/api/v1/dedicated-accounts \\
   -H "Authorization: Bearer <API_KEY>" \\
   -d limit=10`;
 
   return (
-    <div className="space-y-10 max-w-4xl font-sans text-slate-800 animate-fade-in-up">
+    <div className="space-y-10 max-w-4xl text-slate-800 animate-fade-in-up">
       {/* Introduction */}
       <section id="introduction" className="space-y-4">
         <h1 className="text-3xl font-bold tracking-tight text-[#0c1e13]">Introduction</h1>
@@ -80,7 +80,7 @@ export default function DocsIntroduction({ onNavigate }: DocsIntroductionProps) 
           self-hosting.
         </p>
         <pre className="p-4 bg-[#f8faf8] border border-[#e2ebd9] rounded-xl text-xs font-mono text-emerald-800 font-bold">
-          https://api.kredar.com
+          https://api.kredar.xyz
         </pre>
       </section>
 

@@ -64,12 +64,10 @@ export default function SettingsPage() {
         phoneToSend = `${countryCodeClean}${phoneWithoutZero}`;
       }
       await updateProfileMutation.mutateAsync({ ...profile, phoneNumber: phoneToSend });
-      toast.success('Business profile updated successfully!');
-    } catch (err: any) {
-      toast.error(err.response?.data?.message || err.message || 'Failed to update profile.');
+    } catch (err) {
+      // success/error toast already handled inside useUpdateProfile
     }
   };
-
   const handleCreateApiKey = async () => {
     try {
       const created = await createKeyMutation.mutateAsync({
