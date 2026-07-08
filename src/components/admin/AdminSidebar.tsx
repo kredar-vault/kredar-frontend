@@ -4,7 +4,17 @@ import { usePathname, useRouter } from 'next/navigation';
 import { LayoutDashboard, Users, RefreshCw, Webhook, ScrollText, LogOut } from 'lucide-react';
 import KredarLogo from '@/components/KredarLogo';
 
-const sections = [
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  exact?: boolean;
+};
+type Section = { label: string; items: NavItem[] };
+
+import React from 'react';
+
+const sections: Section[] = [
   {
     label: 'PORTAL',
     items: [{ href: '/admin/dashboard', label: 'Overview', icon: LayoutDashboard, exact: true }],
