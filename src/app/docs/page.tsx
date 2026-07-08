@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import DocsHeader from '@/components/features/docs/DocsHeader';
 import DocsSidebar, { SidebarGroup } from '@/components/features/docs/DocsSidebar';
 import DocsCodePanel from '@/components/features/docs/DocsCodePanel';
@@ -50,6 +51,7 @@ const codeSnippets: Record<string, { curl: string; js: string; python: string }>
 
 export default function DocsPage() {
   const [activeSection, setActiveSection] = useState<string>('introduction');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleSectionClick = (id: string) => {
     setActiveSection(id);
@@ -101,27 +103,42 @@ export default function DocsPage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-800 antialiased selection:bg-[#0f8b4b]/20">
-      <DocsHeader />
+      <DocsHeader
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        onSearchResultClick={handleSectionClick}
+      />
 
-      <div className="mx-auto px-6 lg:px-2 py-8 flex flex-col md:flex-row gap-8 items-start">
+      <div className="mx-auto max-w-[1440px] px-4 sm:px-6 py-8 flex flex-col md:flex-row gap-8 items-start w-full">
         <DocsSidebar
           groups={sidebarGroups}
           activeSection={activeSection}
           setActiveSection={handleSectionClick}
         />
 
-        <main className="flex-1 min-w-0 pb-16 space-y-16">
-          <DocsIntroduction onNavigate={handleSectionClick} />
-          <DocsDedicatedAccounts />
-          <DocsTransactions />
-          <DocsSystem />
-        </main>
+        <div className="flex-grow flex-shrink min-w-0 w-full flex flex-col xl:flex-row gap-8 items-start">
+          <main className="flex-grow min-w-0 pb-16 space-y-16">
+            <DocsIntroduction onNavigate={handleSectionClick} />
+            <DocsDedicatedAccounts />
+            <DocsTransactions />
+            <DocsSystem />
+          </main>
 
-        <DocsCodePanel snippets={codeSnippets} activeSection={activeSection} />
+          <DocsCodePanel snippets={codeSnippets} activeSection={activeSection} />
+        </div>
       </div>
 
-      <footer className="border-t border-[#e2ebd9] py-6 text-center text-xs text-slate-400">
-        &copy; Copyright 2026 Kredar. All rights reserved.
+      {/* Copyright info line */}
+      <footer className="border-t border-[#e2ebd9] py-6 text-center text-xs text-slate-400 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4">
+        <span>&copy; Copyright 2026 Kredar. All rights reserved.</span>
+        <div className="flex gap-4">
+          <Link href="/privacy" className="hover:text-[#0f8b4b] transition-colors">
+            Privacy Policy
+          </Link>
+          <Link href="/terms" className="hover:text-[#0f8b4b] transition-colors">
+            Terms of Service
+          </Link>
+        </div>
       </footer>
     </div>
   );

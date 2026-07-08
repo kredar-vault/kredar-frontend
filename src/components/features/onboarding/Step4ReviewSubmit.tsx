@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Link from 'next/link';
 import { AlertCircle, FileText, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import ReviewDetailsGrid from './ReviewDetailsGrid';
@@ -167,10 +168,23 @@ export default function Step4ReviewSubmit({ data, onBack, onSubmit }: Props) {
             onClick={() => setCertified(!certified)}
           >
             I certify that the information provided is accurate and I agree to the{' '}
-            <span className="text-[#0f8b4b] font-medium hover:underline">
+            <Link
+              href="/terms"
+              target="_blank"
+              onClick={(e) => e.stopPropagation()}
+              className="text-[#0f8b4b] font-medium hover:underline focus:outline-none"
+            >
               Kredar Terms of Service
-            </span>{' '}
-            and <span className="text-[#0f8b4b] font-medium hover:underline">Privacy Policy</span>
+            </Link>{' '}
+            and{' '}
+            <Link
+              href="/privacy"
+              target="_blank"
+              onClick={(e) => e.stopPropagation()}
+              className="text-[#0f8b4b] font-medium hover:underline focus:outline-none"
+            >
+              Privacy Policy
+            </Link>
           </label>
         </div>
         {attempted && !certified && (

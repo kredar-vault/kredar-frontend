@@ -18,7 +18,7 @@ export default function LandingFooter() {
         </div>
 
         {/* COMPACT NAVIGATION NAVIGATION */}
-        <div className="flex flex-wrap gap-x-12 gap-y-8 sm:gap-x-16">
+        <div className="grid grid-cols-3 gap-x-8 sm:gap-x-16 lg:flex lg:justify-between lg:max-w-lg lg:w-full">
           {/* Platform Anchors */}
           <div className="space-y-3 min-w-[100px]">
             <h4 className="font-bold text-white text-[10px] tracking-wider uppercase opacity-40">
@@ -55,9 +55,31 @@ export default function LandingFooter() {
                 </a>
               </li>
               <li>
-                <a href="#" className="hover:text-[#00FF9D] transition-colors duration-200">
+                <a href="/docs" className="hover:text-[#00FF9D] transition-colors duration-200">
                   API Reference
                 </a>
+              </li>
+            </ul>
+          </div>
+
+          {/* Legal Links */}
+          <div className="space-y-3 min-w-[100px]">
+            <h4 className="font-bold text-white text-[10px] tracking-wider uppercase opacity-40">
+              Legal
+            </h4>
+            <ul className="space-y-2 text-[11px] md:text-xs text-gray-300 font-medium">
+              <li>
+                <Link
+                  href="/privacy"
+                  className="hover:text-[#00FF9D] transition-colors duration-200"
+                >
+                  Privacy Policy
+                </Link>
+              </li>
+              <li>
+                <Link href="/terms" className="hover:text-[#00FF9D] transition-colors duration-200">
+                  Terms &amp; Conditions
+                </Link>
               </li>
             </ul>
           </div>
