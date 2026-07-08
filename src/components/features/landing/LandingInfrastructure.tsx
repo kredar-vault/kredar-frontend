@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 
 export default function InfrastructureSection() {
   return (
@@ -26,7 +27,10 @@ export default function InfrastructureSection() {
 
           {/* Action buttons */}
           <div className="flex items-center gap-3 pt-1">
-            <button className="px-4 h-8 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white bg-[#006C49] rounded-full hover:bg-[#00855a] transition-all duration-200">
+            <Link
+              href="/auth/login"
+              className="px-4 h-8 flex items-center justify-center gap-1.5 text-[11px] font-semibold text-white bg-[#006C49] rounded-full hover:bg-[#00855a] transition-all duration-200"
+            >
               Get Started
               <svg
                 width="8"
@@ -43,10 +47,13 @@ export default function InfrastructureSection() {
                   strokeLinejoin="round"
                 />
               </svg>
-            </button>
-            <button className="px-4 h-8 flex items-center justify-center text-[11px] font-medium text-gray-300 bg-[#121F16] border border-[#1C3524] rounded-full hover:bg-[#192F20] transition-all duration-200">
+            </Link>
+            <Link
+              href="/docs"
+              className="px-4 h-8 flex items-center justify-center text-[11px] font-medium text-gray-300 bg-[#121F16] border border-[#1C3524] rounded-full hover:bg-[#192F20] transition-all duration-200"
+            >
               View API Docs
-            </button>
+            </Link>
           </div>
         </div>
 
