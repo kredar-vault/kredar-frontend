@@ -6,14 +6,25 @@ import Link from 'next/link';
 import { adminApi } from '@/lib/adminApi';
 
 type Tenant = {
-  id?: string;
-  tenantId?: string;
-  status?: string;
+  tenantId: string;
+  email: string;
+  businessName?: string;
+  isVerified: boolean;
+  isSuspended: boolean;
+  createdAt: string;
+  onboardingStatus: string;
   submittedAt?: string;
-  tenant?: { id: string; email: string; businessName?: string; isSuspended?: boolean };
 };
 
-const STATUS_OPTIONS = ['', 'Pending', 'UnderReview', 'MoreInfoRequired', 'Approved', 'Rejected'];
+const STATUS_OPTIONS = [
+  '',
+  'NotStarted',
+  'Pending',
+  'UnderReview',
+  'MoreInfoRequired',
+  'Approved',
+  'Rejected',
+];
 
 const statusBadge = (s: string) => {
   const map: Record<string, string> = {
@@ -22,8 +33,18 @@ const statusBadge = (s: string) => {
     UnderReview: 'bg-amber-50 text-amber-700 border-amber-100',
     MoreInfoRequired: 'bg-orange-50 text-orange-700 border-orange-100',
     Pending: 'bg-[#f7faf6] text-[#45504b] border-[#d8e1da]',
+    NotStarted: 'bg-gray-50 text-gray-400 border-gray-200',
   };
   return map[s] ?? 'bg-[#f7faf6] text-[#45504b] border-[#d8e1da]';
+};
+
+const statusLabel = (s: string) => {
+  const map: Record<string, string> = {
+    NotStarted: 'Not Started',
+    UnderReview: 'Under Review',
+    MoreInfoRequired: 'More Info Required',
+  };
+  return map[s] ?? s;
 };
 
 const initials = (name: string) =>
@@ -56,8 +77,17 @@ function TenantsContent() {
       {/* Header */}
       <div className="flex items-start justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#081b10]">Tenants & KYB</h1>
-          <p className="text-sm text-[#45504b] mt-0.5">Review onboarding applications</p>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-bold text-[#081b10]">Tenants & KYB</h1>
+            {!loading && (
+              <span className="text-sm font-semibold text-[#0f8b4b] bg-[#effaf2] px-2.5 py-0.5 rounded-full">
+                {tenants.length}
+              </span>
+            )}
+          </div>
+          <p className="text-sm text-[#45504b] mt-0.5">
+            All registered accounts and onboarding status
+          </p>
         </div>
         <select
           value={status}
@@ -67,7 +97,7 @@ function TenantsContent() {
           <option value="">All statuses</option>
           {STATUS_OPTIONS.filter(Boolean).map((s) => (
             <option key={s} value={s}>
-              {s}
+              {statusLabel(s)}
             </option>
           ))}
         </select>
@@ -84,16 +114,19 @@ function TenantsContent() {
           <thead>
             <tr className="border-b border-[#f0f4f1] bg-[#f7faf6]">
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#45504b] uppercase tracking-wide">
-                Business
+                Account
               </th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#45504b] uppercase tracking-wide">
                 Email
               </th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#45504b] uppercase tracking-wide">
-                Status
+                Onboarding
               </th>
               <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#45504b] uppercase tracking-wide">
-                Submitted
+                Verified
+              </th>
+              <th className="text-left px-5 py-3.5 text-xs font-semibold text-[#45504b] uppercase tracking-wide">
+                Joined
               </th>
               <th className="px-5 py-3.5" />
             </tr>
@@ -108,7 +141,7 @@ function TenantsContent() {
                         <div className="h-4 bg-gray-100 rounded animate-pulse w-28" />
                       </div>
                     </td>
-                    {[...Array(3)].map((_, j) => (
+                    {[...Array(4)].map((_, j) => (
                       <td key={j} className="px-5 py-4">
                         <div className="h-4 bg-gray-100 rounded animate-pulse w-24" />
                       </td>
@@ -119,44 +152,57 @@ function TenantsContent() {
                   </tr>
                 ))
               : tenants.map((t) => {
-                  const tenantId = t.tenant?.id ?? t.tenantId ?? t.id ?? '';
-                  const email = t.tenant?.email ?? '—';
-                  const business = t.tenant?.businessName ?? email.split('@')[0];
-                  const st = (t.status ?? 'Unknown') as string;
-                  const submitted = t.submittedAt
-                    ? new Date(t.submittedAt).toLocaleDateString('en-NG', {
-                        day: 'numeric',
-                        month: 'short',
-                        year: 'numeric',
-                      })
-                    : '—';
+                  const display = t.businessName ?? t.email.split('@')[0];
+                  const joined = new Date(t.createdAt).toLocaleDateString('en-NG', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric',
+                  });
                   return (
-                    <tr key={tenantId} className="hover:bg-[#f7faf6]/70 transition-colors">
+                    <tr key={t.tenantId} className="hover:bg-[#f7faf6]/70 transition-colors">
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-lg bg-[#effaf2] flex items-center justify-center flex-shrink-0">
                             <span className="text-xs font-bold text-[#0f8b4b]">
-                              {initials(business)}
+                              {initials(display)}
                             </span>
                           </div>
-                          <span className="font-semibold text-[#081b10]">{business}</span>
+                          <div>
+                            <p className="font-semibold text-[#081b10]">{display}</p>
+                            {t.isSuspended && (
+                              <span className="text-[10px] font-semibold text-red-600">
+                                Suspended
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
-                      <td className="px-5 py-4 text-[#45504b]">{email}</td>
+                      <td className="px-5 py-4 text-[#45504b]">{t.email}</td>
                       <td className="px-5 py-4">
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${statusBadge(st)}`}
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${statusBadge(t.onboardingStatus)}`}
                         >
-                          {st}
+                          {statusLabel(t.onboardingStatus)}
                         </span>
                       </td>
-                      <td className="px-5 py-4 text-[#45504b]">{submitted}</td>
+                      <td className="px-5 py-4">
+                        <span
+                          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold border ${
+                            t.isVerified
+                              ? 'bg-[#effaf2] text-[#0f8b4b] border-[#c6e9d4]'
+                              : 'bg-gray-50 text-gray-400 border-gray-200'
+                          }`}
+                        >
+                          {t.isVerified ? 'Verified' : 'Unverified'}
+                        </span>
+                      </td>
+                      <td className="px-5 py-4 text-[#45504b]">{joined}</td>
                       <td className="px-5 py-4 text-right">
                         <Link
-                          href={`/admin/dashboard/tenants/${tenantId}`}
+                          href={`/admin/dashboard/tenants/${t.tenantId}`}
                           className="inline-flex items-center gap-1 text-xs font-semibold text-[#0f8b4b] hover:text-[#0c703c] transition-colors"
                         >
-                          Review →
+                          View →
                         </Link>
                       </td>
                     </tr>
@@ -164,7 +210,7 @@ function TenantsContent() {
                 })}
             {!loading && tenants.length === 0 && (
               <tr>
-                <td colSpan={5} className="px-5 py-16 text-center">
+                <td colSpan={6} className="px-5 py-16 text-center">
                   <p className="text-sm text-[#45504b]">No tenants found for this filter.</p>
                 </td>
               </tr>
