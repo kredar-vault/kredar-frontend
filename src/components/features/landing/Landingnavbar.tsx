@@ -25,7 +25,7 @@ export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <header className="relative z-50 mx-auto flex max-w-7xl items-center justify-center px-4 pt-6 md:px-6">
+    <header className="relative z-50 mx-auto flex w-full max-w-7xl items-center justify-center px-4 pt-6 md:px-6">
       <div className="flex h-14 w-full items-center justify-between rounded-full border border-[#173822] bg-[#07130B]/80 px-6 backdrop-blur-xl">
         {/* LOGO */}
         <Link href="/" className="flex items-center gap-2">
