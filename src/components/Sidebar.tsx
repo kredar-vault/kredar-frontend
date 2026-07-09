@@ -15,7 +15,6 @@ import {
   LogOut,
   Store,
   CalendarRange,
-  Code2,
   Globe,
   Webhook,
   GitMerge,
@@ -114,8 +113,6 @@ export default function Sidebar({
     }, 1200);
   };
 
-  // Each row: icon lives in the 48px green-pill zone, text in the white zone.
-  // Using a single <Link> per row guarantees icon and label are always aligned.
   const NavRow = ({
     item,
     active,
@@ -129,34 +126,36 @@ export default function Sidebar({
       href={item.href}
       onClick={() => handleItemClick(item.href)}
       title={isCollapsed ? item.label : undefined}
-      className="relative flex items-center h-[30px] w-full"
+      className={cn(
+        'flex items-center w-full group relative py-1.5 pl-4 transition-all duration-150',
+        active
+          ? 'bg-white text-[#006C49] rounded-l-full font-bold shadow-sm'
+          : 'text-white/75 hover:text-white hover:bg-white/5 rounded-l-full',
+      )}
     >
-      {/* Active indicator on the left edge of the green pill */}
-      {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm z-10" />}
+      {/* Curved Cutouts for White Background Extension */}
+      {active && (
+        <>
+          <div className="absolute right-0 -top-3 w-3 h-3 bg-white pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[#006C49] after:rounded-br-full" />
+          <div className="absolute right-0 -bottom-3 w-3 h-3 bg-white pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[#006C49] after:rounded-tr-full" />
+        </>
+      )}
 
-      {/* Icon zone — sits over the green pill */}
-      <div className="w-12 flex-shrink-0 flex items-center justify-center z-10">
-        <item.icon
-          size={iconSize}
-          className={cn(
-            'transition-colors',
-            active ? 'text-white' : 'text-white/60 hover:text-white',
-          )}
-        />
+      {/* Icon Wrapper */}
+      <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+        <item.icon size={iconSize} />
       </div>
 
-      {/* Text zone — white area to the right */}
+      {/* Label Text */}
       {!isCollapsed && (
-        <div
-          className={cn(
-            'flex-1 flex items-center px-2 h-full rounded-xl text-xs transition-all duration-150',
-            active
-              ? 'bg-[#0a2e1f] text-white font-semibold'
-              : 'text-[#45504b] hover:bg-[#f7faf6] hover:text-[#081b10]',
-          )}
-        >
+        <div className="flex-1 flex items-center pl-2.5 pr-2 text-xs transition-all duration-150">
           {loading ? (
-            <div className="h-3 bg-gray-200 rounded animate-pulse w-20" />
+            <div
+              className={cn(
+                'h-2.5 rounded animate-pulse w-20',
+                active ? 'bg-gray-200' : 'bg-white/20',
+              )}
+            />
           ) : (
             <span className="truncate">{item.label}</span>
           )}
@@ -166,88 +165,115 @@ export default function Sidebar({
   );
 
   const sidebarContent = (
-    // Outer wrapper: relative so the green pill can be absolute inside
-    <div className="h-full relative bg-white overflow-hidden border-r border-gray-100">
-      {/* ── Green capsule pill — absolutely behind the icon column ── */}
-      <div className="absolute left-3 top-3 bottom-3 w-12 bg-[#006C49] rounded-full pointer-events-none" />
-
-      {/* ── Single-column content ── */}
-      <div className="relative h-full flex flex-col p-3">
-        {/* Logo — offset right past the pill */}
-        <div className="h-[44px] flex items-center mt-6 pl-[56px] flex-shrink-0">
+    <div className="h-full relative bg-[#006C49] text-white flex flex-col pt-3 pb-3 pl-3 pr-0 border-r border-transparent selection:bg-transparent justify-between select-none">
+      {/* Top Section */}
+      <div className="flex flex-col flex-1 min-h-0">
+        {/* Brand Header — Fixed layout style to show authentic colors */}
+        <div
+          className={cn(
+            'flex items-center flex-shrink-0 mb-3 mt-1',
+            isCollapsed ? 'justify-center pr-3' : 'pl-4',
+          )}
+        >
           <KredarLogo hideText={isCollapsed} />
         </div>
 
-        {/* Main nav — scrollable middle zone */}
-        <nav className="mt-3 space-y-1 flex-1">
-          {mainNavItems.map((item) => (
-            <NavRow key={item.href} item={item} active={isActive(item.href, item.exact)} />
-          ))}
-        </nav>
+        {/* Navigation Wrapper with Bulletproof Hidden Scrollbar */}
+        <div
+          className="flex-1 overflow-y-auto pr-0 space-y-1 pt-6"
+          style={{
+            scrollbarWidth: 'none' /* Firefox */,
+            msOverflowStyle: 'none' /* IE/Edge */,
+            WebkitOverflowScrolling: 'touch',
+          }}
+        >
+          {/* Webkit scrollbar cleaner wrapper hook */}
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `div::-webkit-scrollbar { display: none !important; }`,
+            }}
+          />
 
-        {/* Bottom group */}
-        <div>
-          {/* Developer section */}
-          <div className="mb-2">
+          {/* BLOCK 1: Core Navigation */}
+          <nav className="space-y-0.5">
+            {mainNavItems.map((item) => (
+              <NavRow key={item.href} item={item} active={isActive(item.href, item.exact)} />
+            ))}
+          </nav>
+
+          {/* BLOCK 2: Developers */}
+          <div className="pt-1.5 border-t border-white/10">
             {!isCollapsed && (
-              <p className="pl-[56px] mb-1 text-[9px] font-bold uppercase tracking-widest text-gray-400">
+              <p className="pl-4 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
                 Developer
               </p>
             )}
-            <nav className="space-y-1">
+            <nav className="space-y-0.5">
               {developerItems.map((item) => (
-                <NavRow key={item.href} item={item} active={isActive(item.href)} iconSize={15} />
-              ))}
-            </nav>
-          </div>
-
-          {/* Divider */}
-          <div className="ml-[56px] border-t border-gray-100 my-3" />
-
-          {/* Settings / Help */}
-          <div className="mb-3">
-            <nav className="space-y-1">
-              {bottomNavItems.map((item) => (
                 <NavRow key={item.href} item={item} active={isActive(item.href)} />
               ))}
             </nav>
           </div>
 
-          {/* Profile block */}
-          <div className="space-y-1.5 pt-2 border-t border-gray-50">
-            <div className="flex items-center gap-3 px-2 py-1">
-              <div className="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center font-bold text-white text-[10px] flex-shrink-0 shadow-sm uppercase ml-[10px]">
-                {getInitials()}
-              </div>
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-[#030A05] truncate">{getDisplayName()}</p>
-                  <p className="text-[10px] text-gray-400 font-medium truncate mt-0.5">
-                    {fallbackEmail || 'Merchant Account'}
-                  </p>
-                </div>
-              )}
-            </div>
-
-            <button
-              onClick={() => setShowLogoutConfirm(true)}
-              className="flex items-center gap-2 w-full px-3 py-2 mt-2 rounded-xl text-xs text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors pl-[14px]"
-            >
-              <LogOut size={14} />
-              {!isCollapsed && <span className="font-semibold">Log out</span>}
-            </button>
-
-            <div className="hidden lg:block pt-1">
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                className="flex items-center justify-center gap-2 px-3 py-1.5 w-full text-left rounded-xl text-[10px] text-gray-500 hover:bg-gray-50 transition-colors border border-gray-100"
-              >
-                {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-                {!isCollapsed && <span className="font-semibold">Collapse</span>}
-              </button>
-            </div>
+          {/* BLOCK 3: Support */}
+          <div className="pt-1.5 border-t border-white/10">
+            {!isCollapsed && (
+              <p className="pl-4 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
+                Management
+              </p>
+            )}
+            <nav className="space-y-0.5">
+              {bottomNavItems.map((item) => (
+                <NavRow key={item.href} item={item} active={isActive(item.href)} />
+              ))}
+            </nav>
           </div>
+        </div>
+      </div>
+
+      {/* Footer / Profile block */}
+      <div className="pt-2 border-t border-white/10 space-y-1 flex-shrink-0 pr-3">
+        <div
+          className={cn('flex items-center gap-2 py-0.5', isCollapsed ? 'justify-center' : 'px-2')}
+        >
+          <div className="w-7 h-7 rounded-full bg-white text-[#006C49] flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm uppercase">
+            {getInitials()}
+          </div>
+          {!isCollapsed && (
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-bold text-white truncate leading-tight">
+                {getDisplayName()}
+              </p>
+              <p className="text-[9px] text-white/50 font-medium truncate leading-none mt-0.5">
+                {fallbackEmail || 'Merchant Account'}
+              </p>
+            </div>
+          )}
+        </div>
+
+        <button
+          onClick={() => setShowLogoutConfirm(true)}
+          className={cn(
+            'flex items-center gap-2.5 w-full h-7 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors',
+            isCollapsed ? 'justify-center' : 'px-2',
+          )}
+        >
+          <LogOut size={14} />
+          {!isCollapsed && <span className="font-semibold">Log out</span>}
+        </button>
+
+        <div className="hidden lg:block">
+          <button
+            type="button"
+            onClick={onToggleCollapse}
+            className={cn(
+              'flex items-center justify-center gap-1.5 h-6 w-full text-left rounded-lg text-[9px] text-white/40 hover:bg-white/5 hover:text-white transition-colors border border-white/10',
+              isCollapsed ? 'px-0' : 'px-2',
+            )}
+          >
+            {isCollapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
+            {!isCollapsed && <span className="font-semibold">Collapse</span>}
+          </button>
         </div>
       </div>
     </div>
@@ -256,22 +282,27 @@ export default function Sidebar({
   return (
     <>
       {isMobileOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onCloseMobile} />
+        <div
+          className="fixed inset-0 bg-black/20 backdrop-blur-xs z-40 lg:hidden"
+          onClick={onCloseMobile}
+        />
       )}
 
+      {/* Mobile Drawer */}
       <aside
         className={cn(
-          'fixed top-0 bottom-0 left-0 z-50 w-60 bg-white transition-transform duration-200 ease-in-out lg:hidden h-screen',
+          'fixed top-0 bottom-0 left-0 z-50 w-52 bg-[#006C49] transition-transform duration-200 ease-in-out lg:hidden h-screen',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         {sidebarContent}
       </aside>
 
+      {/* Desktop Sticky Sidebar */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col bg-white h-screen sticky top-0 transition-all duration-200 ease-in-out flex-shrink-0',
-          isCollapsed ? 'w-20' : 'w-60',
+          'hidden lg:flex flex-col bg-[#006C49] h-screen sticky top-0 transition-all duration-200 ease-in-out flex-shrink-0',
+          isCollapsed ? 'w-14' : 'w-52',
         )}
       >
         {sidebarContent}
