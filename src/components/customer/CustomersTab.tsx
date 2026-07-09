@@ -5,12 +5,13 @@ import { Customer } from '@/api/customers/types';
 import CustomerHeader from './customerheader';
 import CustomerProfile from './CustomerProfile';
 import CustomerStatement from './CustomersStaement';
+import CustomerNotes from './CustomerNotes';
 
 interface CustomerTabsProps {
   customer: Customer;
 }
 
-type Tab = 'statement' | 'profile';
+type Tab = 'statement' | 'profile' | 'notes';
 
 export default function CustomerTabs({ customer }: CustomerTabsProps) {
   const [activeTab, setActiveTab] = useState<Tab>('statement');
@@ -44,12 +45,26 @@ export default function CustomerTabs({ customer }: CustomerTabsProps) {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0f8b4b] rounded-full" />
             )}
           </button>
+
+          <button
+            onClick={() => setActiveTab('notes')}
+            className={`pb-3 text-xs font-bold transition-all relative ${
+              activeTab === 'notes' ? 'text-[#0f8b4b]' : 'text-[#667085] hover:text-[#081b10]'
+            }`}
+          >
+            Notes
+            {activeTab === 'notes' && (
+              <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#0f8b4b] rounded-full" />
+            )}
+          </button>
         </div>
 
         {/* Tab Context Container Routing render flow view */}
         <div>
           {activeTab === 'profile' ? (
             <CustomerProfile customer={customer} />
+          ) : activeTab === 'notes' ? (
+            <CustomerNotes customerId={customer.id} />
           ) : (
             <CustomerStatement customerId={customer.id} />
           )}
