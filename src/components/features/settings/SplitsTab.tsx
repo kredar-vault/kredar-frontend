@@ -29,7 +29,7 @@ export default function SplitsTab() {
 
   useEffect(() => {
     api
-      .get('/api/v1/settings/splits')
+      .get('/settings/splits')
       .then((r) =>
         setSplits(
           (r.data.data ?? []).map((s: any) => ({ ...s, accountName: s.accountName ?? '' })),
@@ -66,7 +66,7 @@ export default function SplitsTab() {
     e.preventDefault();
     setSaving(true);
     try {
-      const res = await api.put('/api/v1/settings/splits', { splits });
+      const res = await api.put('/settings/splits', { splits });
       setSplits(
         (res.data.data ?? []).map((s: any) => ({ ...s, accountName: s.accountName ?? '' })),
       );
