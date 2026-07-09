@@ -83,7 +83,7 @@ export default function AccountLookupField({
       setLookupError('');
       onAccountNameChange('');
       try {
-        const res = await api.post('/api/v1/transfers/bank/lookup', {
+        const res = await api.post('/transfers/bank/lookup', {
           accountNumber,
           bankCode,
         });
