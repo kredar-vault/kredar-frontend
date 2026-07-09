@@ -167,8 +167,8 @@ export default function Sidebar({
 
         {/* Bottom — developer icons + settings/help icons */}
         <div className="w-full flex flex-col items-center mb-6">
-          {/* Developer icons */}
-          <div className="w-full flex flex-col items-center space-y-1 mb-2">
+          {/* Developer icons — pt offsets for the DEVELOPER label in the right panel */}
+          <div className="w-full flex flex-col items-center space-y-1 mb-2 pt-[18px]">
             {developerSection.items.map((item) => {
               const active = isActive(item.href);
               return (
