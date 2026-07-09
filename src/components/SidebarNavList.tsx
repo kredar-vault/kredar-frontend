@@ -36,7 +36,7 @@ export default function SidebarNavList({
             href={item.href}
             onClick={() => onItemClick?.(item.href)}
             className={cn(
-              'flex items-center px-3 rounded-xl text-sm transition-all duration-150 h-[36px]',
+              'flex items-center px-3 rounded-xl text-xs transition-all duration-150 h-[30px]',
               isCollapsed && 'justify-center px-2',
               active
                 ? 'bg-[#0a2e1f] text-white font-semibold'

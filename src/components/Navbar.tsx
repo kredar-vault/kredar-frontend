@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Bell, Menu, ChevronDown, Check } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useTenantProfile } from '@/api/tenant/hooks';
 import { getCurrentUser } from '@/lib/cookies';
 import { api } from '@/lib/api';
@@ -21,47 +22,46 @@ type Notif = {
 export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
   const [fallbackEmail, setFallbackEmail] = useState('account@kredar.com');
   const { data: profile } = useTenantProfile();
-
   const [showNotifs, setShowNotifs] = useState(false);
-  const [notifs, setNotifs] = useState<Notif[]>([]);
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [notifsLoaded, setNotifsLoaded] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const qc = useQueryClient();
 
   useEffect(() => {
     const userObj = getCurrentUser();
     if (userObj?.email) setFallbackEmail(userObj.email);
   }, []);
 
-  useEffect(() => {
-    api
-      .get('/notifications?unread=true&take=1')
-      .then((r) => setUnreadCount(r.data.data?.unreadCount ?? 0))
-      .catch(() => {});
-  }, []);
+  // Poll unread count every 15 seconds
+  const { data: unreadData } = useQuery({
+    queryKey: ['notifications-unread'],
+    queryFn: async () => {
+      const r = await api.get('/notifications?unread=true&take=1');
+      return r.data.data?.unreadCount ?? 0;
+    },
+    refetchInterval: 15_000,
+  });
+  const unreadCount: number = unreadData ?? 0;
 
-  const openNotifs = () => {
-    setShowNotifs((v) => !v);
-    if (!notifsLoaded) {
-      api
-        .get('/notifications?take=20')
-        .then((r) => {
-          setNotifs(r.data.data?.items ?? []);
-          setUnreadCount(r.data.data?.unreadCount ?? 0);
-          setNotifsLoaded(true);
-        })
-        .catch(() => setNotifsLoaded(true));
-    }
-  };
+  // Full list — also refreshes every 15s
+  const { data: notifsData, isLoading: notifsLoading } = useQuery({
+    queryKey: ['notifications-list'],
+    queryFn: async () => {
+      const r = await api.get('/notifications?take=20');
+      return (r.data.data?.items ?? []) as Notif[];
+    },
+    refetchInterval: 15_000,
+  });
+  const notifs: Notif[] = notifsData ?? [];
+
+  const openNotifs = () => setShowNotifs((v) => !v);
 
   const markAllRead = () => {
-    api
-      .patch('/notifications/read', {})
-      .then(() => {
-        setNotifs((n) => n.map((x) => ({ ...x, isRead: true })));
-        setUnreadCount(0);
-      })
-      .catch(() => {});
+    api.patch('/notifications/read', {}).then(() => {
+      qc.setQueryData(['notifications-unread'], 0);
+      qc.setQueryData(['notifications-list'], (old: Notif[] | undefined) =>
+        (old ?? []).map((x) => ({ ...x, isRead: true })),
+      );
+    });
   };
 
   useEffect(() => {
@@ -145,7 +145,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
               </div>
 
               <div className="max-h-80 overflow-y-auto divide-y divide-[#f0f4f1]">
-                {!notifsLoaded ? (
+                {notifsLoading ? (
                   [...Array(3)].map((_, i) => (
                     <div key={i} className="px-4 py-3 space-y-1.5">
                       <div className="h-3 bg-gray-100 rounded animate-pulse w-32" />
