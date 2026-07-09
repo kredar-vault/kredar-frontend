@@ -103,6 +103,8 @@ export async function createCustomerWithDedicatedAccount(payload: CreateCustomer
     throw new Error('Customer ID not returned from service initialization.');
   }
 
+  await api.post('/dedicated-accounts', { customerId, expectedAmount: 0 });
+
   return customer;
 }
 
