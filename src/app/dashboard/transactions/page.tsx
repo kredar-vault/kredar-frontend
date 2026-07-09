@@ -84,7 +84,7 @@ export default function TransactionsPage() {
       currency: tx.currency || 'NGN',
       method: tx.paymentMethod || tx.method || 'Bank Transfer',
       time: timeStr,
-      customerName: tx.customer?.name || tx.customerName || 'Anonymous',
+      customerName: tx.customer?.name || tx.customerName || tx.narration || 'Anonymous',
       accountNumber: tx.dedicatedAccountNumber || tx.accountNumber || '',
       narration: tx.narration || '',
       expectedAmount: formatCurrency(tx.expectedAmount || tx.amount || 0, tx.currency),
