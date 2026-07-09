@@ -141,7 +141,7 @@ export default function Sidebar({
     <div className="h-full flex bg-white overflow-hidden p-3 gap-2 border-r border-gray-100">
       {/* ── Left Green Capsule Icon Strip ── */}
       <div className="w-12 bg-[#006C49] rounded-full flex flex-col items-center flex-shrink-0 justify-between py-4">
-        {/* Top nav icons — main + developer */}
+        {/* Top — main nav icons */}
         <div className="w-full flex flex-col items-center pt-16 space-y-1">
           {mainNavItems.map((item) => {
             const active = isActive(item.href, item.exact);
@@ -163,55 +163,61 @@ export default function Sidebar({
               </Link>
             );
           })}
-
-          {/* Thin divider before developer icons */}
-          <div className="w-6 border-t border-white/10 my-1" />
-
-          {developerSection.items.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => onCloseMobile()}
-                className="relative flex items-center justify-center w-full h-[30px]"
-                title={item.label}
-              >
-                {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
-                <item.icon
-                  size={16}
-                  className={cn(
-                    'transition-colors',
-                    active ? 'text-white' : 'text-white/60 hover:text-white',
-                  )}
-                />
-              </Link>
-            );
-          })}
         </div>
 
-        {/* Bottom — Settings / Help icons */}
-        <div className="w-full flex flex-col items-center mb-6 space-y-1">
-          {bottomNavItems.map((item) => {
-            const active = isActive(item.href, item.exact);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={() => onCloseMobile()}
-                className="relative flex items-center justify-center w-full h-[30px]"
-              >
-                {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
-                <item.icon
-                  size={16}
-                  className={cn(
-                    'transition-colors',
-                    active ? 'text-white' : 'text-white/60 hover:text-white',
-                  )}
-                />
-              </Link>
-            );
-          })}
+        {/* Bottom — developer icons + settings/help icons */}
+        <div className="w-full flex flex-col items-center mb-6">
+          {/* Developer icons */}
+          <div className="w-full flex flex-col items-center space-y-1 mb-2">
+            {developerSection.items.map((item) => {
+              const active = isActive(item.href);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => onCloseMobile()}
+                  className="relative flex items-center justify-center w-full h-[30px]"
+                  title={item.label}
+                >
+                  {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
+                  <item.icon
+                    size={16}
+                    className={cn(
+                      'transition-colors',
+                      active ? 'text-white' : 'text-white/60 hover:text-white',
+                    )}
+                  />
+                </Link>
+              );
+            })}
+          </div>
+
+          {/* Divider */}
+          <div className="w-6 border-t border-white/10 mb-2" />
+
+          {/* Settings / Help icons */}
+          <div className="w-full flex flex-col items-center space-y-1">
+            {bottomNavItems.map((item) => {
+              const active = isActive(item.href, item.exact);
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => onCloseMobile()}
+                  className="relative flex items-center justify-center w-full h-[30px]"
+                >
+                  {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
+                  <item.icon
+                    size={16}
+                    className={cn(
+                      'transition-colors',
+                      active ? 'text-white' : 'text-white/60 hover:text-white',
+                    )}
+                  />
+                </Link>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -262,7 +268,6 @@ export default function Sidebar({
                       )}
                       title={isCollapsed ? item.label : undefined}
                     >
-                      <item.icon size={13} className="flex-shrink-0" />
                       {!isCollapsed && <span className="truncate">{item.label}</span>}
                     </Link>
                   );
