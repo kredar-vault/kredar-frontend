@@ -67,7 +67,7 @@ export default function SubMerchantsPage() {
     setCreateError('');
     setCreating(true);
     try {
-      await api.post('/api/v1/sub-merchants', { name: createName, reference: createRef });
+      await api.post('/sub-merchants', { name: createName, reference: createRef });
       setShowCreate(false);
       setCreateName('');
       setCreateRef('');
@@ -97,7 +97,7 @@ export default function SubMerchantsPage() {
     setPayoutError('');
     setSavingPayout(true);
     try {
-      await api.put(`/api/v1/sub-merchants/${payoutTarget.id}/payout`, payoutForm);
+      await api.put(`/sub-merchants/${payoutTarget.id}/payout`, payoutForm);
       setPayoutTarget(null);
       load();
     } catch (err: any) {
