@@ -18,8 +18,10 @@ import {
   Code2,
   Globe,
   Webhook,
-  ScrollText,
   GitMerge,
+  Building2,
+  Activity,
+  Bell,
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import SidebarNavList from './SidebarNavList';
@@ -48,6 +50,9 @@ const mainNavItems: NavItem[] = [
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/dashboard/reconciliation', label: 'Reconciliation', icon: GitMerge },
+  { href: '/dashboard/operations', label: 'Operations', icon: Building2 },
+  { href: '/dashboard/activity', label: 'Activity', icon: Activity },
+  { href: '/dashboard/inbox', label: 'Inbox', icon: Bell },
   { href: '/dashboard/sub-merchants', label: 'Sub-merchants', icon: Store },
   { href: '/dashboard/billing', label: 'Billing', icon: CalendarRange },
 ];
@@ -57,9 +62,8 @@ const developerSection: NavSection = {
   icon: Code2,
   basePath: '/dashboard/developer',
   items: [
-    { href: '/dashboard/developer/api-explorer', label: 'API Explorer', icon: Globe },
+    { href: '/dashboard/developer/api-explorer', label: 'API Playground', icon: Globe },
     { href: '/dashboard/developer/webhooks', label: 'Webhooks', icon: Webhook },
-    { href: '/dashboard/developer/logs', label: 'Logs', icon: ScrollText },
   ],
 };
 
@@ -148,7 +152,7 @@ export default function Sidebar({
                 onClick={() => {
                   onCloseMobile();
                 }}
-                className="relative flex items-center justify-center w-full h-[36px]"
+                className="relative flex items-center justify-center w-full h-[30px]"
               >
                 {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
                 <item.icon
@@ -172,7 +176,7 @@ export default function Sidebar({
               <Link
                 href={developerSection.items[0].href}
                 onClick={() => onCloseMobile()}
-                className="relative flex items-center justify-center w-full h-[36px]"
+                className="relative flex items-center justify-center w-full h-[30px]"
                 title="Developer"
               >
                 {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
@@ -195,7 +199,7 @@ export default function Sidebar({
                 onClick={() => {
                   onCloseMobile();
                 }}
-                className="relative flex items-center justify-center w-full h-[36px]"
+                className="relative flex items-center justify-center w-full h-[30px]"
               >
                 {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
                 <item.icon
@@ -250,7 +254,7 @@ export default function Sidebar({
                       href={item.href}
                       onClick={() => handleItemClick(item.href)}
                       className={cn(
-                        'flex items-center gap-2 px-3 rounded-xl text-xs transition-all duration-150 h-[34px]',
+                        'flex items-center gap-2 px-3 rounded-xl text-xs transition-all duration-150 h-[30px]',
                         isCollapsed && 'justify-center px-2',
                         active
                           ? 'bg-[#0a2e1f] text-white font-semibold'
