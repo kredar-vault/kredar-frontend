@@ -19,9 +19,10 @@ export function useCreateTransfer() {
     onSuccess: () => {
       toast.success('Withdrawal initiated');
     },
-    onError: (error) => {
+    onError: (error: any) => {
       console.error('[useCreateTransfer] error', error);
-      toast.error('Withdrawal failed. Please try again.');
+      const msg = error?.response?.data?.message;
+      toast.error(msg || 'Withdrawal failed. Please try again.');
     },
   });
 }
