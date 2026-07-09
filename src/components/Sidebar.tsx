@@ -16,6 +16,10 @@ import {
   Store,
   CalendarRange,
   Code2,
+  Globe,
+  Webhook,
+  ScrollText,
+  GitMerge,
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import SidebarNavList from './SidebarNavList';
@@ -31,17 +35,35 @@ interface NavItem {
   exact?: boolean;
 }
 
+interface NavSection {
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string }>;
+  items: NavItem[];
+  basePath: string;
+}
+
 const mainNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/balances', label: 'Balances', icon: Wallet },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
+  { href: '/dashboard/reconciliation', label: 'Reconciliation', icon: GitMerge },
   { href: '/dashboard/sub-merchants', label: 'Sub-merchants', icon: Store },
   { href: '/dashboard/billing', label: 'Billing', icon: CalendarRange },
 ];
 
+const developerSection: NavSection = {
+  label: 'Developer',
+  icon: Code2,
+  basePath: '/dashboard/developer',
+  items: [
+    { href: '/dashboard/developer/api-explorer', label: 'API Explorer', icon: Globe },
+    { href: '/dashboard/developer/webhooks', label: 'Webhooks', icon: Webhook },
+    { href: '/dashboard/developer/logs', label: 'Logs', icon: ScrollText },
+  ],
+};
+
 const bottomNavItems: NavItem[] = [
-  { href: '/dashboard/developer', label: 'Developer', icon: Code2 },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
   { href: '/dashboard/help', label: 'Help', icon: HelpCircle },
 ];
@@ -143,6 +165,27 @@ export default function Sidebar({
 
         {/* Bottom utility icons explicitly stacked low */}
         <div className="w-full flex flex-col items-center mb-6 space-y-1">
+          {/* Developer section icon */}
+          {(() => {
+            const active = pathname.startsWith(developerSection.basePath);
+            return (
+              <Link
+                href={developerSection.items[0].href}
+                onClick={() => onCloseMobile()}
+                className="relative flex items-center justify-center w-full h-[36px]"
+                title="Developer"
+              >
+                {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
+                <developerSection.icon
+                  size={16}
+                  className={cn(
+                    'transition-colors',
+                    active ? 'text-white' : 'text-white/60 hover:text-white',
+                  )}
+                />
+              </Link>
+            );
+          })()}
           {bottomNavItems.map((item) => {
             const active = isActive(item.href, item.exact);
             return (
@@ -191,6 +234,38 @@ export default function Sidebar({
 
           {/* Lower Group pushed completely to bottom layout block */}
           <div className="space-y-3">
+            {/* Developer section */}
+            <div>
+              {!isCollapsed && (
+                <p className="px-3 mb-1 text-[9px] font-bold uppercase tracking-widest text-gray-400">
+                  Developer
+                </p>
+              )}
+              <nav className="space-y-0.5">
+                {developerSection.items.map((item) => {
+                  const active = isActive(item.href);
+                  return (
+                    <Link
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => handleItemClick(item.href)}
+                      className={cn(
+                        'flex items-center gap-2 px-3 rounded-xl text-xs transition-all duration-150 h-[34px]',
+                        isCollapsed && 'justify-center px-2',
+                        active
+                          ? 'bg-[#0a2e1f] text-white font-semibold'
+                          : 'text-[#45504b] hover:bg-[#f7faf6] hover:text-[#081b10]',
+                      )}
+                      title={isCollapsed ? item.label : undefined}
+                    >
+                      <item.icon size={13} className="flex-shrink-0" />
+                      {!isCollapsed && <span className="truncate">{item.label}</span>}
+                    </Link>
+                  );
+                })}
+              </nav>
+            </div>
+
             <div>
               <SidebarNavList
                 items={bottomNavItems}
