@@ -35,7 +35,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
 
   useEffect(() => {
     api
-      .get('/api/v1/notifications?unread=true&take=1')
+      .get('/notifications?unread=true&take=1')
       .then((r) => setUnreadCount(r.data.data?.unreadCount ?? 0))
       .catch(() => {});
   }, []);
@@ -44,7 +44,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
     setShowNotifs((v) => !v);
     if (!notifsLoaded) {
       api
-        .get('/api/v1/notifications?take=20')
+        .get('/notifications?take=20')
         .then((r) => {
           setNotifs(r.data.data?.items ?? []);
           setUnreadCount(r.data.data?.unreadCount ?? 0);
@@ -56,7 +56,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
 
   const markAllRead = () => {
     api
-      .patch('/api/v1/notifications/read', {})
+      .patch('/notifications/read', {})
       .then(() => {
         setNotifs((n) => n.map((x) => ({ ...x, isRead: true })));
         setUnreadCount(0);
