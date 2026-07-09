@@ -31,7 +31,16 @@ export default function SettlementTab() {
   useEffect(() => {
     api
       .get('/settings/settlement')
-      .then((r) => setConfig(r.data.data ?? {}))
+      .then((r) => {
+        const d = r.data.data ?? {};
+        setConfig({
+          settlementAccountNumber: d.settlementAccountNumber ?? '',
+          settlementBankCode: d.settlementBankCode ?? '',
+          settlementAccountName: d.settlementAccountName ?? '',
+          autoSettle: d.autoSettle ?? false,
+          minPayoutNaira: d.minPayoutNaira ?? 0,
+        });
+      })
       .catch(() => {})
       .finally(() => setLoadingConfig(false));
   }, []);

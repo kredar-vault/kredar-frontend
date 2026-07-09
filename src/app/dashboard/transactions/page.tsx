@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TrendingUp, AlertTriangle, AlertCircle } from 'lucide-react';
+import { TrendingUp, AlertTriangle, AlertCircle, Download, Upload } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import TransactionDetailsDrawer from '@/components/features/transactions/TransactionDetailsDrawer';
@@ -22,6 +22,14 @@ export default function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
+
+  const { data: insights } = useQuery({
+    queryKey: ['insights'],
+    queryFn: async () => {
+      const res = await api.get('/insights');
+      return res.data?.data ?? res.data ?? {};
+    },
+  });
 
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ['transactions'],
@@ -163,7 +171,7 @@ export default function TransactionsPage() {
       ) : (
         <>
           {/* Slick Compact Metric Grid Layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {/* Metric 1 */}
             <div className="bg-white rounded-2xl p-4 border border-[#f0f4f1] shadow-sm flex items-start justify-between transition-all hover:border-[#0f8b4b]/30">
               <div className="space-y-1">
@@ -215,6 +223,50 @@ export default function TransactionsPage() {
               </div>
               <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
                 <AlertCircle size={16} />
+              </div>
+            </div>
+
+            {/* Metric 4 — Pay-in */}
+            <div className="bg-white rounded-2xl p-4 border border-[#f0f4f1] shadow-sm flex items-start justify-between transition-all hover:border-[#0f8b4b]/30">
+              <div className="space-y-1">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Pay-in
+                </p>
+                <p className="text-xl font-bold text-gray-900 tracking-tight">
+                  {new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(insights?.totalCollected ?? 0)}
+                </p>
+                <p className="text-[11px] text-[#0f8b4b] font-medium">Total collected via DVA</p>
+              </div>
+              <div className="p-2 rounded-xl bg-[#0f8b4b]/5 text-[#0f8b4b]">
+                <Download size={16} />
+              </div>
+            </div>
+
+            {/* Metric 5 — Pay-out */}
+            <div className="bg-white rounded-2xl p-4 border border-[#f0f4f1] shadow-sm flex items-start justify-between transition-all hover:border-blue-200">
+              <div className="space-y-1">
+                <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">
+                  Pay-out
+                </p>
+                <p className="text-xl font-bold text-gray-900 tracking-tight">
+                  {new Intl.NumberFormat('en-NG', {
+                    style: 'currency',
+                    currency: 'NGN',
+                    minimumFractionDigits: 0,
+                    maximumFractionDigits: 0,
+                  }).format(insights?.totalTransferred ?? 0)}
+                </p>
+                <p className="text-[11px] text-blue-500 font-medium">
+                  Total withdrawn via transfer
+                </p>
+              </div>
+              <div className="p-2 rounded-xl bg-blue-50 text-blue-500">
+                <Upload size={16} />
               </div>
             </div>
           </div>
