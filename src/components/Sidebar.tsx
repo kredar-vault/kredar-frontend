@@ -14,6 +14,7 @@ import {
   ChevronRight,
   LogOut,
   Store,
+  CalendarRange,
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import SidebarNavList from './SidebarNavList';
@@ -35,6 +36,7 @@ const mainNavItems: NavItem[] = [
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/dashboard/sub-merchants', label: 'Sub-merchants', icon: Store },
+  { href: '/dashboard/billing', label: 'Billing', icon: CalendarRange },
 ];
 
 const bottomNavItems: NavItem[] = [
