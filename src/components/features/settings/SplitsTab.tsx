@@ -32,7 +32,12 @@ export default function SplitsTab() {
       .get('/settings/splits')
       .then((r) =>
         setSplits(
-          (r.data.data ?? []).map((s: any) => ({ ...s, accountName: s.accountName ?? '' })),
+          (r.data.data ?? []).map((s: any) => ({
+            ...s,
+            accountNumber: s.accountNumber ?? '',
+            bankCode: s.bankCode ?? '',
+            accountName: s.accountName ?? '',
+          })),
         ),
       )
       .catch(() => {})
