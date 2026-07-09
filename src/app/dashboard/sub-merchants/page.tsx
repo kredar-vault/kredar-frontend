@@ -52,7 +52,7 @@ export default function SubMerchantsPage() {
   const load = () => {
     setLoading(true);
     api
-      .get('/api/v1/sub-merchants')
+      .get('/sub-merchants')
       .then((r) => setMerchants(r.data.data ?? []))
       .catch((e) => setError(e.response?.data?.message ?? 'Failed to load sub-merchants'))
       .finally(() => setLoading(false));
