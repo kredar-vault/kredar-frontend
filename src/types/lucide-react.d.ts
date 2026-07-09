@@ -70,4 +70,5 @@ declare module 'lucide-react' {
   export const Store: LucideIcon;
   export const Plus: LucideIcon;
   export const Building2: LucideIcon;
+  export const CalendarRange: LucideIcon;
 }
