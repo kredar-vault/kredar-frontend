@@ -94,7 +94,8 @@ export default function RecentTransactionsTable() {
               </tr>
             ) : (
               transactions.slice(0, 7).map((tx: any) => {
-                const txName = tx.name || tx.customer?.name || tx.customerName || 'Anonymous';
+                const txName =
+                  tx.narration || tx.name || tx.customer?.name || tx.customerName || 'Anonymous';
                 const txAvatar =
                   tx.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${txName}`;
                 const txDate = tx.date || tx.createdAt?.split('T')[0] || 'Today';
