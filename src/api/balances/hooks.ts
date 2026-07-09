@@ -7,7 +7,7 @@ export function useBalance() {
   return useQuery({
     queryKey: ['balance'],
     queryFn: async () => {
-      const res = await api.get('/api/v1/insights/balance');
+      const res = await api.get('/insights/balance');
       return (res.data?.data?.availableBalance ?? res.data?.availableBalance ?? 0) as number;
     },
   });
@@ -24,8 +24,7 @@ export function useSimulateDeposit() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: SimulateDepositPayload) =>
-      api.post('/api/v1/sandbox/simulate/deposit', payload),
+    mutationFn: (payload: SimulateDepositPayload) => api.post('/sandbox/simulate/deposit', payload),
     onSuccess: () => {
       toast.success('Deposit simulated successfully');
       queryClient.invalidateQueries({ queryKey: ['balance'] });
