@@ -30,7 +30,7 @@ export default function SettlementTab() {
 
   useEffect(() => {
     api
-      .get('/api/v1/settings/settlement')
+      .get('/settings/settlement')
       .then((r) => setConfig(r.data.data ?? {}))
       .catch(() => {})
       .finally(() => setLoadingConfig(false));
@@ -40,7 +40,7 @@ export default function SettlementTab() {
     e.preventDefault();
     setSavingConfig(true);
     try {
-      const res = await api.put('/api/v1/settings/settlement', config);
+      const res = await api.put('/settings/settlement', config);
       setConfig(res.data.data);
       toast.success('Settlement account saved.');
     } catch (err: any) {
