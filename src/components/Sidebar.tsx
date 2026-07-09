@@ -141,7 +141,7 @@ export default function Sidebar({
     <div className="h-full flex bg-white overflow-hidden p-3 gap-2 border-r border-gray-100">
       {/* ── Left Green Capsule Icon Strip ── */}
       <div className="w-12 bg-[#006C49] rounded-full flex flex-col items-center flex-shrink-0 justify-between py-4">
-        {/* Main top icons wrapper */}
+        {/* Top nav icons — main + developer */}
         <div className="w-full flex flex-col items-center pt-16 space-y-1">
           {mainNavItems.map((item) => {
             const active = isActive(item.href, item.exact);
@@ -149,10 +149,33 @@ export default function Sidebar({
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => {
-                  onCloseMobile();
-                }}
+                onClick={() => onCloseMobile()}
                 className="relative flex items-center justify-center w-full h-[30px]"
+              >
+                {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
+                <item.icon
+                  size={16}
+                  className={cn(
+                    'transition-colors',
+                    active ? 'text-white' : 'text-white/60 hover:text-white',
+                  )}
+                />
+              </Link>
+            );
+          })}
+
+          {/* Thin divider before developer icons */}
+          <div className="w-6 border-t border-white/10 my-1" />
+
+          {developerSection.items.map((item) => {
+            const active = isActive(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => onCloseMobile()}
+                className="relative flex items-center justify-center w-full h-[30px]"
+                title={item.label}
               >
                 {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
                 <item.icon
@@ -167,38 +190,15 @@ export default function Sidebar({
           })}
         </div>
 
-        {/* Bottom utility icons explicitly stacked low */}
+        {/* Bottom — Settings / Help icons */}
         <div className="w-full flex flex-col items-center mb-6 space-y-1">
-          {/* Developer section icon */}
-          {(() => {
-            const active = pathname.startsWith(developerSection.basePath);
-            return (
-              <Link
-                href={developerSection.items[0].href}
-                onClick={() => onCloseMobile()}
-                className="relative flex items-center justify-center w-full h-[30px]"
-                title="Developer"
-              >
-                {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
-                <developerSection.icon
-                  size={16}
-                  className={cn(
-                    'transition-colors',
-                    active ? 'text-white' : 'text-white/60 hover:text-white',
-                  )}
-                />
-              </Link>
-            );
-          })()}
           {bottomNavItems.map((item) => {
             const active = isActive(item.href, item.exact);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => {
-                  onCloseMobile();
-                }}
+                onClick={() => onCloseMobile()}
                 className="relative flex items-center justify-center w-full h-[30px]"
               >
                 {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm" />}
@@ -237,15 +237,15 @@ export default function Sidebar({
           </div>
 
           {/* Lower Group pushed completely to bottom layout block */}
-          <div className="space-y-3">
+          <div>
             {/* Developer section */}
-            <div>
+            <div className="mb-2">
               {!isCollapsed && (
                 <p className="px-3 mb-1 text-[9px] font-bold uppercase tracking-widest text-gray-400">
                   Developer
                 </p>
               )}
-              <nav className="space-y-0.5">
+              <nav className="space-y-1">
                 {developerSection.items.map((item) => {
                   const active = isActive(item.href);
                   return (
@@ -270,7 +270,11 @@ export default function Sidebar({
               </nav>
             </div>
 
-            <div>
+            {/* Divider between Developer and Settings */}
+            <div className="border-t border-gray-100 my-3" />
+
+            {/* Settings / Help */}
+            <div className="mb-3">
               <SidebarNavList
                 items={bottomNavItems}
                 isCollapsed={isCollapsed}
