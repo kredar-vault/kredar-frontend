@@ -48,7 +48,7 @@ export default function TransactionDetailsDrawer({
         currency: transaction.currency ?? 'NGN',
         method: transaction.method ?? 'Bank Transfer',
         time: transaction.time ?? '22:55pm',
-        customerName: transaction.customerName ?? 'Chinonso Okeke',
+        customerName: transaction.customerName ?? 'Anonymous',
         accountNumber:
           transaction.accountNumber ??
           (transaction.status === 'Underpaid' ? 'XT-AV-3024567891' : '1234567890'),
