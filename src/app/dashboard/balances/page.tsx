@@ -1,11 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import Link from 'next/link';
 import { useBalance, useSimulateDeposit } from '@/api/balances/hooks';
 import { useCreateTransfer } from '@/api/transfers/hooks';
-import { useSettlementSettings } from '@/api/settlement-config/hooks';
 import { Plus, Minus, Loader2, X } from 'lucide-react';
+import AccountLookupField from '@/components/ui/AccountLookupField';
 
 function generateMerchantTxRef() {
   return `kredar_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -17,16 +16,18 @@ function generateAccountReference() {
 
 export default function BalancesPage() {
   const { data: balance = 0, isLoading } = useBalance();
-  const { data: settlement } = useSettlementSettings();
 
-  // Deposit modal state
+  // Deposit modal
   const [depositOpen, setDepositOpen] = useState(false);
   const [depositAmount, setDepositAmount] = useState('');
   const [senderName, setSenderName] = useState('');
   const depositMutation = useSimulateDeposit();
 
-  // Withdraw modal state
+  // Withdraw modal
   const [withdrawOpen, setWithdrawOpen] = useState(false);
+  const [bankCode, setBankCode] = useState('');
+  const [accountNumber, setAccountNumber] = useState('');
+  const [accountName, setAccountName] = useState('');
   const [withdrawAmount, setWithdrawAmount] = useState('');
   const transferMutation = useCreateTransfer();
 
@@ -37,9 +38,12 @@ export default function BalancesPage() {
       minimumFractionDigits: 0,
     }).format(value);
 
-  const hasSettlementAccount = !!(
-    settlement?.settlementAccountNumber && settlement?.settlementBankCode
-  );
+  const resetWithdraw = () => {
+    setBankCode('');
+    setAccountNumber('');
+    setAccountName('');
+    setWithdrawAmount('');
+  };
 
   const handleConfirmDeposit = async () => {
     if (!depositAmount || !senderName.trim()) return;
@@ -54,28 +58,29 @@ export default function BalancesPage() {
       setDepositAmount('');
       setSenderName('');
     } catch {
-      // error toast handled in useSimulateDeposit
+      // toast handled in hook
     }
   };
 
   const handleConfirmWithdraw = async () => {
-    if (!withdrawAmount || !hasSettlementAccount) return;
+    if (!accountName || !withdrawAmount || !bankCode || !accountNumber) return;
     try {
       await transferMutation.mutateAsync({
         merchantTxRef: generateMerchantTxRef(),
-        bankCode: settlement!.settlementBankCode!,
-        accountNumber: settlement!.settlementAccountNumber!,
+        bankCode,
+        accountNumber,
         amount: Number(withdrawAmount),
         narration: 'Balance withdrawal',
       });
       setWithdrawOpen(false);
-      setWithdrawAmount('');
+      resetWithdraw();
     } catch {
-      // error toast handled in useCreateTransfer
+      // toast handled in hook
     }
   };
 
   const withdrawExceedsBalance = Number(withdrawAmount) > balance;
+  const canWithdraw = !!accountName && !!withdrawAmount && !withdrawExceedsBalance;
 
   return (
     <div className="max-w-4xl space-y-5 pb-6">
@@ -109,7 +114,6 @@ export default function BalancesPage() {
             <Plus size={14} />
             Deposit
           </button>
-
           <button
             onClick={() => setWithdrawOpen(true)}
             className="flex h-8 items-center gap-1.5 rounded-md bg-[#102A1F] px-3.5 text-xs font-semibold text-white transition hover:bg-black"
@@ -137,7 +141,6 @@ export default function BalancesPage() {
                 <X size={18} />
               </button>
             </div>
-
             <div className="space-y-3">
               <div>
                 <label className="text-xs font-medium text-[#45504b]">Sender name</label>
@@ -160,7 +163,6 @@ export default function BalancesPage() {
                 />
               </div>
             </div>
-
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => {
@@ -190,14 +192,17 @@ export default function BalancesPage() {
 
       {/* Withdraw modal */}
       {withdrawOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full space-y-4">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl space-y-5">
             <div className="flex items-center justify-between">
-              <h4 className="text-base font-bold text-[#081b10]">Withdraw funds</h4>
+              <div>
+                <h4 className="text-base font-bold text-[#081b10]">Withdraw funds</h4>
+                <p className="text-xs text-[#8c9c94] mt-0.5">Enter the account to send funds to</p>
+              </div>
               <button
                 onClick={() => {
                   setWithdrawOpen(false);
-                  setWithdrawAmount('');
+                  resetWithdraw();
                 }}
                 className="text-[#667085] hover:text-black"
               >
@@ -205,96 +210,60 @@ export default function BalancesPage() {
               </button>
             </div>
 
-            {hasSettlementAccount ? (
-              <div className="space-y-3">
-                <p className="text-xs text-[#667085]">
-                  Funds will be sent to your registered settlement account.
-                </p>
+            <AccountLookupField
+              layout="stack"
+              bankCode={bankCode}
+              accountNumber={accountNumber}
+              accountName={accountName}
+              onBankChange={setBankCode}
+              onAccountNumberChange={setAccountNumber}
+              onAccountNameChange={setAccountName}
+            />
 
-                <div className="bg-[#f7faf6] border border-[#e8ede9] rounded-lg px-3 py-2.5">
-                  <p className="text-sm font-semibold text-[#081b10]">
-                    {settlement?.settlementAccountName ?? 'Settlement account'}
-                  </p>
-                  <p className="text-xs text-[#667085] mt-0.5">
-                    {settlement?.settlementAccountNumber}
-                  </p>
-                </div>
-
-                <div>
-                  <label className="text-xs font-medium text-[#45504b]">Amount (NGN)</label>
-                  <input
-                    type="number"
-                    value={withdrawAmount}
-                    onChange={(e) => setWithdrawAmount(e.target.value)}
-                    placeholder="0.00"
-                    className="w-full mt-1 h-9 px-3 text-sm border border-[#d8e1da] rounded-lg outline-none focus:border-[#0f8b4b]"
-                  />
-                </div>
-
+            {accountName && (
+              <div>
+                <label className="text-xs font-medium text-[#45504b]">Amount (NGN)</label>
+                <input
+                  type="number"
+                  value={withdrawAmount}
+                  onChange={(e) => setWithdrawAmount(e.target.value)}
+                  placeholder="0.00"
+                  className="w-full mt-1 h-10 px-3 text-sm border border-[#d8e1da] rounded-xl outline-none focus:border-[#0f8b4b]"
+                />
                 {withdrawAmount && (
-                  <div
-                    className={`rounded-lg px-3 py-2 text-xs ${
-                      withdrawExceedsBalance
-                        ? 'bg-red-50 text-red-600'
-                        : 'bg-[#f7faf6] text-[#45504b]'
-                    }`}
+                  <p
+                    className={`text-xs mt-1 ${withdrawExceedsBalance ? 'text-red-500' : 'text-[#8c9c94]'}`}
                   >
                     {withdrawExceedsBalance
                       ? `Insufficient balance. Available: ${formatCurrency(balance)}`
-                      : `You will withdraw ${formatCurrency(Number(withdrawAmount))}. Available: ${formatCurrency(balance)}`}
-                  </div>
+                      : `Available: ${formatCurrency(balance)}`}
+                  </p>
                 )}
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    onClick={() => {
-                      setWithdrawOpen(false);
-                      setWithdrawAmount('');
-                    }}
-                    className="flex-1 h-9 text-xs font-semibold rounded-lg border border-[#d8e1da] text-[#45504b]"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleConfirmWithdraw}
-                    disabled={
-                      !withdrawAmount || withdrawExceedsBalance || transferMutation.isPending
-                    }
-                    className="flex-1 h-9 text-xs font-semibold rounded-lg bg-[#0F8B4B] text-white disabled:opacity-50 flex items-center justify-center gap-2"
-                  >
-                    {transferMutation.isPending ? (
-                      <Loader2 size={14} className="animate-spin" />
-                    ) : (
-                      'Confirm withdrawal'
-                    )}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="bg-[#f7faf6] border border-[#e8ede9] rounded-lg px-3 py-2.5 text-xs text-[#45504b]">
-                  No settlement account configured. Add one in Settings before withdrawing.
-                </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={() => {
-                      setWithdrawOpen(false);
-                      setWithdrawAmount('');
-                    }}
-                    className="h-9 text-xs font-semibold px-4 rounded-lg border border-[#d8e1da] text-[#45504b]"
-                  >
-                    Cancel
-                  </button>
-                  <Link
-                    href="/dashboard/settings?tab=settlement"
-                    className="h-9 text-xs font-semibold px-4 rounded-lg bg-[#0F8B4B] text-white flex items-center"
-                    onClick={() => setWithdrawOpen(false)}
-                  >
-                    Go to Settings
-                  </Link>
-                </div>
               </div>
             )}
+
+            <div className="flex gap-3 pt-1">
+              <button
+                onClick={() => {
+                  setWithdrawOpen(false);
+                  resetWithdraw();
+                }}
+                className="flex-1 h-10 text-xs font-semibold rounded-xl border border-[#d8e1da] text-[#45504b] hover:bg-[#f7faf6] transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmWithdraw}
+                disabled={!canWithdraw || transferMutation.isPending}
+                className="flex-1 h-10 text-xs font-semibold rounded-xl bg-[#0F8B4B] text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-colors hover:bg-[#0c703c]"
+              >
+                {transferMutation.isPending ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  'Confirm withdrawal'
+                )}
+              </button>
+            </div>
           </div>
         </div>
       )}
