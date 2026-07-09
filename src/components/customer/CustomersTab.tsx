@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Customer } from '@/api/customers/types';
 import CustomerHeader from './customerheader';
 import CustomerProfile from './CustomerProfile';
@@ -13,8 +14,13 @@ interface CustomerTabsProps {
 
 type Tab = 'statement' | 'profile' | 'notes';
 
+const VALID_TABS: Tab[] = ['statement', 'profile', 'notes'];
+
 export default function CustomerTabs({ customer }: CustomerTabsProps) {
-  const [activeTab, setActiveTab] = useState<Tab>('statement');
+  const searchParams = useSearchParams();
+  const paramTab = searchParams.get('tab') as Tab | null;
+  const initialTab: Tab = paramTab && VALID_TABS.includes(paramTab) ? paramTab : 'statement';
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab);
 
   return (
     <div className="space-y-6 w-full max-w-6xl mx-auto">
