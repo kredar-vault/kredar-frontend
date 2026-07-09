@@ -15,6 +15,7 @@ import {
   LogOut,
   Store,
   CalendarRange,
+  Code2,
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import SidebarNavList from './SidebarNavList';
@@ -40,6 +41,7 @@ const mainNavItems: NavItem[] = [
 ];
 
 const bottomNavItems: NavItem[] = [
+  { href: '/dashboard/developer', label: 'Developer', icon: Code2 },
   { href: '/dashboard/settings', label: 'Settings', icon: Settings },
   { href: '/dashboard/help', label: 'Help', icon: HelpCircle },
 ];
