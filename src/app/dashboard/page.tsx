@@ -17,14 +17,14 @@ export default function DashboardHome() {
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
       {/* Header section */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#081b10]">Overview</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold text-[#081b10]">Overview</h1>
           <p className="text-sm text-[#45504b] mt-1">
             Welcome. Here's an overview of your account today
           </p>
         </div>
-        <button className="kredar-btn-primary flex items-center gap-2 h-10 px-4 text-xs font-semibold">
+        <button className="kredar-btn-primary flex items-center gap-2 h-10 px-4 text-xs font-semibold self-start sm:self-auto">
           <Download size={14} />
           Export
         </button>
@@ -34,7 +34,7 @@ export default function DashboardHome() {
       {loading ? (
         <div className="space-y-6">
           {/* Skeletons: Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}

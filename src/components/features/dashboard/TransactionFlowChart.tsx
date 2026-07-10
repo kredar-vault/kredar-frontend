@@ -57,7 +57,7 @@ export default function TransactionFlowChart() {
 
   return (
     <div className="bg-white border border-[#eef2ef] rounded-md p-6  space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h3 className="text-base font-bold text-[#081b10]">Transaction flow</h3>
           <p className="text-[11px] text-[#667085] font-medium mt-0.5">

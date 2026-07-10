@@ -19,7 +19,6 @@ import {
   Webhook,
   GitMerge,
   Building2,
-  Activity,
   Bell,
   StickyNote,
   Plus,
@@ -45,7 +44,6 @@ const mainNavItems: NavItem[] = [
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/dashboard/reconciliation', label: 'Reconciliation', icon: GitMerge },
   { href: '/dashboard/operations', label: 'Operations', icon: Building2 },
-  { href: '/dashboard/activity', label: 'Activity', icon: Activity },
   { href: '/dashboard/inbox', label: 'Inbox', icon: Bell },
   {
     href: '/dashboard/sub-merchants',
@@ -179,7 +177,7 @@ export default function Sidebar({
         <div className="flex flex-col flex-1 min-h-0">
           {/* Top Pill Call-to-Action widget */}
           <div className="mb-4 mt-1">
-            <Link href="/customers">
+            <Link href="/dashboard/customers/new">
               <button
                 className={cn(
                   'flex items-center justify-center bg-white/80 text-[#006C49] hover:bg-gray-50 shadow-xs transition-all font-bold rounded-full h-9',

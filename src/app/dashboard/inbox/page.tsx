@@ -110,7 +110,7 @@ export default function InboxPage() {
   const categories = ['all', 'unread'] as const;
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto pb-12 px-4 sm:px-6">
+    <div className="space-y-6 max-w-4xl mx-auto pb-12">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
