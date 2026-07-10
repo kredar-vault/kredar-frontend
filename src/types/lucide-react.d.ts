@@ -85,4 +85,8 @@ declare module 'lucide-react' {
   export const Wifi: LucideIcon;
   export const WifiOff: LucideIcon;
   export const Maximize2: LucideIcon;
+  export const Flag: LucideIcon;
+  export const CalendarClock: LucideIcon;
+  export const UserCircle: LucideIcon;
+  export const ListFilter: LucideIcon;
 }

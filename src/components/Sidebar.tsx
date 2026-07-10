@@ -22,6 +22,7 @@ import {
   Building2,
   Activity,
   Bell,
+  StickyNote,
 } from 'lucide-react';
 import KredarLogo from './KredarLogo';
 import LogoutConfirmModal from './auth/LogoutConfirmModal';
@@ -40,6 +41,7 @@ const mainNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/balances', label: 'Balances', icon: Wallet },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
+  { href: '/dashboard/customer-notes', label: 'Customer Notes', icon: StickyNote },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/dashboard/reconciliation', label: 'Reconciliation', icon: GitMerge },
   { href: '/dashboard/operations', label: 'Operations', icon: Building2 },
