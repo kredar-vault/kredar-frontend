@@ -21,30 +21,36 @@ import {
   Building2,
   Activity,
   Bell,
+  Plus,
 } from 'lucide-react';
-import KredarLogo from './KredarLogo';
 import LogoutConfirmModal from './auth/LogoutConfirmModal';
 import { cn } from '@/lib/utils';
 import { useTenantProfile } from '@/api/tenant/hooks';
-import { getCurrentUser, clearAuthCookies } from '@/lib/cookies';
+import { getCurrentUser, clearAuthCookies, getPendingBusinessType } from '@/lib/cookies';
 
 interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   exact?: boolean;
+  hiddenFor?: string[]; // businessType values that should NOT see this item
 }
 
 const mainNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/balances', label: 'Balances', icon: Wallet },
+  { href: '/dashboard/balances', label: 'Balances', icon: Wallet, hiddenFor: ['platform'] },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/dashboard/reconciliation', label: 'Reconciliation', icon: GitMerge },
   { href: '/dashboard/operations', label: 'Operations', icon: Building2 },
   { href: '/dashboard/activity', label: 'Activity', icon: Activity },
   { href: '/dashboard/inbox', label: 'Inbox', icon: Bell },
-  { href: '/dashboard/sub-merchants', label: 'Sub-merchants', icon: Store },
+  {
+    href: '/dashboard/sub-merchants',
+    label: 'Sub-merchants',
+    icon: Store,
+    hiddenFor: ['merchant'],
+  },
   { href: '/dashboard/billing', label: 'Billing', icon: CalendarRange },
 ];
 
@@ -81,6 +87,12 @@ export default function Sidebar({
   const [fallbackEmail, setFallbackEmail] = useState('');
 
   const { data: profile } = useTenantProfile();
+
+  const effectiveBusinessType = profile?.businessType || getPendingBusinessType() || '';
+
+  const visibleMainNavItems = mainNavItems.filter(
+    (item) => !item.hiddenFor?.includes(effectiveBusinessType),
+  );
 
   useEffect(() => {
     const user = getCurrentUser();
@@ -127,37 +139,30 @@ export default function Sidebar({
       onClick={() => handleItemClick(item.href)}
       title={isCollapsed ? item.label : undefined}
       className={cn(
-        'flex items-center w-full group relative py-1.5 pl-4 transition-all duration-150',
+        'flex items-center w-full group relative transition-all duration-150 h-8 my-0.5 rounded-full',
+        isCollapsed ? 'justify-center px-0' : 'px-3.5',
         active
-          ? 'bg-white text-[#006C49] rounded-l-full font-bold shadow-sm'
-          : 'text-white/75 hover:text-white hover:bg-white/5 rounded-l-full',
+          ? 'bg-white/10 text-white shadow-sm font-bold'
+          : 'text-white/75 hover:bg-white/10 hover:text-white',
       )}
     >
-      {/* Curved Cutouts for White Background Extension */}
-      {active && (
-        <>
-          <div className="absolute right-0 -top-3 w-3 h-3 bg-white pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[#006C49] after:rounded-br-full" />
-          <div className="absolute right-0 -bottom-3 w-3 h-3 bg-white pointer-events-none after:content-[''] after:absolute after:inset-0 after:bg-[#006C49] after:rounded-tr-full" />
-        </>
-      )}
-
-      {/* Icon Wrapper */}
-      <div className="w-6 h-6 flex-shrink-0 flex items-center justify-center">
+      {/* Icon framework */}
+      <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
         <item.icon size={iconSize} />
       </div>
 
-      {/* Label Text */}
+      {/* Label block handles expansion fluidly */}
       {!isCollapsed && (
-        <div className="flex-1 flex items-center pl-2.5 pr-2 text-xs transition-all duration-150">
+        <div className="flex-1 pl-3 text-xs tracking-wide truncate">
           {loading ? (
             <div
               className={cn(
-                'h-2.5 rounded animate-pulse w-20',
-                active ? 'bg-gray-200' : 'bg-white/20',
+                'h-2 rounded animate-pulse w-20',
+                active ? 'bg-[#006C49]/20' : 'bg-white/20',
               )}
             />
           ) : (
-            <span className="truncate">{item.label}</span>
+            <span>{item.label}</span>
           )}
         </div>
       )}
@@ -165,115 +170,123 @@ export default function Sidebar({
   );
 
   const sidebarContent = (
-    <div className="h-full relative bg-[#006C49] text-white flex flex-col pt-3 pb-3 pl-3 pr-0 border-r border-transparent selection:bg-transparent justify-between select-none">
-      {/* Top Section */}
-      <div className="flex flex-col flex-1 min-h-0">
-        {/* Brand Header — Fixed layout style to show authentic colors */}
-        <div
-          className={cn(
-            'flex items-center flex-shrink-0 mb-3 mt-1',
-            isCollapsed ? 'justify-center pr-3' : 'pl-4',
-          )}
-        >
-          <KredarLogo hideText={isCollapsed} />
-        </div>
+    <div className="h-full w-full p-3 flex flex-col justify-between select-none bg-white">
+      {/* ── Brand Green Floating Container with Extreme Curve (Sentinel / Google Drive Style) ── */}
+      <div className="h-full w-full bg-[#006C49] text-white flex flex-col rounded-br-2xl rounded-bl-2xl rounded-tl-2xl rounded-tr-[40px] shadow-sm overflow-hidden p-3 justify-between relative">
+        {/* Upper Navigation stack */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Top Pill Call-to-Action widget */}
+          <div className="mb-4 mt-1">
+            <Link href="/customers">
+              <button
+                className={cn(
+                  'flex items-center justify-center bg-white/80 text-[#006C49] hover:bg-gray-50 shadow-xs transition-all font-bold rounded-full h-9',
+                  isCollapsed ? 'w-9 mx-auto' : 'w-full gap-2 px-4 text-xs',
+                )}
+              >
+                <Plus size={15} className="stroke-[2.5]" />
+                {!isCollapsed && <span>New Customers</span>}
+              </button>
+            </Link>
+          </div>
 
-        {/* Navigation Wrapper with Bulletproof Hidden Scrollbar */}
-        <div
-          className="flex-1 overflow-y-auto pr-0 space-y-1 pt-6"
-          style={{
-            scrollbarWidth: 'none' /* Firefox */,
-            msOverflowStyle: 'none' /* IE/Edge */,
-            WebkitOverflowScrolling: 'touch',
-          }}
-        >
-          {/* Webkit scrollbar cleaner wrapper hook */}
-          <style
-            dangerouslySetInnerHTML={{
-              __html: `div::-webkit-scrollbar { display: none !important; }`,
-            }}
-          />
+          {/* Nav groups stream */}
+          <div
+            className="flex-1 overflow-y-auto space-y-4 pr-0.5 pt-3"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `div::-webkit-scrollbar { display: none !important; }`,
+              }}
+            />
 
-          {/* BLOCK 1: Core Navigation */}
-          <nav className="space-y-0.5">
-            {mainNavItems.map((item) => (
-              <NavRow key={item.href} item={item} active={isActive(item.href, item.exact)} />
-            ))}
-          </nav>
-
-          {/* BLOCK 2: Developers */}
-          <div className="pt-1.5 border-t border-white/10">
-            {!isCollapsed && (
-              <p className="pl-4 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
-                Developer
-              </p>
-            )}
+            {/* Segment 1 */}
             <nav className="space-y-0.5">
-              {developerItems.map((item) => (
-                <NavRow key={item.href} item={item} active={isActive(item.href)} />
+              {visibleMainNavItems.map((item) => (
+                <NavRow key={item.href} item={item} active={isActive(item.href, item.exact)} />
               ))}
             </nav>
-          </div>
 
-          {/* BLOCK 3: Support */}
-          <div className="pt-1.5 border-t border-white/10">
-            {!isCollapsed && (
-              <p className="pl-4 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
-                Management
-              </p>
-            )}
-            <nav className="space-y-0.5">
-              {bottomNavItems.map((item) => (
-                <NavRow key={item.href} item={item} active={isActive(item.href)} />
-              ))}
-            </nav>
-          </div>
-        </div>
-      </div>
-
-      {/* Footer / Profile block */}
-      <div className="pt-2 border-t border-white/10 space-y-1 flex-shrink-0 pr-3">
-        <div
-          className={cn('flex items-center gap-2 py-0.5', isCollapsed ? 'justify-center' : 'px-2')}
-        >
-          <div className="w-7 h-7 rounded-full bg-white text-[#006C49] flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-sm uppercase">
-            {getInitials()}
-          </div>
-          {!isCollapsed && (
-            <div className="flex-1 min-w-0">
-              <p className="text-xs font-bold text-white truncate leading-tight">
-                {getDisplayName()}
-              </p>
-              <p className="text-[9px] text-white/50 font-medium truncate leading-none mt-0.5">
-                {fallbackEmail || 'Merchant Account'}
-              </p>
+            {/* Segment 2 */}
+            <div className="pt-3 border-t border-white/10">
+              {!isCollapsed && (
+                <p className="pl-3 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
+                  Developer
+                </p>
+              )}
+              <nav className="space-y-0.5">
+                {developerItems.map((item) => (
+                  <NavRow key={item.href} item={item} active={isActive(item.href)} />
+                ))}
+              </nav>
             </div>
-          )}
+
+            {/* Segment 3 */}
+            <div className="pt-3 border-t border-white/10">
+              {!isCollapsed && (
+                <p className="pl-3 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
+                  Management
+                </p>
+              )}
+              <nav className="space-y-0.5">
+                {bottomNavItems.map((item) => (
+                  <NavRow key={item.href} item={item} active={isActive(item.href)} />
+                ))}
+              </nav>
+            </div>
+          </div>
         </div>
 
-        <button
-          onClick={() => setShowLogoutConfirm(true)}
-          className={cn(
-            'flex items-center gap-2.5 w-full h-7 rounded-lg text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors',
-            isCollapsed ? 'justify-center' : 'px-2',
-          )}
-        >
-          <LogOut size={14} />
-          {!isCollapsed && <span className="font-semibold">Log out</span>}
-        </button>
-
-        <div className="hidden lg:block">
-          <button
-            type="button"
-            onClick={onToggleCollapse}
+        {/* Lower Account Identity Anchor */}
+        <div className="pt-3 border-t border-white/10 space-y-2 flex-shrink-0">
+          {/* Profile Row Display Container */}
+          <div
             className={cn(
-              'flex items-center justify-center gap-1.5 h-6 w-full text-left rounded-lg text-[9px] text-white/40 hover:bg-white/5 hover:text-white transition-colors border border-white/10',
-              isCollapsed ? 'px-0' : 'px-2',
+              'flex items-center gap-2.5 py-1 px-1 rounded-full bg-white/10 border border-white/5',
+              isCollapsed ? 'justify-center' : 'pl-1 pr-3',
             )}
           >
-            {isCollapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
-            {!isCollapsed && <span className="font-semibold">Collapse</span>}
+            <div className="w-7 h-7 rounded-full bg-white text-[#006C49] flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-xs uppercase">
+              {getInitials()}
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-white truncate leading-tight">
+                  {getDisplayName()}
+                </p>
+                <p className="text-[8px] text-white/60 font-medium truncate leading-none mt-0.5">
+                  {fallbackEmail}
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Action triggers */}
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className={cn(
+              'flex items-center gap-2.5 w-full h-8 rounded-full text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors',
+              isCollapsed ? 'justify-center' : 'px-3.5',
+            )}
+          >
+            <LogOut size={14} />
+            {!isCollapsed && <span className="font-semibold">Log out</span>}
           </button>
+
+          <div className="hidden lg:block">
+            <button
+              type="button"
+              onClick={onToggleCollapse}
+              className={cn(
+                'flex items-center justify-center gap-1.5 h-6 w-full rounded-full text-[9px] text-white/50 hover:bg-white/10 hover:text-white transition-colors border border-white/10',
+                isCollapsed ? 'px-0' : 'px-2',
+              )}
+            >
+              {isCollapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
+              {!isCollapsed && <span className="font-semibold">Collapse View</span>}
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -283,26 +296,26 @@ export default function Sidebar({
     <>
       {isMobileOpen && (
         <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-xs z-40 lg:hidden"
+          className="fixed inset-0 bg-black/10 backdrop-blur-xs z-40 lg:hidden"
           onClick={onCloseMobile}
         />
       )}
 
-      {/* Mobile Drawer */}
+      {/* Mobile container side panel context */}
       <aside
         className={cn(
-          'fixed top-0 bottom-0 left-0 z-50 w-52 bg-[#006C49] transition-transform duration-200 ease-in-out lg:hidden h-screen',
+          'fixed top-0 bottom-0 left-0 z-50 w-52 transition-transform duration-200 ease-in-out lg:hidden h-screen flex',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         {sidebarContent}
       </aside>
 
-      {/* Desktop Sticky Sidebar */}
+      {/* Desktop wrapper container context */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col bg-[#006C49] h-screen sticky top-0 transition-all duration-200 ease-in-out flex-shrink-0',
-          isCollapsed ? 'w-14' : 'w-52',
+          'hidden lg:flex flex-col h-screen sticky top-0 transition-all duration-200 ease-in-out flex-shrink-0',
+          isCollapsed ? 'w-[72px]' : 'w-56',
         )}
       >
         {sidebarContent}

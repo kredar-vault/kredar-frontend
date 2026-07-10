@@ -67,7 +67,11 @@ export const isOnboardingComplete = () => getCookie('kredar_onboarding_complete'
 export const setOnboardingComplete = (val: boolean) =>
   setCookie('kredar_onboarding_complete', val ? 'true' : 'false', 7);
 export const clearOnboardingComplete = () => deleteCookie('kredar_onboarding_complete');
-
+// Pending business type helpers (local-only until backend PATCH accepts it)
+export const getPendingBusinessType = () => getCookie('kredar_pending_business_type');
+export const setPendingBusinessType = (val: string) =>
+  setCookie('kredar_pending_business_type', val, 30);
+export const clearPendingBusinessType = () => deleteCookie('kredar_pending_business_type');
 // Onboarding state draft helpers
 export const getOnboardingDraft = (email?: string) => {
   const key = email ? `kredar_onboarding_state_${email}` : 'kredar_onboarding_state';
@@ -88,10 +92,10 @@ export const clearOnboardingDraft = (email?: string) => {
   deleteCookie(key);
 };
 
-// Logout helper
 export const clearAuthCookies = () => {
   clearToken();
   clearCurrentUser();
   clearOnboardingComplete();
   clearRegisteredEmail();
+  clearPendingBusinessType();
 };

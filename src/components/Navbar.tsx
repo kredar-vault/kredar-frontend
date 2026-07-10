@@ -7,6 +7,7 @@ import { useTenantProfile } from '@/api/tenant/hooks';
 import { getCurrentUser } from '@/lib/cookies';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
+import KredarLogo from './KredarLogo';
 
 interface NavbarProps {
   onToggleMobile?: () => void;
@@ -32,7 +33,6 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
     if (userObj?.email) setFallbackEmail(userObj.email);
   }, []);
 
-  // Poll unread count every 15 seconds
   const { data: unreadData } = useQuery({
     queryKey: ['notifications-unread'],
     queryFn: async () => {
@@ -43,7 +43,6 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
   });
   const unreadCount: number = unreadData ?? 0;
 
-  // Full list — also refreshes every 15s
   const { data: notifsData, isLoading: notifsLoading } = useQuery({
     queryKey: ['notifications-list'],
     queryFn: async () => {
@@ -93,9 +92,9 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
   };
 
   return (
-    <header className="h-14 border-b border-gray-100 bg-white/80 backdrop-blur-md flex items-center px-4 sm:px-6 justify-between sticky top-0 z-30 select-none selection:bg-[#006C49]/10">
-      {/* LEFT SECTION */}
-      <div className="flex items-center gap-4 flex-1 max-w-xl">
+    <header className="h-14 border-b border-gray-100 bg-white sticky top-0 z-30 select-none flex items-center px-4 sm:px-6 justify-between">
+      {/* LEFT SECTION — Brand logo mounted natively inline with search */}
+      <div className="flex items-center gap-6 flex-1 max-w-xl">
         {onToggleMobile && (
           <button
             onClick={onToggleMobile}
@@ -106,7 +105,11 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
           </button>
         )}
 
-        {/* Added Command Search Bar Interface Element */}
+        <div className="flex-shrink-0 hidden lg:block pr-2">
+          <KredarLogo hideText={false} />
+        </div>
+
+        {/* Command Search Area */}
         <div className="relative w-full max-w-xs hidden sm:block group">
           <Search
             size={14}
@@ -117,7 +120,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
             placeholder="Search transactions, links..."
             className="w-full h-8 pl-9 pr-8 bg-gray-50/50 hover:bg-gray-50 text-xs rounded-lg border border-gray-200/80 focus:border-[#006C49]/40 focus:bg-white focus:outline-hidden transition-all placeholder:text-gray-400"
           />
-          <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:inline-flex items-center gap-0.5 pointer-events-none h-4 selection:bg-transparent px-1.5 text-[9px] font-medium text-gray-400 bg-white border border-gray-200 rounded-sm shadow-2xs">
+          <kbd className="absolute right-2 top-1/2 -translate-y-1/2 hidden md:inline-flex items-center gap-0.5 pointer-events-none h-4 px-1.5 text-[9px] font-medium text-gray-400 bg-white border border-gray-200 rounded-sm shadow-2xs">
             ⌘K
           </kbd>
         </div>
@@ -125,17 +128,16 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
 
       {/* RIGHT SECTION */}
       <div className="flex items-center gap-3">
-        {/* Workspace Display Pill */}
         <div className="hidden md:flex flex-col text-right pr-2">
-          <span className="text-[9px] font-bold uppercase tracking-wider text-gray-400 flex items-center justify-end gap-1">
-            <Sparkles size={8} className="text-[#006C49]" /> Current Workspace
+          <span className="text-[9px] font-bold text-gray-400 flex items-center justify-end gap-1">
+            Current Workspace
           </span>
           <span className="text-xs font-bold text-gray-900 mt-0.5">{businessName}</span>
         </div>
 
         <div className="h-4 w-px bg-gray-200 hidden md:block" />
 
-        {/* Notifications Dropdown Container */}
+        {/* Notifications Dropdown */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={openNotifs}
@@ -189,9 +191,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
                       key={n.id}
                       className={cn(
                         'px-4 py-2.5 transition-colors',
-                        n.isRead
-                          ? 'opacity-70 hover:opacity-100'
-                          : 'bg-[#006C49]/5/20 bg-emerald-50/20',
+                        n.isRead ? 'opacity-70 hover:opacity-100' : 'bg-emerald-50/20',
                       )}
                     >
                       <div className="flex items-start gap-2">
@@ -218,7 +218,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
 
         <div className="h-4 w-px bg-gray-200" />
 
-        {/* Profile User Action Menu Block */}
+        {/* User Identity context button */}
         <button className="flex items-center gap-2 text-left p-0.5 rounded-lg hover:bg-gray-50 transition-colors group">
           <div className="w-7 h-7 rounded-lg bg-[#006C49] text-white flex items-center justify-center text-xs font-bold shadow-xs uppercase transition-transform group-hover:scale-[0.97]">
             {getInitials()}
