@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { X, Loader2 } from 'lucide-react';
+import { X } from 'lucide-react';
 import { api } from '@/lib/api';
 import {
   isBannerDismissed,
@@ -104,23 +104,13 @@ export default function ProfileCompletionBanner() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
-        <button
-          type="button"
-          onClick={handleComplete}
-          className="h-9 rounded-full bg-[#006C49] px-4 text-xs font-semibold text-white transition hover:bg-[#005237]"
-        >
-          Complete profile
-        </button>
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label="Dismiss"
-          className="text-gray-400 hover:text-[#030A05] p-1.5 rounded-lg hover:bg-white/60 transition"
-        >
-          <X size={16} />
-        </button>
-      </div>
+      <button
+        type="button"
+        onClick={handleComplete}
+        className="h-9 rounded-full bg-[#006C49] px-4 text-xs font-semibold text-white transition hover:bg-[#005237] shrink-0"
+      >
+        Complete profile
+      </button>
     </div>
   );
 }

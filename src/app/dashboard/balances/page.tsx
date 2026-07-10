@@ -15,7 +15,6 @@ import {
   Loader2,
   X,
   Activity,
-  Lock,
 } from 'lucide-react';
 import {
   useBalanceFull,
@@ -285,44 +284,53 @@ export default function BalancesPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">Balances</h1>
-        <p className="text-xs text-[#667085] mt-0.5">Monitor and manage your funds.</p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">
+            {isPlatform ? 'Revenue' : 'Balances'}
+          </h1>
+          <p className="text-xs text-[#667085] mt-0.5">
+            {isPlatform
+              ? 'Track and withdraw your earned revenue.'
+              : 'Monitor and manage your funds.'}
+          </p>
+        </div>
+        {isPlatform && (
+          <button
+            onClick={() => setDepositOpen(true)}
+            className="flex h-9 items-center gap-1.5 rounded-xl bg-[#effaf2] text-[#0f8b4b] px-4 text-xs font-semibold hover:bg-[#d4eedb] transition-colors flex-shrink-0"
+          >
+            <Plus size={14} />
+            Simulate Deposit
+          </button>
+        )}
       </div>
 
-      {/* Main balance hero */}
-      <div className="bg-white border border-[#f0f4f1] rounded-2xl p-6 shadow-sm">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div>
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-              {isPlatform ? "Collected Balance (Customers' Funds)" : 'Available Balance'}
-            </p>
-            {balLoading ? (
-              <div className="h-10 w-48 bg-gray-100 rounded-xl animate-pulse" />
-            ) : (
-              <h2 className="text-4xl font-bold tracking-tight text-[#081b10]">
-                {fmt(availableBalance, balance?.currency)}
-              </h2>
-            )}
-            {isPlatform && (
-              <div className="flex items-center gap-1.5 mt-2">
-                <Lock size={11} className="text-amber-500" />
-                <p className="text-xs text-amber-600 font-medium">
-                  This is your customers' money — not withdrawable by you
-                </p>
-              </div>
-            )}
-          </div>
+      {/* Main balance hero — MERCHANT only */}
+      {!isPlatform && (
+        <div className="bg-white border border-[#f0f4f1] rounded-2xl p-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+            <div>
+              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
+                Available Balance
+              </p>
+              {balLoading ? (
+                <div className="h-10 w-48 bg-gray-100 rounded-xl animate-pulse" />
+              ) : (
+                <h2 className="text-4xl font-bold tracking-tight text-[#081b10]">
+                  {fmt(availableBalance, balance?.currency)}
+                </h2>
+              )}
+            </div>
 
-          <div className="flex gap-2.5 flex-shrink-0 flex-wrap">
-            <button
-              onClick={() => setDepositOpen(true)}
-              className="flex h-9 items-center gap-1.5 rounded-xl bg-[#effaf2] text-[#0f8b4b] px-4 text-xs font-semibold hover:bg-[#d4eedb] transition-colors"
-            >
-              <Plus size={14} />
-              Simulate Deposit
-            </button>
-            {!isPlatform && (
+            <div className="flex gap-2.5 flex-shrink-0 flex-wrap">
+              <button
+                onClick={() => setDepositOpen(true)}
+                className="flex h-9 items-center gap-1.5 rounded-xl bg-[#effaf2] text-[#0f8b4b] px-4 text-xs font-semibold hover:bg-[#d4eedb] transition-colors"
+              >
+                <Plus size={14} />
+                Simulate Deposit
+              </button>
               <button
                 onClick={() => setWithdrawOpen(true)}
                 disabled={!balance?.canWithdraw}
@@ -331,76 +339,50 @@ export default function BalancesPage() {
                 <Minus size={14} />
                 Withdraw
               </button>
-            )}
+            </div>
           </div>
         </div>
-      </div>
-
-      {/* Stats grid */}
-      {balLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="bg-white border border-[#f0f4f1] rounded-2xl p-4 h-24 animate-pulse"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-          <StatCard
-            label="Pending"
-            value={fmt(balance?.pendingBalance ?? 0)}
-            icon={<Clock size={16} />}
-            accent="bg-amber-50 text-amber-500"
-          />
-          {isPlatform ? (
-            <>
-              <StatCard
-                label="On Hold"
-                value={fmt(balance?.onHoldBalance ?? 0)}
-                icon={<Wallet size={16} />}
-                accent="bg-gray-100 text-gray-500"
-              />
-              <StatCard
-                label="Revenue Today"
-                value={fmt(revenue?.todayRevenue ?? 0)}
-                loading={revLoading}
-                icon={<TrendingUp size={16} />}
-                accent="bg-[#effaf2] text-[#0f8b4b]"
-              />
-              <StatCard
-                label="Revenue This Month"
-                value={fmt(revenue?.monthlyRevenue ?? 0)}
-                loading={revLoading}
-                icon={<CalendarClock size={16} />}
-                accent="bg-[#effaf2] text-[#0f8b4b]"
-              />
-            </>
-          ) : (
-            <>
-              <StatCard
-                label="Incoming Today"
-                value={fmt(balance?.incomingToday ?? 0)}
-                icon={<ArrowDownLeft size={16} />}
-                accent="bg-[#effaf2] text-[#0f8b4b]"
-              />
-              <StatCard
-                label="Settled Today"
-                value={fmt(balance?.settledToday ?? 0)}
-                icon={<CheckCircle2 size={16} />}
-                accent="bg-[#effaf2] text-[#0f8b4b]"
-              />
-              <StatCard
-                label="On Hold"
-                value={fmt(balance?.onHoldBalance ?? 0)}
-                icon={<Wallet size={16} />}
-                accent="bg-gray-100 text-gray-500"
-              />
-            </>
-          )}
-        </div>
       )}
+
+      {/* Stats grid — MERCHANT only */}
+      {!isPlatform &&
+        (balLoading ? (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            {[1, 2, 3, 4].map((i) => (
+              <div
+                key={i}
+                className="bg-white border border-[#f0f4f1] rounded-2xl p-4 h-24 animate-pulse"
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard
+              label="Pending"
+              value={fmt(balance?.pendingBalance ?? 0)}
+              icon={<Clock size={16} />}
+              accent="bg-amber-50 text-amber-500"
+            />
+            <StatCard
+              label="Incoming Today"
+              value={fmt(balance?.incomingToday ?? 0)}
+              icon={<ArrowDownLeft size={16} />}
+              accent="bg-[#effaf2] text-[#0f8b4b]"
+            />
+            <StatCard
+              label="Settled Today"
+              value={fmt(balance?.settledToday ?? 0)}
+              icon={<CheckCircle2 size={16} />}
+              accent="bg-[#effaf2] text-[#0f8b4b]"
+            />
+            <StatCard
+              label="On Hold"
+              value={fmt(balance?.onHoldBalance ?? 0)}
+              icon={<Wallet size={16} />}
+              accent="bg-gray-100 text-gray-500"
+            />
+          </div>
+        ))}
 
       {/* Platform revenue section */}
       {isPlatform && !revLoading && revenue?.enabled && (

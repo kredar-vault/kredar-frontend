@@ -22,6 +22,7 @@ import {
   Bell,
   StickyNote,
   Plus,
+  TrendingUp,
 } from 'lucide-react';
 import LogoutConfirmModal from './auth/LogoutConfirmModal';
 import { cn } from '@/lib/utils';
@@ -39,6 +40,7 @@ interface NavItem {
 const mainNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
   { href: '/dashboard/balances', label: 'Balances', icon: Wallet, hiddenFor: ['platform'] },
+  { href: '/dashboard/balances', label: 'Revenue', icon: TrendingUp, hiddenFor: ['merchant'] },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/customer-notes', label: 'Customer Notes', icon: StickyNote },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
@@ -88,10 +90,14 @@ export default function Sidebar({
 
   const { data: profile } = useTenantProfile();
 
-  const effectiveBusinessType = profile?.businessType || getPendingBusinessType() || '';
+  const effectiveBusinessType = (
+    profile?.businessType ||
+    getPendingBusinessType() ||
+    ''
+  ).toLowerCase();
 
   const visibleMainNavItems = mainNavItems.filter(
-    (item) => !item.hiddenFor?.includes(effectiveBusinessType),
+    (item) => !item.hiddenFor?.some((t) => effectiveBusinessType.includes(t)),
   );
 
   useEffect(() => {
