@@ -9,6 +9,7 @@ export interface Customer {
   createdAt: string;
   dedicatedAccountNumber: string;
   bankName: string;
+  totalReceived?: number;
 }
 
 export interface DedicatedAccount {

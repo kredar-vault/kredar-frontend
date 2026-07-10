@@ -89,4 +89,5 @@ declare module 'lucide-react' {
   export const CalendarClock: LucideIcon;
   export const UserCircle: LucideIcon;
   export const ListFilter: LucideIcon;
+  export const User: LucideIcon;
 }

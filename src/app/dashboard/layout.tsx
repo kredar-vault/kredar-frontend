@@ -5,10 +5,17 @@ import Navbar from '@/components/Navbar';
 import Sidebar from '@/components/Sidebar';
 import AuthGuard from '@/components/AuthGuard';
 import ProfileCompletionBanner from '@/components/features/dashboard/profilebanner';
+import { useTenantProfile } from '@/api/tenant/hooks';
+import BusinessTypeModal from '@/components/features/dashboard/BusinessTypemodal';
+import { getPendingBusinessType } from '@/lib/cookies';
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const { data: profile, isLoading: profileLoading } = useTenantProfile();
+
+  const needsBusinessType =
+    !profileLoading && profile && !profile.businessType && !getPendingBusinessType();
 
   return (
     <div className="min-h-screen bg-zinc-100/70 flex">
@@ -36,6 +43,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </main>
       </div>
+      {needsBusinessType && <BusinessTypeModal />}
     </div>
   );
 }

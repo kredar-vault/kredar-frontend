@@ -8,6 +8,7 @@ import TransactionDetailsDrawer from '@/components/features/transactions/Transac
 import TransactionsTable from '@/components/features/transactions/TransactionsTable';
 import TransactionsFilters from '@/components/features/transactions/TransactionsFilters';
 import { TransactionItem } from '@/api/transactions/types';
+import { useCustomerMap } from '@/api/customers/useCustomerMao';
 
 const statusColors: Record<string, string> = {
   Reconciled: 'bg-[#effaf2] text-[#0f8b4b] border-[#d4eedb]',
@@ -22,7 +23,7 @@ export default function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
-
+  const { customerMap } = useCustomerMap();
   const { data: insights } = useQuery({
     queryKey: ['insights'],
     queryFn: async () => {
@@ -84,7 +85,9 @@ export default function TransactionsPage() {
       currency: tx.currency || 'NGN',
       method: tx.paymentMethod || tx.method || 'Bank Transfer',
       time: timeStr,
-      customerName: tx.customer?.name || tx.customerName || tx.narration || 'Anonymous',
+      customerId: tx.customerId || '',
+      customerName:
+        customerMap.get(tx.customerId)?.fullName || tx.customer?.name || tx.customerName || null,
       accountNumber: tx.dedicatedAccountNumber || tx.accountNumber || '',
       narration: tx.narration || '',
       expectedAmount: formatCurrency(tx.expectedAmount || tx.amount || 0, tx.currency),

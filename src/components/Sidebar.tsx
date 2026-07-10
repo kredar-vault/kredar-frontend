@@ -15,7 +15,6 @@ import {
   LogOut,
   Store,
   CalendarRange,
-  Code2,
   Globe,
   Webhook,
   GitMerge,
@@ -23,23 +22,24 @@ import {
   Activity,
   Bell,
   StickyNote,
+  Plus,
 } from 'lucide-react';
-import KredarLogo from './KredarLogo';
 import LogoutConfirmModal from './auth/LogoutConfirmModal';
 import { cn } from '@/lib/utils';
 import { useTenantProfile } from '@/api/tenant/hooks';
-import { getCurrentUser, clearAuthCookies } from '@/lib/cookies';
+import { getCurrentUser, clearAuthCookies, getPendingBusinessType } from '@/lib/cookies';
 
 interface NavItem {
   href: string;
   label: string;
   icon: React.ComponentType<{ size?: number; className?: string }>;
   exact?: boolean;
+  hiddenFor?: string[]; // businessType values that should NOT see this item
 }
 
 const mainNavItems: NavItem[] = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, exact: true },
-  { href: '/dashboard/balances', label: 'Balances', icon: Wallet },
+  { href: '/dashboard/balances', label: 'Balances', icon: Wallet, hiddenFor: ['platform'] },
   { href: '/dashboard/customers', label: 'Customers', icon: Users },
   { href: '/dashboard/customer-notes', label: 'Customer Notes', icon: StickyNote },
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
@@ -47,7 +47,12 @@ const mainNavItems: NavItem[] = [
   { href: '/dashboard/operations', label: 'Operations', icon: Building2 },
   { href: '/dashboard/activity', label: 'Activity', icon: Activity },
   { href: '/dashboard/inbox', label: 'Inbox', icon: Bell },
-  { href: '/dashboard/sub-merchants', label: 'Sub-merchants', icon: Store },
+  {
+    href: '/dashboard/sub-merchants',
+    label: 'Sub-merchants',
+    icon: Store,
+    hiddenFor: ['merchant'],
+  },
   { href: '/dashboard/billing', label: 'Billing', icon: CalendarRange },
 ];
 
@@ -85,6 +90,12 @@ export default function Sidebar({
 
   const { data: profile } = useTenantProfile();
 
+  const effectiveBusinessType = profile?.businessType || getPendingBusinessType() || '';
+
+  const visibleMainNavItems = mainNavItems.filter(
+    (item) => !item.hiddenFor?.includes(effectiveBusinessType),
+  );
+
   useEffect(() => {
     const user = getCurrentUser();
     if (user?.email) setFallbackEmail(user.email);
@@ -116,8 +127,6 @@ export default function Sidebar({
     }, 1200);
   };
 
-  // Each row: icon lives in the 48px green-pill zone, text in the white zone.
-  // Using a single <Link> per row guarantees icon and label are always aligned.
   const NavRow = ({
     item,
     active,
@@ -131,36 +140,31 @@ export default function Sidebar({
       href={item.href}
       onClick={() => handleItemClick(item.href)}
       title={isCollapsed ? item.label : undefined}
-      className="relative flex items-center h-[30px] w-full"
+      className={cn(
+        'flex items-center w-full group relative transition-all duration-150 h-8 my-0.5 rounded-full',
+        isCollapsed ? 'justify-center px-0' : 'px-3.5',
+        active
+          ? 'bg-white/10 text-white shadow-sm font-bold'
+          : 'text-white/75 hover:bg-white/10 hover:text-white',
+      )}
     >
-      {/* Active indicator on the left edge of the green pill */}
-      {active && <div className="absolute left-0 w-0.5 h-3.5 bg-white rounded-r-sm z-10" />}
-
-      {/* Icon zone — sits over the green pill */}
-      <div className="w-12 flex-shrink-0 flex items-center justify-center z-10">
-        <item.icon
-          size={iconSize}
-          className={cn(
-            'transition-colors',
-            active ? 'text-white' : 'text-white/60 hover:text-white',
-          )}
-        />
+      {/* Icon framework */}
+      <div className="w-5 h-5 flex-shrink-0 flex items-center justify-center">
+        <item.icon size={iconSize} />
       </div>
 
-      {/* Text zone — white area to the right */}
+      {/* Label block handles expansion fluidly */}
       {!isCollapsed && (
-        <div
-          className={cn(
-            'flex-1 flex items-center px-2 h-full rounded-xl text-xs transition-all duration-150',
-            active
-              ? 'bg-[#0a2e1f] text-white font-semibold'
-              : 'text-[#45504b] hover:bg-[#f7faf6] hover:text-[#081b10]',
-          )}
-        >
+        <div className="flex-1 pl-3 text-xs tracking-wide truncate">
           {loading ? (
-            <div className="h-3 bg-gray-200 rounded animate-pulse w-20" />
+            <div
+              className={cn(
+                'h-2 rounded animate-pulse w-20',
+                active ? 'bg-[#006C49]/20' : 'bg-white/20',
+              )}
+            />
           ) : (
-            <span className="truncate">{item.label}</span>
+            <span>{item.label}</span>
           )}
         </div>
       )}
@@ -168,87 +172,122 @@ export default function Sidebar({
   );
 
   const sidebarContent = (
-    // Outer wrapper: relative so the green pill can be absolute inside
-    <div className="h-full relative bg-white overflow-hidden border-r border-gray-100">
-      {/* ── Green capsule pill — absolutely behind the icon column ── */}
-      <div className="absolute left-3 top-3 bottom-3 w-12 bg-[#006C49] rounded-full pointer-events-none" />
+    <div className="h-full w-full p-3 flex flex-col justify-between select-none bg-white">
+      {/* ── Brand Green Floating Container with Extreme Curve (Sentinel / Google Drive Style) ── */}
+      <div className="h-full w-full bg-[#006C49] text-white flex flex-col rounded-br-2xl rounded-bl-2xl rounded-tl-2xl rounded-tr-[40px] shadow-sm overflow-hidden p-3 justify-between relative">
+        {/* Upper Navigation stack */}
+        <div className="flex flex-col flex-1 min-h-0">
+          {/* Top Pill Call-to-Action widget */}
+          <div className="mb-4 mt-1">
+            <Link href="/customers">
+              <button
+                className={cn(
+                  'flex items-center justify-center bg-white/80 text-[#006C49] hover:bg-gray-50 shadow-xs transition-all font-bold rounded-full h-9',
+                  isCollapsed ? 'w-9 mx-auto' : 'w-full gap-2 px-4 text-xs',
+                )}
+              >
+                <Plus size={15} className="stroke-[2.5]" />
+                {!isCollapsed && <span>New Customers</span>}
+              </button>
+            </Link>
+          </div>
 
-      {/* ── Single-column content ── */}
-      <div className="relative h-full flex flex-col p-3">
-        {/* Logo — offset right past the pill */}
-        <div className="h-[44px] flex items-center mt-6 pl-[56px] flex-shrink-0">
-          <KredarLogo hideText={isCollapsed} />
+          {/* Nav groups stream */}
+          <div
+            className="flex-1 overflow-y-auto space-y-4 pr-0.5 pt-3"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          >
+            <style
+              dangerouslySetInnerHTML={{
+                __html: `div::-webkit-scrollbar { display: none !important; }`,
+              }}
+            />
+
+            {/* Segment 1 */}
+            <nav className="space-y-0.5">
+              {visibleMainNavItems.map((item) => (
+                <NavRow key={item.href} item={item} active={isActive(item.href, item.exact)} />
+              ))}
+            </nav>
+
+            {/* Segment 2 */}
+            <div className="pt-3 border-t border-white/10">
+              {!isCollapsed && (
+                <p className="pl-3 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
+                  Developer
+                </p>
+              )}
+              <nav className="space-y-0.5">
+                {developerItems.map((item) => (
+                  <NavRow key={item.href} item={item} active={isActive(item.href)} />
+                ))}
+              </nav>
+            </div>
+
+            {/* Segment 3 */}
+            <div className="pt-3 border-t border-white/10">
+              {!isCollapsed && (
+                <p className="pl-3 mb-1 text-[8px] font-bold uppercase tracking-widest text-white/40">
+                  Management
+                </p>
+              )}
+              <nav className="space-y-0.5">
+                {bottomNavItems.map((item) => (
+                  <NavRow key={item.href} item={item} active={isActive(item.href)} />
+                ))}
+              </nav>
+            </div>
+          </div>
         </div>
 
-        {/* Main nav — scrollable middle zone */}
-        <nav className="mt-3 space-y-1 flex-1">
-          {mainNavItems.map((item) => (
-            <NavRow key={item.href} item={item} active={isActive(item.href, item.exact)} />
-          ))}
-        </nav>
-
-        {/* Bottom group */}
-        <div>
-          {/* Developer section */}
-          <div className="mb-2">
-            {!isCollapsed && (
-              <p className="pl-[56px] mb-1 text-[9px] font-bold uppercase tracking-widest text-gray-400">
-                Developer
-              </p>
+        {/* Lower Account Identity Anchor */}
+        <div className="pt-3 border-t border-white/10 space-y-2 flex-shrink-0">
+          {/* Profile Row Display Container */}
+          <div
+            className={cn(
+              'flex items-center gap-2.5 py-1 px-1 rounded-full bg-white/10 border border-white/5',
+              isCollapsed ? 'justify-center' : 'pl-1 pr-3',
             )}
-            <nav className="space-y-1">
-              {developerItems.map((item) => (
-                <NavRow key={item.href} item={item} active={isActive(item.href)} iconSize={15} />
-              ))}
-            </nav>
-          </div>
-
-          {/* Divider */}
-          <div className="ml-[56px] border-t border-gray-100 my-3" />
-
-          {/* Settings / Help */}
-          <div className="mb-3">
-            <nav className="space-y-1">
-              {bottomNavItems.map((item) => (
-                <NavRow key={item.href} item={item} active={isActive(item.href)} />
-              ))}
-            </nav>
-          </div>
-
-          {/* Profile block */}
-          <div className="space-y-1.5 pt-2 border-t border-gray-50">
-            <div className="flex items-center gap-3 px-2 py-1">
-              <div className="w-7 h-7 rounded-full bg-pink-500 flex items-center justify-center font-bold text-white text-[10px] flex-shrink-0 shadow-sm uppercase ml-[10px]">
-                {getInitials()}
+          >
+            <div className="w-7 h-7 rounded-full bg-white text-[#006C49] flex items-center justify-center font-bold text-[10px] flex-shrink-0 shadow-xs uppercase">
+              {getInitials()}
+            </div>
+            {!isCollapsed && (
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-bold text-white truncate leading-tight">
+                  {getDisplayName()}
+                </p>
+                <p className="text-[8px] text-white/60 font-medium truncate leading-none mt-0.5">
+                  {fallbackEmail}
+                </p>
               </div>
-              {!isCollapsed && (
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-bold text-[#030A05] truncate">{getDisplayName()}</p>
-                  <p className="text-[10px] text-gray-400 font-medium truncate mt-0.5">
-                    {fallbackEmail || 'Merchant Account'}
-                  </p>
-                </div>
-              )}
-            </div>
+            )}
+          </div>
 
+          {/* Action triggers */}
+          <button
+            onClick={() => setShowLogoutConfirm(true)}
+            className={cn(
+              'flex items-center gap-2.5 w-full h-8 rounded-full text-xs text-white/70 hover:bg-white/10 hover:text-white transition-colors',
+              isCollapsed ? 'justify-center' : 'px-3.5',
+            )}
+          >
+            <LogOut size={14} />
+            {!isCollapsed && <span className="font-semibold">Log out</span>}
+          </button>
+
+          <div className="hidden lg:block">
             <button
-              onClick={() => setShowLogoutConfirm(true)}
-              className="flex items-center gap-2 w-full px-3 py-2 mt-2 rounded-xl text-xs text-gray-500 hover:bg-red-50 hover:text-red-600 transition-colors pl-[14px]"
+              type="button"
+              onClick={onToggleCollapse}
+              className={cn(
+                'flex items-center justify-center gap-1.5 h-6 w-full rounded-full text-[9px] text-white/50 hover:bg-white/10 hover:text-white transition-colors border border-white/10',
+                isCollapsed ? 'px-0' : 'px-2',
+              )}
             >
-              <LogOut size={14} />
-              {!isCollapsed && <span className="font-semibold">Log out</span>}
+              {isCollapsed ? <ChevronRight size={10} /> : <ChevronLeft size={10} />}
+              {!isCollapsed && <span className="font-semibold">Collapse View</span>}
             </button>
-
-            <div className="hidden lg:block pt-1">
-              <button
-                type="button"
-                onClick={onToggleCollapse}
-                className="flex items-center justify-center gap-2 px-3 py-1.5 w-full text-left rounded-xl text-[10px] text-gray-500 hover:bg-gray-50 transition-colors border border-gray-100"
-              >
-                {isCollapsed ? <ChevronRight size={12} /> : <ChevronLeft size={12} />}
-                {!isCollapsed && <span className="font-semibold">Collapse</span>}
-              </button>
-            </div>
           </div>
         </div>
       </div>
@@ -258,22 +297,27 @@ export default function Sidebar({
   return (
     <>
       {isMobileOpen && (
-        <div className="fixed inset-0 bg-black/40 z-40 lg:hidden" onClick={onCloseMobile} />
+        <div
+          className="fixed inset-0 bg-black/10 backdrop-blur-xs z-40 lg:hidden"
+          onClick={onCloseMobile}
+        />
       )}
 
+      {/* Mobile container side panel context */}
       <aside
         className={cn(
-          'fixed top-0 bottom-0 left-0 z-50 w-60 bg-white transition-transform duration-200 ease-in-out lg:hidden h-screen',
+          'fixed top-0 bottom-0 left-0 z-50 w-52 transition-transform duration-200 ease-in-out lg:hidden h-screen flex',
           isMobileOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
         {sidebarContent}
       </aside>
 
+      {/* Desktop wrapper container context */}
       <aside
         className={cn(
-          'hidden lg:flex flex-col bg-white h-screen sticky top-0 transition-all duration-200 ease-in-out flex-shrink-0',
-          isCollapsed ? 'w-20' : 'w-60',
+          'hidden lg:flex flex-col h-screen sticky top-0 transition-all duration-200 ease-in-out flex-shrink-0',
+          isCollapsed ? 'w-[72px]' : 'w-56',
         )}
       >
         {sidebarContent}
