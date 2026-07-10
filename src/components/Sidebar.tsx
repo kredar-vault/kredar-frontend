@@ -177,7 +177,7 @@ export default function Sidebar({
         <div className="flex flex-col flex-1 min-h-0">
           {/* Top Pill Call-to-Action widget */}
           <div className="mb-4 mt-1">
-            <Link href="/customers">
+            <Link href="/dashboard/customers/new">
               <button
                 className={cn(
                   'flex items-center justify-center bg-white/80 text-[#006C49] hover:bg-gray-50 shadow-xs transition-all font-bold rounded-full h-9',
