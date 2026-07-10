@@ -19,7 +19,6 @@ import {
   Webhook,
   GitMerge,
   Building2,
-  Activity,
   Bell,
   StickyNote,
   Plus,
@@ -45,7 +44,6 @@ const mainNavItems: NavItem[] = [
   { href: '/dashboard/transactions', label: 'Transactions', icon: ArrowLeftRight },
   { href: '/dashboard/reconciliation', label: 'Reconciliation', icon: GitMerge },
   { href: '/dashboard/operations', label: 'Operations', icon: Building2 },
-  { href: '/dashboard/activity', label: 'Activity', icon: Activity },
   { href: '/dashboard/inbox', label: 'Inbox', icon: Bell },
   {
     href: '/dashboard/sub-merchants',
