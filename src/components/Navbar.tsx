@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Bell, Menu, ChevronDown, Check, Search, Sparkles } from 'lucide-react';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRouter } from 'next/navigation';
 import { useTenantProfile } from '@/api/tenant/hooks';
 import { getCurrentUser } from '@/lib/cookies';
 import { api } from '@/lib/api';
@@ -53,7 +54,22 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
   });
   const notifs: Notif[] = notifsData ?? [];
 
+  const router = useRouter();
+
   const openNotifs = () => setShowNotifs((v) => !v);
+
+  const handleNotifClick = (id: string, isRead: boolean) => {
+    if (!isRead) {
+      api.patch('/notifications/read', { ids: [id] }).then(() => {
+        qc.setQueryData(['notifications-unread'], (old: number) => Math.max(0, (old ?? 1) - 1));
+        qc.setQueryData(['notifications-list'], (old: Notif[] | undefined) =>
+          (old ?? []).map((x) => (x.id === id ? { ...x, isRead: true } : x)),
+        );
+      });
+    }
+    setShowNotifs(false);
+    router.push('/dashboard/inbox');
+  };
 
   const markAllRead = () => {
     api.patch('/notifications/read', {}).then(() => {
@@ -172,7 +188,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
                 )}
               </div>
 
-              <div className="max-h-64 overflow-y-auto divide-y divide-gray-50">
+              <div className="max-h-72 overflow-y-auto divide-y divide-[#f0f4f1]">
                 {notifsLoading ? (
                   [...Array(3)].map((_, i) => (
                     <div key={i} className="px-4 py-3 space-y-1.5">
@@ -187,31 +203,36 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
                   </div>
                 ) : (
                   notifs.map((n) => (
-                    <div
+                    <button
                       key={n.id}
-                      className={cn(
-                        'px-4 py-2.5 transition-colors',
-                        n.isRead ? 'opacity-70 hover:opacity-100' : 'bg-emerald-50/20',
-                      )}
+                      onClick={() => handleNotifClick(n.id, n.isRead)}
+                      className={`w-full text-left px-4 py-3 hover:bg-[#f0faf5] transition-colors ${n.isRead ? '' : 'bg-[#f7faf6]'}`}
                     >
                       <div className="flex items-start gap-2">
                         {!n.isRead && (
                           <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-[#006C49] flex-shrink-0" />
                         )}
-                        <div className={!n.isRead ? '' : 'ml-3.5'}>
-                          <p className="text-xs font-semibold text-gray-900">{n.title}</p>
-                          <p className="text-[11px] text-gray-500 mt-0.5 leading-snug">
+                        <div className={`min-w-0 flex-1 ${!n.isRead ? '' : 'ml-3.5'}`}>
+                          <p className="text-xs font-semibold text-[#030A05]">{n.title}</p>
+                          <p className="text-xs text-[#45504b] mt-0.5 line-clamp-2 break-words">
                             {n.message}
                           </p>
-                          <p className="text-[9px] text-gray-400 mt-1 font-medium">
-                            {timeAgo(n.createdAt)}
-                          </p>
+                          <p className="text-[10px] text-gray-400 mt-1">{timeAgo(n.createdAt)}</p>
                         </div>
                       </div>
-                    </div>
+                    </button>
                   ))
                 )}
               </div>
+              <button
+                onClick={() => {
+                  setShowNotifs(false);
+                  router.push('/dashboard/inbox');
+                }}
+                className="w-full py-2.5 text-xs font-semibold text-[#006C49] hover:bg-[#f0faf5] transition-colors border-t border-[#f0f4f1] text-center"
+              >
+                View all in Inbox
+              </button>
             </div>
           )}
         </div>
