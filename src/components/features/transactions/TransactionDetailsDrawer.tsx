@@ -5,6 +5,7 @@ import { X, Download } from 'lucide-react';
 import DrawerReconciliation from './DrawerReconciliation';
 import { cn } from '@/lib/utils';
 import { TransactionItem } from '@/api/transactions/types';
+import CustomerIdentityCard from '@/components/ui/CustomerIdentityCard';
 
 interface TransactionDetailsDrawerProps {
   isOpen: boolean;
@@ -159,7 +160,13 @@ export default function TransactionDetailsDrawer({
 
             <div className="grid grid-cols-2 gap-y-3.5 text-sm">
               <span className="text-[#45504b] font-medium">Customer</span>
-              <span className="font-semibold text-[#081b10] text-right">{tx.customerName}</span>
+              <span className="text-right">
+                <CustomerIdentityCard
+                  customerId={transaction?.customerId}
+                  customerName={tx.customerName}
+                  dedicatedAccountNumber={tx.accountNumber}
+                />
+              </span>
 
               <span className="text-[#45504b] font-medium">Dedicated virtual account</span>
               <span className="font-semibold text-[#081b10] text-right">{tx.accountNumber}</span>
