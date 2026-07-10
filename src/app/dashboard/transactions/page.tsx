@@ -132,7 +132,7 @@ export default function TransactionsPage() {
   }).length;
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 px-4 sm:px-6">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
       {/* Top Header Row */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
@@ -146,7 +146,7 @@ export default function TransactionsPage() {
       {isLoading ? (
         <>
           {/* Micro Card Skeletons */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
@@ -171,7 +171,7 @@ export default function TransactionsPage() {
       ) : (
         <>
           {/* Slick Compact Metric Grid Layout */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             {/* Metric 1 */}
             <div className="bg-white rounded-2xl p-4 border border-[#f0f4f1] shadow-sm flex items-start justify-between transition-all hover:border-[#0f8b4b]/30">
               <div className="space-y-1">

@@ -126,7 +126,7 @@ export default function BalancesPage() {
 
       {/* Deposit modal */}
       {depositOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl p-6 max-w-sm w-full space-y-4">
             <div className="flex items-center justify-between">
               <h4 className="text-base font-bold text-[#081b10]">Simulate deposit</h4>

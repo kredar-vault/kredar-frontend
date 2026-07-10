@@ -431,7 +431,7 @@ export default function ApiPlaygroundPage() {
 
   return (
     <div
-      className="flex flex-col gap-0 max-w-[1400px] mx-auto px-4 sm:px-6 pb-4"
+      className="flex flex-col gap-0 max-w-[1400px] mx-auto pb-4"
       style={{ height: 'calc(100vh - 64px)' }}
     >
       {/* Header + tab bar */}
