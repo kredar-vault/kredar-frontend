@@ -2,12 +2,38 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { MoreVertical, ChevronRight, Loader2, CreditCard } from 'lucide-react';
+import { MoreVertical, ChevronRight, Loader2, CreditCard, StickyNote } from 'lucide-react';
 import { toast } from 'sonner';
+import { useQuery } from '@tanstack/react-query';
 
 import { Customer } from '@/api/customers/types';
 import { useGenerateVirtualAccount } from '@/api/customers/hooks';
 import CustomerAvatar from './avatar';
+import { api } from '@/lib/api';
+
+function NoteCountBadge({ customerId }: { customerId: string }) {
+  const { data: count } = useQuery<number>({
+    queryKey: ['customer-notes-count', customerId],
+    queryFn: async () => {
+      const res = await api.get(`/customers/${customerId}/notes`);
+      return (res.data?.data ?? []).length;
+    },
+    staleTime: 60_000,
+  });
+
+  if (!count) return null;
+  return (
+    <Link
+      href={`/dashboard/customers/${customerId}?tab=notes`}
+      onClick={(e) => e.stopPropagation()}
+      className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-[#ecfdf3] text-[#027A48] text-[10px] font-semibold hover:bg-[#d1fae5] transition-colors"
+      title={`${count} note${count !== 1 ? 's' : ''}`}
+    >
+      <StickyNote size={10} />
+      {count}
+    </Link>
+  );
+}
 
 interface CustomersTableProps {
   customers: Customer[];
@@ -77,9 +103,12 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
                   <div className="flex items-center gap-3">
                     <CustomerAvatar firstName={customer.firstName} lastName={customer.lastName} />
                     <div className="truncate">
-                      <p className="font-semibold text-[#101828] truncate">
-                        {customer.fullName || `${customer.firstName} ${customer.lastName}`}
-                      </p>
+                      <div className="flex items-center gap-1.5">
+                        <p className="font-semibold text-[#101828] truncate">
+                          {customer.fullName || `${customer.firstName} ${customer.lastName}`}
+                        </p>
+                        <NoteCountBadge customerId={customer.id} />
+                      </div>
                       <p className="text-xs text-[#667085] truncate max-w-[180px]">{customer.id}</p>
                     </div>
                   </div>
