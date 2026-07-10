@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+
 import {
   CheckCircle2,
   AlertTriangle,
@@ -18,6 +19,8 @@ import {
   X,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useCustomerMap } from '@/api/customers/useCustomerMao';
+import CustomerIdentityCard from '@/components/ui/CustomerIdentityCard';
 
 const STATUS_MAP: Record<string, { label: string; class: string }> = {
   Reconciled: { label: 'Matched', class: 'text-[#0f8b4b] bg-[#effaf2]' },
@@ -61,7 +64,7 @@ export default function ReconciliationPage() {
   const [matchNote, setMatchNote] = useState('');
   const [ignoreReason, setIgnoreReason] = useState('');
   const qc = useQueryClient();
-
+  const { customerMap } = useCustomerMap();
   const statusParam =
     statusFilter === 'matched'
       ? 'Reconciled'
@@ -299,8 +302,12 @@ export default function ReconciliationPage() {
                           {statusInfo.label}
                         </span>
                       </td>
-                      <td className="px-4 py-3.5 text-gray-700 whitespace-nowrap text-xs">
-                        {tx.narration || customerName}
+                      <td className="px-4 py-3.5 whitespace-nowrap">
+                        <CustomerIdentityCard
+                          customerId={tx.customerId}
+                          customerName={customerMap.get(tx.customerId)?.fullName}
+                          dedicatedAccountNumber={tx.dedicatedAccountNumber}
+                        />
                       </td>
                       <td className="px-4 py-3.5 text-gray-500 font-mono text-xs whitespace-nowrap">
                         {maskAccount(tx.dedicatedAccountNumber)}
