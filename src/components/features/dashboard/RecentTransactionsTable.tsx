@@ -51,7 +51,7 @@ export default function RecentTransactionsTable() {
       </div>
 
       <div className="overflow-x-auto">
-        <table className="w-full text-left border-collapse">
+        <table className="min-w-[560px] w-full text-left border-collapse">
           <thead>
             <tr className="border-b border-[#f7faf6] text-[#667085] text-[11px] font-bold uppercase tracking-wider">
               <th className="pb-3 font-bold">Customer Details</th>
