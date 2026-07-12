@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Trash2, Plus, Users } from 'lucide-react';
 import { TeamMember } from '@/api/team/types';
+import Button from '../landing/Button';
 
 interface TeamTableProps {
   members: TeamMember[];
@@ -44,13 +45,13 @@ export default function TeamTable({
           </p>
         </div>
 
-        <button
+        <Button
           onClick={onAdd}
           className="kredar-btn-primary flex items-center justify-center gap-2"
         >
           <Plus size={16} />
           Add Member
-        </button>
+        </Button>
       </div>
 
       {members.length === 0 ? (
@@ -63,9 +64,9 @@ export default function TeamTable({
 
           <p className="mt-2 text-sm text-[#667085]">Invite your first teammate.</p>
 
-          <button onClick={onAdd} className="kredar-btn-primary mt-6">
+          <Button onClick={onAdd} className="kredar-btn-primary mt-6">
             Add Member
-          </button>
+          </Button>
         </div>
       ) : (
         <>
@@ -112,16 +113,16 @@ export default function TeamTable({
                   </p>
 
                   <div className="relative flex justify-end overflow-visible">
-                    <button
+                    <Button
                       onClick={() => setOpenMenu(openMenu === member.id ? null : member.id)}
                       className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[#f5f5f5]"
                     >
                       :
-                    </button>
+                    </Button>
 
                     {openMenu === member.id && (
                       <div className="absolute right-0 top-11 z-[9999] w-48 rounded-xl border border-[#edf2ee] bg-white py-2 shadow-2xl">
-                        <button
+                        <Button
                           onClick={() => {
                             setOpenMenu(null);
                             onEdit(member);
@@ -129,9 +130,9 @@ export default function TeamTable({
                           className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#081b10] hover:bg-[#f7faf8]"
                         >
                           edit Edit Member
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                           onClick={() => {
                             setOpenMenu(null);
                             onDelete(member);
@@ -140,7 +141,7 @@ export default function TeamTable({
                         >
                           <Trash2 size={16} />
                           Delete Member
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>
@@ -182,16 +183,16 @@ export default function TeamTable({
                   </div>
 
                   <div className="relative">
-                    <button
+                    <Button
                       onClick={() => setOpenMenu(openMenu === member.id ? null : member.id)}
                       className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[#f5f5f5]"
                     >
                       :
-                    </button>
+                    </Button>
 
                     {openMenu === member.id && (
                       <div className="absolute right-0 top-11 z-[9999] w-48 rounded-xl border border-[#edf2ee] bg-white py-2 shadow-2xl">
-                        <button
+                        <Button
                           onClick={() => {
                             setOpenMenu(null);
                             onEdit(member);
@@ -199,9 +200,9 @@ export default function TeamTable({
                           className="flex w-full items-center gap-3 px-4 py-3 text-sm hover:bg-[#f7faf8]"
                         >
                           edit Edit Member
-                        </button>
+                        </Button>
 
-                        <button
+                        <Button
                           onClick={() => {
                             setOpenMenu(null);
                             onDelete(member);
@@ -210,7 +211,7 @@ export default function TeamTable({
                         >
                           <Trash2 size={16} />
                           Delete Member
-                        </button>
+                        </Button>
                       </div>
                     )}
                   </div>

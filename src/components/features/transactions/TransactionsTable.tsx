@@ -92,10 +92,22 @@ export default function TransactionsTable({ transactions, onRowClick }: Transact
                 </div>
               )}
 
-              {/* Label + date */}
+              {/* Label + date + customer/account */}
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold text-[#081b10] truncate">{label}</p>
                 <p className="text-xs text-gray-400 mt-0.5">{dateTime}</p>
+              </div>
+
+              {/* Customer name */}
+              <div className="hidden sm:block w-40 flex-shrink-0 min-w-0">
+                <p className="text-sm text-[#081b10] truncate">{tx.customerName || '—'}</p>
+              </div>
+
+              {/* Account number */}
+              <div className="hidden md:block w-36 flex-shrink-0 min-w-0">
+                <p className="text-xs text-gray-500 tabular-nums truncate">
+                  {tx.accountNumber || '—'}
+                </p>
               </div>
 
               {/* Amount + status badge */}

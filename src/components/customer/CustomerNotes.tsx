@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
 import { StickyNote, Trash2, Plus, Loader2 } from 'lucide-react';
+import Button from '../features/landing/Button';
 
 export default function CustomerNotes({ customerId }: { customerId: string }) {
   const [content, setContent] = useState('');
@@ -46,14 +47,14 @@ export default function CustomerNotes({ customerId }: { customerId: string }) {
           rows={2}
           className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#0f8b4b]/30 focus:border-[#0f8b4b]"
         />
-        <button
+        <Button
           type="submit"
           disabled={!content.trim() || addNote.isPending}
           className="self-end flex items-center gap-1.5 px-4 py-2 rounded-xl bg-[#0f8b4b] text-white text-xs font-semibold hover:bg-[#0c7640] disabled:opacity-50 transition-colors"
         >
           {addNote.isPending ? <Loader2 size={13} className="animate-spin" /> : <Plus size={13} />}
           Add
-        </button>
+        </Button>
       </form>
 
       {/* Notes list */}
@@ -85,14 +86,14 @@ export default function CustomerNotes({ customerId }: { customerId: string }) {
                   })}
                 </p>
               </div>
-              <button
+              <Button
                 onClick={() => deleteNote.mutate(note.id)}
                 disabled={deleteNote.isPending}
                 className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-50 text-gray-400 hover:text-red-500 transition-all disabled:opacity-50"
                 title="Delete note"
               >
                 <Trash2 size={13} />
-              </button>
+              </Button>
             </div>
           ))}
         </div>

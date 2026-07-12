@@ -13,6 +13,7 @@ type NavItem = {
 type Section = { label: string; items: NavItem[] };
 
 import React from 'react';
+import Button from '../features/landing/Button';
 
 const sections: Section[] = [
   {
@@ -94,13 +95,13 @@ export default function AdminSidebar() {
           <p className="text-white/50 text-xs mt-1 leading-relaxed">
             Full control over your platform
           </p>
-          <button
+          <Button
             onClick={handleLogout}
             className="mt-3 w-full bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-xs font-semibold py-2 rounded-lg transition-colors flex items-center justify-center gap-1.5"
           >
             <LogOut size={12} />
             Sign out
-          </button>
+          </Button>
         </div>
       </div>
     </aside>

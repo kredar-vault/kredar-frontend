@@ -55,7 +55,7 @@ export default function WebhooksPage() {
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto pb-12">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12">
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">Webhooks</h1>
         <p className="text-xs text-[#45504b] mt-0.5">

@@ -28,20 +28,25 @@ export default function CustomersPage() {
 
   const loading = customersLoading || statsLoading;
 
+  const statCards = [
+    { label: 'Total Customers', value: stats?.totalCustomers ?? 0 },
+    { label: 'Active Customers', value: stats?.activeCustomers ?? 0 },
+    { label: 'Inactive Customers', value: stats?.inactiveCustomers ?? 0 },
+    { label: 'Restricted', value: stats?.restrictedCustomers ?? 0 },
+  ];
+
   return (
-    <div className="mx-auto max-w-7xl space-y-6 pb-12">
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 px-4 sm:px-6 mt-4">
+      {/* Page Title Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-[#081B10]">
-            Customers
-          </h1>
-
-          <p className="mt-1 text-sm text-[#667085]">Manage your registered customers.</p>
+          <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">Customers</h1>
+          <p className="text-xs text-[#45504b] mt-0.5">Manage your registered customers</p>
         </div>
 
         <Link
           href="/dashboard/customers/new"
-          className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#0F8B4B] px-4 text-sm font-semibold text-white transition hover:bg-[#0D7A42] self-start sm:self-auto"
+          className="inline-flex h-10 items-center gap-2 rounded-xl bg-[#0f8b4b] px-4 text-sm font-semibold text-white transition hover:bg-[#0a7040] self-start sm:self-auto"
         >
           <Plus size={16} />
           Add Customer
@@ -50,54 +55,35 @@ export default function CustomersPage() {
 
       {loading ? (
         <>
-          <div className="grid gap-5 grid-cols-2 md:grid-cols-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {Array.from({ length: 4 }).map((_, index) => (
               <div
                 key={index}
-                className="h-32 animate-pulse rounded-md border border-[#EAECF0] bg-white"
+                className="h-20 animate-pulse rounded-2xl border border-gray-100 bg-white"
               />
             ))}
           </div>
 
-          <div className="h-[500px] animate-pulse rounded-md border border-[#EAECF0] bg-white" />
+          <div className="h-[500px] animate-pulse rounded-2xl border border-gray-100 bg-white" />
         </>
       ) : (
         <>
-          <div className="grid gap-5 grid-cols-2 md:grid-cols-4">
-            <div className="rounded-md border border-[#EAECF0] bg-white p-6">
-              <p className="text-sm font-medium text-[#667085]">Total Customers</p>
-
-              <h2 className="mt-3 text-3xl font-bold text-[#101828]">
-                {stats?.totalCustomers ?? 0}
-              </h2>
-            </div>
-
-            <div className="rounded-md border border-[#EAECF0] bg-white p-6">
-              <p className="text-sm font-medium text-[#667085]">Active Customers</p>
-
-              <h2 className="mt-3 text-3xl font-bold text-[#0F8B4B]">
-                {stats?.activeCustomers ?? 0}
-              </h2>
-            </div>
-
-            <div className="rounded-md border border-[#EAECF0] bg-white p-6">
-              <p className="text-sm font-medium text-[#667085]">Inactive Customers</p>
-
-              <h2 className="mt-3 text-3xl font-bold text-[#101828]">
-                {stats?.inactiveCustomers ?? 0}
-              </h2>
-            </div>
-
-            <div className="rounded-md border border-[#EAECF0] bg-white p-6">
-              <p className="text-sm font-medium text-[#667085]">Restricted</p>
-
-              <h2 className="mt-3 text-3xl font-bold text-[#101828]">
-                {stats?.restrictedCustomers ?? 0}
-              </h2>
-            </div>
+          {/* Unified Stat Cards — matches Reconciliation page pattern */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {statCards.map((s) => (
+              <div
+                key={s.label}
+                className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-1"
+              >
+                <p className="text-xs text-gray-400 font-medium">{s.label}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {typeof s.value === 'number' ? s.value.toLocaleString() : s.value}
+                </p>
+              </div>
+            ))}
           </div>
 
-          <div className="space-y-4 rounded-md border border-[#EAECF0] bg-white p-5 ">
+          <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden mt-2 p-5 space-y-4">
             <CustomersFilters searchQuery={searchQuery} setSearchQuery={setSearchQuery} />
 
             <CustomersTable customers={filteredCustomers} />

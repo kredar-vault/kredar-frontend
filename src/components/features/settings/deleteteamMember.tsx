@@ -1,6 +1,7 @@
 'use client';
 
 import { Loader2, Trash2, X } from 'lucide-react';
+import Button from '../landing/Button';
 
 interface DeleteMemberDialogProps {
   open: boolean;
@@ -35,12 +36,12 @@ export default function DeleteMemberDialog({
             </div>
           </div>
 
-          <button
+          <Button
             onClick={onClose}
             className="h-9 w-9 rounded-lg hover:bg-gray-100 flex items-center justify-center"
           >
             <X size={18} />
-          </button>
+          </Button>
         </div>
 
         <div className="px-6 py-6">
@@ -51,11 +52,11 @@ export default function DeleteMemberDialog({
         </div>
 
         <div className="flex justify-end gap-3 border-t border-[#edf2ee] px-6 py-5">
-          <button onClick={onClose} disabled={loading} className="kredar-btn-outline">
+          <Button onClick={onClose} disabled={loading} className="kredar-btn-outline">
             Cancel
-          </button>
+          </Button>
 
-          <button
+          <Button
             onClick={onConfirm}
             disabled={loading}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-red-700 disabled:opacity-60"
@@ -68,7 +69,7 @@ export default function DeleteMemberDialog({
                 Delete Member
               </>
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

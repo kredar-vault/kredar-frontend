@@ -25,7 +25,7 @@ export default function InfrastructureSection() {
             powerful payment infrastructure for businesses handling high-volume bank transfers.
           </p>
 
-          {/* Action buttons */}
+          {/* Action Buttons */}
           <div className="flex items-center gap-3 pt-1">
             <Link
               href="/auth/login"

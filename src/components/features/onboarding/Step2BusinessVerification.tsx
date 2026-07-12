@@ -3,6 +3,7 @@
 import { useRef, useState } from 'react';
 import { AlertCircle } from 'lucide-react';
 import DocUploadCard, { UploadingFileState } from './DocUploadCard';
+import Button from '../landing/Button';
 
 export interface Step2Data {
   certificate: File | null;
@@ -195,12 +196,12 @@ export default function Step2BusinessVerification({ defaultValues, onNext, onBac
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-2">
-        <button type="button" onClick={onBack} className="kredar-btn-outline">
+        <Button type="button" onClick={onBack} className="kredar-btn-outline">
           Back
-        </button>
-        <button type="button" onClick={handleNext} className="kredar-btn-primary">
+        </Button>
+        <Button type="button" onClick={handleNext} className="kredar-btn-primary">
           Next
-        </button>
+        </Button>
       </div>
     </div>
   );

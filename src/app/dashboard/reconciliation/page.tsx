@@ -3,41 +3,19 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-
-import {
-  CheckCircle2,
-  AlertTriangle,
-  XCircle,
-  TrendingUp,
-  ExternalLink,
-  Edit2,
-  Filter,
-  Download,
-  Search,
-  ChevronLeft,
-  ChevronRight,
-  X,
-} from 'lucide-react';
+import { Download, Search, ChevronLeft, ChevronRight, X, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCustomerMap } from '@/api/customers/useCustomerMao';
 import CustomerIdentityCard from '@/components/ui/CustomerIdentityCard';
+import Button from '@/components/features/landing/Button';
 
 const STATUS_MAP: Record<string, { label: string; class: string }> = {
-  Reconciled: { label: 'Matched', class: 'text-[#0f8b4b] bg-[#effaf2]' },
-  Overpaid: { label: 'Matched', class: 'text-[#0f8b4b] bg-[#effaf2]' },
-  Underpaid: { label: 'Needs Review', class: 'text-amber-600 bg-amber-50' },
-  Pending: { label: 'Needs Review', class: 'text-amber-600 bg-amber-50' },
+  Reconciled: { label: 'Successful', class: 'text-[#0f8b4b] bg-[#effaf2]' },
+  Overpaid: { label: 'Successful', class: 'text-[#0f8b4b] bg-[#effaf2]' },
+  Underpaid: { label: 'Pending', class: 'text-amber-600 bg-amber-50' },
+  Pending: { label: 'Pending', class: 'text-amber-600 bg-amber-50' },
   Failed: { label: 'Failed', class: 'text-red-600 bg-red-50' },
-  Reversed: { label: 'Ignored', class: 'text-gray-500 bg-gray-100' },
-};
-
-const STATUS_DOT: Record<string, string> = {
-  Reconciled: 'bg-[#0f8b4b]',
-  Overpaid: 'bg-[#0f8b4b]',
-  Underpaid: 'bg-amber-500',
-  Pending: 'bg-amber-500',
-  Failed: 'bg-red-500',
-  Reversed: 'bg-gray-400',
+  Reversed: { label: 'Failed', class: 'text-gray-500 bg-gray-100' },
 };
 
 function maskAccount(acct?: string) {
@@ -65,6 +43,7 @@ export default function ReconciliationPage() {
   const [ignoreReason, setIgnoreReason] = useState('');
   const qc = useQueryClient();
   const { customerMap } = useCustomerMap();
+
   const statusParam =
     statusFilter === 'matched'
       ? 'Reconciled'
@@ -130,143 +109,125 @@ export default function ReconciliationPage() {
   });
 
   const statCards = [
-    {
-      label: 'Matched',
-      value: stats?.matched ?? 0,
-      sub: stats?.successRate != null ? `${stats.successRate}%` : '',
-      subClass: 'text-[#0f8b4b] bg-[#effaf2]',
-      desc: 'Fully reconciled transactions',
-      icon: <CheckCircle2 size={22} className="text-[#0f8b4b]" />,
-    },
-    {
-      label: 'Needs Review',
-      value: stats?.pendingReview ?? 0,
-      sub: (stats?.pendingReview ?? 0) > 0 ? 'Critical' : 'Clear',
-      subClass:
-        (stats?.pendingReview ?? 0) > 0
-          ? 'text-amber-600 bg-amber-50'
-          : 'text-[#0f8b4b] bg-[#effaf2]',
-      desc: 'Requires immediate attention',
-      icon: <AlertTriangle size={22} className="text-amber-500" />,
-    },
-    {
-      label: 'Unmatched',
-      value: stats?.failedMatches ?? 0,
-      sub: 'Pending',
-      subClass: 'text-gray-500 bg-gray-100',
-      desc: 'Waiting for data feed',
-      icon: <XCircle size={22} className="text-gray-400" />,
-    },
-    {
-      label: 'Success Rate',
-      value: stats?.successRate != null ? `${stats.successRate}%` : '—',
-      sub: '',
-      subClass: '',
-      desc: 'vs all transactions',
-      icon: <TrendingUp size={22} className="text-[#0f8b4b]" />,
-    },
+    { label: 'Matched', value: stats?.matched ?? 0 },
+    { label: 'Needs Review', value: stats?.pendingReview ?? 0 },
+    { label: 'Unmatched', value: stats?.failedMatches ?? 0 },
+    { label: 'Success Rate', value: stats?.successRate != null ? `${stats.successRate}%` : '—' },
   ];
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12 px-4 sm:px-6">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">Reconciliation</h1>
-          <p className="text-xs text-[#45504b] mt-0.5">
-            Match and verify incoming transactions against expected payments
-          </p>
-        </div>
-        <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-xs font-semibold text-gray-600 hover:bg-gray-50 transition-colors">
-          <Download size={13} /> Export
-        </button>
+    <div className="space-y-6 max-w-7xl mx-auto pb-12 px-4 sm:px-6 mt-4">
+      {/* Page Title Header */}
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">Reconciliation</h1>
+        <p className="text-xs text-[#45504b] mt-0.5">
+          Match and verify incoming transactions against expected payments
+        </p>
       </div>
 
-      {/* Stat Cards */}
+      {/* Unified Stat Cards (No Icons, No Shadows, Title Case) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((s) => (
           <div
             key={s.label}
-            className="bg-white border border-[#f0f4f1] rounded-2xl p-5 shadow-sm flex flex-col gap-2"
+            className="bg-white border border-gray-100 rounded-2xl p-5 flex flex-col gap-1"
           >
-            <div className="flex items-start justify-between">
-              <p className="text-sm text-gray-500 font-medium">{s.label}</p>
-              {s.icon}
-            </div>
-            <div className="flex items-baseline gap-2">
-              <p className="text-3xl font-bold text-gray-900">
-                {typeof s.value === 'number' ? s.value.toLocaleString() : s.value}
-              </p>
-              {s.sub && (
-                <span className={cn('text-xs font-semibold px-2 py-0.5 rounded-full', s.subClass)}>
-                  {s.sub}
-                </span>
-              )}
-            </div>
-            <p className="text-xs text-gray-400">{s.desc}</p>
+            <p className="text-xs text-gray-400 font-medium">{s.label}</p>
+            <p className="text-2xl font-bold text-gray-900">
+              {typeof s.value === 'number' ? s.value.toLocaleString() : s.value}
+            </p>
           </div>
         ))}
       </div>
 
-      {/* Table */}
-      <div className="bg-white border border-[#f0f4f1] rounded-2xl shadow-sm overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-50 flex-wrap gap-3">
-          <h2 className="text-sm font-bold text-gray-900">Transactions</h2>
-          <div className="flex items-center gap-2 flex-wrap">
-            <div className="relative">
-              <Search
-                size={13}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-              />
-              <input
-                type="text"
-                placeholder="Search reference, narration..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-8 pr-3 py-1.5 text-xs border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#0f8b4b]/20 w-52"
-              />
-            </div>
-            <div className="flex items-center gap-1">
-              <Filter size={13} className="text-gray-400" />
-              <select
-                value={statusFilter}
-                onChange={(e) => {
-                  setStatusFilter(e.target.value);
-                  setPage(1);
-                }}
-                className="text-xs border border-gray-200 rounded-lg px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#0f8b4b]/20 text-gray-600"
-              >
-                <option value="all">All</option>
-                <option value="matched">Matched</option>
-                <option value="review">Needs Review</option>
-                <option value="unmatched">Ignored / Failed</option>
-              </select>
-            </div>
+      {/* Filters and Controls Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <div className="relative">
+            <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by TRX ID..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#0f8b4b] w-56 text-gray-700 bg-white"
+            />
+          </div>
+
+          <div className="relative flex items-center">
+            <select className="appearance-none text-xs border border-gray-200 rounded-xl pl-3 pr-8 py-2 focus:outline-none text-gray-600 bg-white min-w-[100px]">
+              <option>Date</option>
+            </select>
+            <span className="absolute right-3 pointer-events-none text-gray-400 text-[10px]">
+              ▼
+            </span>
+          </div>
+
+          <div className="relative flex items-center">
+            <select className="appearance-none text-xs border border-gray-200 rounded-xl pl-3 pr-8 py-2 focus:outline-none text-gray-600 bg-white min-w-[100px]">
+              <option>Currency</option>
+            </select>
+            <span className="absolute right-3 pointer-events-none text-gray-400 text-[10px]">
+              ▼
+            </span>
+          </div>
+
+          <div className="relative flex items-center">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setPage(1);
+              }}
+              className="appearance-none text-xs border border-gray-200 rounded-xl pl-3 pr-8 py-2 focus:outline-none text-gray-600 bg-white min-w-[110px]"
+            >
+              <option value="all">Status</option>
+              <option value="matched">Matched</option>
+              <option value="review">Needs Review</option>
+              <option value="unmatched">Ignored / Failed</option>
+            </select>
+            <span className="absolute right-3 pointer-events-none text-gray-400 text-[10px]">
+              ▼
+            </span>
           </div>
         </div>
 
+        <Button className="flex items-center gap-1.5 px-4 py-2 bg-[#0f8b4b] hover:bg-[#0a7040] rounded-xl text-xs font-semibold text-white transition-colors self-start md:self-auto">
+          <Download size={13} /> Export
+        </Button>
+      </div>
+
+      {/* Styled Data Table Container */}
+      <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden mt-2">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-gray-50">
-                {['Status', 'Customer', 'Account', 'Reference', 'Amount', 'Date', 'Actions'].map(
-                  (h) => (
-                    <th
-                      key={h}
-                      className="px-4 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-gray-400 whitespace-nowrap"
-                    >
-                      {h}
-                    </th>
-                  ),
-                )}
+              <tr className="border-b border-gray-100 bg-white">
+                {[
+                  'Transaction ID',
+                  'Customer',
+                  'Account',
+                  'Reference',
+                  'Amount',
+                  'Date',
+                  'Status',
+                  '',
+                ].map((h, idx) => (
+                  <th
+                    key={idx}
+                    className="px-6 py-4 text-left text-xs font-semibold text-gray-600 whitespace-nowrap"
+                  >
+                    {h}
+                  </th>
+                ))}
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-gray-100 bg-white">
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    {[...Array(7)].map((_, j) => (
-                      <td key={j} className="px-4 py-4">
+                    {[...Array(8)].map((_, j) => (
+                      <td key={j} className="px-6 py-4.5">
                         <div className="h-4 bg-gray-100 rounded animate-pulse" />
                       </td>
                     ))}
@@ -274,7 +235,7 @@ export default function ReconciliationPage() {
                 ))
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="px-4 py-16 text-center text-sm text-gray-400">
+                  <td colSpan={8} className="px-6 py-16 text-center text-sm text-gray-400">
                     No transactions found
                   </td>
                 </tr>
@@ -284,82 +245,47 @@ export default function ReconciliationPage() {
                     label: tx.status,
                     class: 'text-gray-500 bg-gray-100',
                   };
-                  const dot = STATUS_DOT[tx.status] ?? 'bg-gray-300';
-                  const isMatched = ['Reconciled', 'Overpaid'].includes(tx.status);
-                  const needsReviewItem = ['Underpaid', 'Pending'].includes(tx.status);
-                  const customerName = tx.customerId ? 'Linked' : 'Unknown';
-
                   return (
-                    <tr key={tx.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <span
-                          className={cn(
-                            'inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg',
-                            statusInfo.class,
-                          )}
-                        >
-                          <span className={cn('w-1.5 h-1.5 rounded-full flex-shrink-0', dot)} />
-                          {statusInfo.label}
-                        </span>
+                    <tr key={tx.id} className="hover:bg-gray-50/40 transition-colors">
+                      <td className="px-6 py-4.5 font-medium text-gray-900 whitespace-nowrap">
+                        {tx.id ? `TRX${tx.id.slice(0, 7)}` : '—'}
                       </td>
-                      <td className="px-4 py-3.5 whitespace-nowrap">
+                      <td className="px-6 py-4.5 whitespace-nowrap">
                         <CustomerIdentityCard
                           customerId={tx.customerId}
                           customerName={customerMap.get(tx.customerId)?.fullName}
                           dedicatedAccountNumber={tx.dedicatedAccountNumber}
                         />
                       </td>
-                      <td className="px-4 py-3.5 text-gray-500 font-mono text-xs whitespace-nowrap">
+                      <td className="px-6 py-4.5 text-gray-500 font-mono text-xs whitespace-nowrap">
                         {maskAccount(tx.dedicatedAccountNumber)}
                       </td>
-                      <td className="px-4 py-3.5 text-gray-500 text-xs whitespace-nowrap font-mono">
+                      <td className="px-6 py-4.5 text-gray-500 text-xs whitespace-nowrap font-mono">
                         {tx.reference || '—'}
                       </td>
-                      <td className="px-4 py-3.5 font-bold text-gray-900 whitespace-nowrap tabular-nums">
+                      <td className="px-6 py-4.5 font-medium text-gray-900 whitespace-nowrap tabular-nums">
                         {fmt(tx.amount ?? 0)}
                       </td>
-                      <td className="px-4 py-3.5 text-gray-500 text-xs whitespace-nowrap">
-                        {tx.createdAt
-                          ? new Date(tx.createdAt).toLocaleDateString('en-NG', {
-                              day: 'numeric',
-                              month: 'short',
-                              year: 'numeric',
-                            })
-                          : '—'}
+                      <td className="px-6 py-4.5 text-gray-500 text-xs whitespace-nowrap">
+                        {tx.createdAt ? new Date(tx.createdAt).toISOString().split('T')[0] : '—'}
                       </td>
-                      <td className="px-4 py-3.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1">
-                          {isMatched ? (
-                            <button
-                              onClick={() =>
-                                window.open(`/dashboard/transactions?ref=${tx.reference}`, '_blank')
-                              }
-                              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
-                              title="View details"
-                            >
-                              <ExternalLink size={14} />
-                            </button>
-                          ) : needsReviewItem ? (
-                            <button
-                              onClick={() => {
-                                setPendingAction({ type: 'match', id: tx.id });
-                              }}
-                              className="p-1.5 hover:bg-amber-50 rounded-lg text-gray-400 hover:text-amber-500 transition-colors"
-                              title="Match to customer"
-                            >
-                              <Edit2 size={14} />
-                            </button>
-                          ) : null}
-                          {!isMatched && (
-                            <button
-                              onClick={() => setPendingAction({ type: 'ignore', id: tx.id })}
-                              className="p-1.5 hover:bg-red-50 rounded-lg text-gray-400 hover:text-red-500 transition-colors"
-                              title="Ignore transaction"
-                            >
-                              <AlertTriangle size={14} />
-                            </button>
+                      <td className="px-6 py-4.5 whitespace-nowrap">
+                        <span
+                          className={cn(
+                            'inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full',
+                            statusInfo.class,
                           )}
-                        </div>
+                        >
+                          {statusInfo.label}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4.5 text-right whitespace-nowrap">
+                        <button
+                          onClick={() => setPendingAction({ type: 'match', id: tx.id })}
+                          className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+                        >
+                          <MoreVertical size={16} />
+                        </button>
                       </td>
                     </tr>
                   );
@@ -369,25 +295,29 @@ export default function ReconciliationPage() {
           </table>
         </div>
 
+        {/* Pagination Controls */}
         {totalPages > 1 && (
-          <div className="flex items-center justify-between px-5 py-3 border-t border-gray-50">
-            <button
+          <div className="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-white">
+            <Button
               onClick={() => setPage((p) => Math.max(1, p - 1))}
               disabled={page === 1}
-              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 disabled:opacity-40"
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 disabled:opacity-40 font-medium"
             >
-              <ChevronLeft size={14} /> Prev
-            </button>
-            <span className="text-xs text-gray-400">
-              Page {page} of {totalPages}
-            </span>
-            <button
+              <ChevronLeft size={14} /> Previous
+            </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-gray-700 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-200">
+                {page}
+              </span>
+              <span className="text-xs text-gray-400 font-medium">of {totalPages}</span>
+            </div>
+            <Button
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
               disabled={page === totalPages}
-              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 disabled:opacity-40"
+              className="flex items-center gap-1 text-xs text-gray-500 hover:text-gray-800 disabled:opacity-40 font-medium"
             >
               Next <ChevronRight size={14} />
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -395,15 +325,15 @@ export default function ReconciliationPage() {
       {/* Match Modal */}
       {pendingAction?.type === 'match' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-gray-900">Match to Customer</h3>
-              <button
+              <Button
                 onClick={() => setPendingAction(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X size={16} />
-              </button>
+              </Button>
             </div>
             <div className="space-y-3">
               <div>
@@ -431,13 +361,13 @@ export default function ReconciliationPage() {
                 />
               </div>
               <div className="flex gap-2 pt-1">
-                <button
+                <Button
                   onClick={() => setPendingAction(null)}
                   className="flex-1 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   disabled={!matchCustomerId || matchMutation.isPending}
                   onClick={() =>
                     matchMutation.mutate({
@@ -449,7 +379,7 @@ export default function ReconciliationPage() {
                   className="flex-1 py-2 rounded-xl bg-[#0f8b4b] text-white text-xs font-semibold hover:bg-[#0a7040] disabled:opacity-50 transition-colors"
                 >
                   {matchMutation.isPending ? 'Matching…' : 'Confirm Match'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
@@ -459,15 +389,15 @@ export default function ReconciliationPage() {
       {/* Ignore Modal */}
       {pendingAction?.type === 'ignore' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm mx-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-sm mx-4">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-sm font-bold text-gray-900">Ignore Transaction</h3>
-              <button
+              <Button
                 onClick={() => setPendingAction(null)}
                 className="text-gray-400 hover:text-gray-600"
               >
                 <X size={16} />
-              </button>
+              </Button>
             </div>
             <div className="space-y-3">
               <p className="text-xs text-gray-500">
@@ -486,13 +416,13 @@ export default function ReconciliationPage() {
                 />
               </div>
               <div className="flex gap-2 pt-1">
-                <button
+                <Button
                   onClick={() => setPendingAction(null)}
                   className="flex-1 py-2 rounded-xl border border-gray-200 text-xs font-semibold text-gray-600 hover:bg-gray-50"
                 >
                   Cancel
-                </button>
-                <button
+                </Button>
+                <Button
                   disabled={ignoreMutation.isPending}
                   onClick={() =>
                     ignoreMutation.mutate({ id: pendingAction.id, reason: ignoreReason })
@@ -500,7 +430,7 @@ export default function ReconciliationPage() {
                   className="flex-1 py-2 rounded-xl bg-red-500 text-white text-xs font-semibold hover:bg-red-600 disabled:opacity-50 transition-colors"
                 >
                   {ignoreMutation.isPending ? 'Ignoring…' : 'Ignore'}
-                </button>
+                </Button>
               </div>
             </div>
           </div>
