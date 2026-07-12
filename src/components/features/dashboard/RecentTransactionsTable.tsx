@@ -1,10 +1,10 @@
 'use client';
 
-import { ChevronDown, MoreVertical } from 'lucide-react';
+import { useState, Fragment } from 'react'; // 1. Added Fragment import
+import { ChevronDown, Calendar, CreditCard, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import Button from '../landing/Button';
 
 const statusColors: Record<string, string> = {
   Reconciled: 'bg-[#edfdf2] text-[#117b43] border-[#daeedf]',
@@ -16,6 +16,8 @@ const statusColors: Record<string, string> = {
 };
 
 export default function RecentTransactionsTable() {
+  const [expandedRowId, setExpandedRowId] = useState<string | null>(null);
+
   const { data: transactions = [], isLoading } = useQuery({
     queryKey: ['transactions'],
     queryFn: async () => {
@@ -28,13 +30,17 @@ export default function RecentTransactionsTable() {
     },
   });
 
+  const toggleRow = (id: string) => {
+    setExpandedRowId(expandedRowId === id ? null : id);
+  };
+
   return (
-    <div className="bg-white border border-[#eef2ef] rounded-md p-6  space-y-5">
+    <div className="bg-white border border-[#eef2ef] rounded-md p-6 space-y-5">
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-base font-bold text-[#081b10]">Recent transactions</h3>
           <p className="text-[11px] text-[#667085] font-medium mt-0.5">
-            Real-time dynamic verification stream
+            Real-time dynamic verification stream (Click rows to expand)
           </p>
         </div>
 
@@ -95,6 +101,7 @@ export default function RecentTransactionsTable() {
               </tr>
             ) : (
               transactions.slice(0, 7).map((tx: any) => {
+                const txId = tx.id || tx.reference || Math.random().toString();
                 const txName =
                   tx.narration || tx.name || tx.customer?.name || tx.customerName || 'Anonymous';
                 const txAvatar =
@@ -104,6 +111,7 @@ export default function RecentTransactionsTable() {
                 const mappedStatus =
                   txStatus.charAt(0).toUpperCase() + txStatus.slice(1).toLowerCase();
                 const statusClass = statusColors[mappedStatus] || statusColors['Pending'];
+                const isExpanded = expandedRowId === txId;
 
                 const amountStr = new Intl.NumberFormat('en-NG', {
                   style: 'currency',
@@ -112,38 +120,91 @@ export default function RecentTransactionsTable() {
                 }).format(tx.amount || 0);
 
                 return (
-                  <tr key={tx.id} className="text-xs hover:bg-[#f7faf6]/30 transition-colors group">
-                    <td className="py-3.5 flex items-center gap-3">
-                      <img
-                        src={txAvatar}
-                        alt=""
-                        className="w-8 h-8 rounded-md object-cover border border-[#eef2ef] bg-[#f7faf6]"
-                      />
-                      <div className="flex flex-col">
-                        <span className="font-bold text-[#081b10] text-xs">{txName}</span>
-                        <span className="text-[10px] text-[#667085] font-medium">
-                          Ref: TXN-{String(tx.id || '').substring(0, 6)}
+                  // 2. Fixed: Wrap with explicit keyed Fragment component
+                  <Fragment key={txId}>
+                    <tr
+                      onClick={() => toggleRow(txId)}
+                      className={cn(
+                        'text-xs transition-colors group cursor-pointer select-none',
+                        isExpanded ? 'bg-[#f7faf6]/50' : 'hover:bg-[#f7faf6]/30',
+                      )}
+                    >
+                      <td className="py-3.5 flex items-center gap-3">
+                        <img
+                          src={txAvatar}
+                          alt=""
+                          className="w-8 h-8 rounded-md object-cover border border-[#eef2ef] bg-[#f7faf6]"
+                        />
+                        <div className="flex flex-col">
+                          <span className="font-bold text-[#081b10] text-xs">{txName}</span>
+                          <span className="text-[10px] text-[#667085] font-medium">
+                            Ref: TXN-{String(txId).substring(0, 6)}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-3.5 font-medium text-[#45504b]">{txDate}</td>
+                      <td className="py-3.5 font-bold text-[#081b10] text-xs">{amountStr}</td>
+                      <td className="py-3.5">
+                        <span
+                          className={cn(
+                            'inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border tracking-wide',
+                            statusClass,
+                          )}
+                        >
+                          {mappedStatus}
                         </span>
-                      </div>
-                    </td>
-                    <td className="py-3.5 font-medium text-[#45504b]">{txDate}</td>
-                    <td className="py-3.5 font-bold text-[#081b10] text-xs">{amountStr}</td>
-                    <td className="py-3.5">
-                      <span
-                        className={cn(
-                          'inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold border tracking-wide',
-                          statusClass,
-                        )}
-                      >
-                        {mappedStatus}
-                      </span>
-                    </td>
-                    <td className="py-3.5 text-right opacity-40 group-hover:opacity-100 transition-opacity">
-                      <Button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-lg hover:bg-[#f7faf6]">
-                        <MoreVertical size={14} />
-                      </Button>
-                    </td>
-                  </tr>
+                      </td>
+                      <td className="py-3.5 text-right pr-2">
+                        <ChevronDown
+                          size={14}
+                          className={cn(
+                            'text-gray-400 ml-auto transition-transform duration-200',
+                            isExpanded && 'rotate-180 text-gray-700',
+                          )}
+                        />
+                      </td>
+                    </tr>
+
+                    {isExpanded && (
+                      <tr className="bg-[#fcfdfe]">
+                        <td colSpan={5} className="p-4 border-l-2 border-[#117b43]">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-[11px] text-[#45504b]">
+                            <div className="flex items-start gap-2">
+                              <FileText size={14} className="text-gray-400 mt-0.5 shrink-0" />
+                              <div>
+                                <p className="font-bold text-gray-400 uppercase tracking-wider text-[9px]">
+                                  Full Reference ID
+                                </p>
+                                <p className="font-mono text-gray-800 mt-0.5 break-all">{txId}</p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <CreditCard size={14} className="text-gray-400 mt-0.5 shrink-0" />
+                              <div>
+                                <p className="font-bold text-gray-400 uppercase tracking-wider text-[9px]">
+                                  Target Account
+                                </p>
+                                <p className="text-gray-800 mt-0.5 font-medium">
+                                  {tx.dedicatedAccountNumber || '—'}
+                                </p>
+                              </div>
+                            </div>
+                            <div className="flex items-start gap-2">
+                              <Calendar size={14} className="text-gray-400 mt-0.5 shrink-0" />
+                              <div>
+                                <p className="font-bold text-gray-400 uppercase tracking-wider text-[9px]">
+                                  Narration Log
+                                </p>
+                                <p className="text-gray-800 mt-0.5 italic">
+                                  "{tx.narration || 'No processing remarks provided.'}"
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    )}
+                  </Fragment>
                 );
               })
             )}
