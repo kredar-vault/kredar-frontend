@@ -25,10 +25,6 @@ export default function DashboardHome() {
             Welcome. Here's an overview of your account today
           </p>
         </div>
-        <Button className="flex items-center gap-2 h-10 px-4 rounded-xl bg-[#0f8b4b] text-white text-xs font-semibold hover:bg-[#0a7040] transition-colors self-start sm:self-auto">
-          <Download size={14} />
-          Export
-        </Button>
       </div>
 
       {/* SKELETAL LOADING STATE MATCHING ACTUAL STRUCTURE */}
