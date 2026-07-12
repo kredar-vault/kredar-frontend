@@ -290,7 +290,7 @@ export default function TransactionsPage() {
                   return (
                     <tr
                       key={tx.id}
-                      className="hover:bg-gray-50/40 transition-colors cursor-pointer"
+                      className="hover:bg-gray-50/40 transition-colors cursor-pointer p-2"
                       onClick={() => handleRowClick(tx)}
                     >
                       <td className="px-6 py-4.5 font-medium text-gray-900 whitespace-nowrap">
@@ -308,14 +308,6 @@ export default function TransactionsPage() {
                         >
                           {statusInfo.label}
                         </span>
-                      </td>
-                      <td
-                        className="px-6 py-4.5 text-right whitespace-nowrap"
-                        onClick={(e) => e.stopPropagation()}
-                      >
-                        <button className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors">
-                          <MoreVertical size={16} />
-                        </button>
                       </td>
                     </tr>
                   );

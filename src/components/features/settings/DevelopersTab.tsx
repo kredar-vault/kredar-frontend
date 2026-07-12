@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { Plus, Trash2, MoreVertical, RotateCw, Eye, EyeOff, Copy, Check } from 'lucide-react';
 import { ApiKeyItem } from '@/api/api-keys/types';
 import { WebhookEndpoint } from '@/api/webhooks/types';
-import Button from '../landing/Button';
 
 interface DevelopersTabProps {
   apiKeys: ApiKeyItem[];
@@ -134,16 +133,16 @@ export default function DevelopersTab({
                       {displayValue}
                     </code>
 
-                    <Button
+                    <button
                       type="button"
                       onClick={() => toggleVisible(key.id)}
                       className="text-[#45504b] p-1.5 rounded-lg hover:bg-[#f3f4f6]"
                       title={isVisible ? 'Hide key' : 'Show key'}
                     >
                       {isVisible ? <EyeOff size={15} /> : <Eye size={15} />}
-                    </Button>
+                    </button>
 
-                    <Button
+                    <button
                       type="button"
                       onClick={() => handleCopy(key.id, key.keyString)}
                       className="text-[#45504b] p-1.5 rounded-lg hover:bg-[#f3f4f6]"
@@ -154,31 +153,31 @@ export default function DevelopersTab({
                       ) : (
                         <Copy size={15} />
                       )}
-                    </Button>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-2 shrink-0">
-                    <Button
+                    <button
                       type="button"
                       onClick={() => setConfirmDeleteId(key.id)}
                       className="text-[#ef4444] hover:text-red-600 transition-colors p-1.5 hover:bg-[#fff0f0] rounded-lg"
                       title="Delete API Key"
                     >
                       <Trash2 size={16} />
-                    </Button>
+                    </button>
 
                     <div className="relative" ref={openMenuId === key.id ? menuRef : null}>
-                      <Button
+                      <button
                         type="button"
                         onClick={() => setOpenMenuId(openMenuId === key.id ? null : key.id)}
                         className="text-[#45504b] p-1.5 rounded-lg hover:bg-[#f3f4f6]"
                       >
                         <MoreVertical size={16} />
-                      </Button>
+                      </button>
 
                       {openMenuId === key.id && (
                         <div className="absolute right-0 top-8 z-10 bg-white border border-[#d8e1da] rounded-lg shadow-md py-1 min-w-[140px]">
-                          <Button
+                          <button
                             type="button"
                             onClick={() => {
                               onRotateKey(key.id);
@@ -188,7 +187,7 @@ export default function DevelopersTab({
                           >
                             <RotateCw size={14} />
                             Rotate key
-                          </Button>
+                          </button>
                         </div>
                       )}
                     </div>
@@ -199,14 +198,14 @@ export default function DevelopersTab({
           )}
         </div>
 
-        <Button
+        <button
           type="button"
           onClick={onCreateKey}
           className="kredar-btn-primary h-9 text-xs font-semibold px-4 flex items-center gap-1.5"
         >
           <Plus size={14} />
           Create API Key
-        </Button>
+        </button>
       </div>
 
       <hr className="border-[#f0f4f1]" />
@@ -228,23 +227,23 @@ export default function DevelopersTab({
           </div>
 
           <div className="flex gap-2">
-            <Button
+            <button
               type="submit"
               className="kredar-btn-primary h-9 text-xs font-semibold px-4 flex items-center gap-1.5"
             >
               <Plus size={14} />
               Save webhook
-            </Button>
+            </button>
 
             {webhooks.length > 0 && (
-              <Button
+              <button
                 type="button"
                 onClick={() => onDeleteWebhook(webhooks[0].id)}
                 className="kredar-btn-outline h-9 text-xs font-semibold px-4 flex items-center gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
               >
                 <Trash2 size={14} />
                 Delete webhook
-              </Button>
+              </button>
             )}
           </div>
         </form>
@@ -260,20 +259,20 @@ export default function DevelopersTab({
               immediately.
             </p>
             <div className="flex justify-end gap-2 pt-2">
-              <Button
+              <button
                 type="button"
                 onClick={() => setConfirmDeleteId(null)}
                 className="kredar-btn-outline h-9 text-xs font-semibold px-4"
               >
                 Cancel
-              </Button>
-              <Button
+              </button>
+              <button
                 type="button"
                 onClick={confirmDelete}
                 className="h-9 text-xs font-semibold px-4 rounded-lg bg-red-600 text-white hover:bg-red-700"
               >
                 Delete
-              </Button>
+              </button>
             </div>
           </div>
         </div>
@@ -293,24 +292,24 @@ export default function DevelopersTab({
               <code className="text-xs font-mono text-[#081b10] break-all flex-1">
                 {newKeySecret}
               </code>
-              <Button
+              <button
                 type="button"
                 onClick={() => handleCopyModal(newKeySecret)}
                 className="text-[#45504b] p-1.5 rounded-lg hover:bg-white shrink-0"
                 title="Copy key"
               >
                 {copiedModal ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-              </Button>
+              </button>
             </div>
 
             <div className="flex justify-end pt-2">
-              <Button
+              <button
                 type="button"
                 onClick={onCloseNewKeyModal}
                 className="kredar-btn-primary h-9 text-xs font-semibold px-4"
               >
                 Done, I&apos;ve copied it
-              </Button>
+              </button>
             </div>
           </div>
         </div>
