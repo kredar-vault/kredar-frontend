@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Button from '../landing/Button';
 
 export default function DocsDedicatedAccounts() {
   const [copiedCreateReq, setCopiedCreateReq] = useState(false);
@@ -55,12 +54,12 @@ export default function DocsDedicatedAccounts() {
             <div className="bg-[#24292e] rounded-xl overflow-hidden shadow border border-slate-700">
               <div className="bg-[#1f2428] border-b border-slate-700 px-4 py-1.5 flex justify-between items-center text-[10px] font-mono text-slate-400">
                 <span>JSON Payload</span>
-                <Button
+                <button
                   onClick={() => handleCopy(createReqJson, setCopiedCreateReq)}
                   className="text-white hover:text-emerald-400"
                 >
                   {copiedCreateReq ? 'copied!' : 'copy'}
-                </Button>
+                </button>
               </div>
               <pre className="p-4 overflow-x-auto text-[10px] font-mono text-emerald-400 bg-[#1b1f23]">
                 <code>{createReqJson}</code>
@@ -74,12 +73,12 @@ export default function DocsDedicatedAccounts() {
             <div className="bg-[#24292e] rounded-xl overflow-hidden shadow border border-slate-700">
               <div className="bg-[#1f2428] border-b border-slate-700 px-4 py-1.5 flex justify-between items-center text-[10px] font-mono text-slate-400">
                 <span>JSON Response</span>
-                <Button
+                <button
                   onClick={() => handleCopy(createResJson, setCopiedCreateRes)}
                   className="text-white hover:text-emerald-400"
                 >
                   {copiedCreateRes ? 'copied!' : 'copy'}
-                </Button>
+                </button>
               </div>
               <pre className="p-4 overflow-x-auto text-[10px] font-mono text-emerald-400 bg-[#1b1f23]">
                 <code>{createResJson}</code>

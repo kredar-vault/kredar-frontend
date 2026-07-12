@@ -113,13 +113,13 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
     <header className="h-14 border-b border-gray-100 bg-white sticky top-0 z-30 select-none flex items-center px-4 sm:px-6 justify-between">
       <div className="flex items-center gap-6 flex-1 max-w-xl">
         {onToggleMobile && (
-          <Button
+          <button
             onClick={onToggleMobile}
             className="lg:hidden p-1.5 hover:bg-gray-50 border border-gray-200 rounded-md text-gray-700 transition-all active:scale-95 flex-shrink-0"
             aria-label="Open navigation sidebar"
           >
             <Menu size={18} />
-          </Button>
+          </button>
         )}
       </div>
 

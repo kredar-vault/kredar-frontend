@@ -270,7 +270,7 @@ export default function TransactionsPage() {
                   <tr key={i}>
                     {[...Array(5)].map((_, j) => (
                       <td key={j} className="px-6 py-4.5">
-                        <div className="h-4 bg-gray-100 rounded animate-pulse" />
+                        <div className="h-6 bg-gray-100 rounded animate-pulse" />
                       </td>
                     ))}
                   </tr>
