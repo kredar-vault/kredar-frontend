@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import { Search, ArrowLeft } from 'lucide-react';
-import Button from '../landing/Button';
 
 interface DocsHeaderProps {
   searchQuery?: string;
@@ -183,7 +182,7 @@ export default function DocsHeader({
             <div className="absolute top-full left-0 mt-1 w-[220px] xs:w-[260px] sm:w-80 bg-white border border-[#e2ebd9] rounded-lg shadow-xl z-50 max-h-64 overflow-y-auto py-1 animate-in fade-in slide-in-from-top-2 duration-150">
               {results.length > 0 ? (
                 results.map((result) => (
-                  <Button
+                  <button
                     key={result.id}
                     onClick={() => handleResultClick(result.id)}
                     className="w-full text-left px-4 py-2 hover:bg-[#f4f7f4] transition-colors flex flex-col gap-0.5 border-b border-[#f4f7f4] last:border-b-0"
@@ -199,7 +198,7 @@ export default function DocsHeader({
                     <span className="text-[10px] text-slate-500 line-clamp-1">
                       {result.content}
                     </span>
-                  </Button>
+                  </button>
                 ))
               ) : (
                 <div className="px-4 py-3 text-xs text-slate-400 text-center font-medium">

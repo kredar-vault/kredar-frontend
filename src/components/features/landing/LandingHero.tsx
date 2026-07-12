@@ -39,7 +39,7 @@ export default function HeroSection() {
 
         {/* Centered CTA Buttons layout for both Mobile and Desktop */}
         <div className="mt-8 flex flex-col justify-center items-center gap-3 sm:flex-row z-30 w-full sm:w-auto">
-          <Link href="/register" className="w-full sm:w-auto flex justify-center">
+          <Link href="/auth/signup" className="w-full sm:w-auto flex justify-center">
             <Button className="bg-white text-[#030A05] hover:bg-white/90 w-full sm:w-auto justify-center">
               Create Free Account
             </Button>
