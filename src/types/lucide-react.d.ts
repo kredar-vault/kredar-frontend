@@ -91,4 +91,5 @@ declare module 'lucide-react' {
   export const ListFilter: LucideIcon;
   export const LayoutList: LucideIcon;
   export const User: LucideIcon;
+  export const Calendar: LucideIcon;
 }

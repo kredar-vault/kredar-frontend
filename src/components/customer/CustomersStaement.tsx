@@ -110,11 +110,6 @@ export default function CustomerStatement({ customerId }: CustomerStatementProps
                         {statusKey}
                       </span>
                     </td>
-                    <td className="py-3.5 text-right">
-                      <Button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-md hover:bg-[#f7faf6]">
-                        <MoreVertical size={13} />
-                      </Button>
-                    </td>
                   </tr>
                 );
               })
