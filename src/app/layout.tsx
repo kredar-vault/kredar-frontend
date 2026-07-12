@@ -24,7 +24,7 @@ export const metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" className={jakarta.variable} suppressHydrationWarning>
-      <body className="antialiased bg-[#F8FAF8] text-[#081B10]">
+      <body className="bg-[#F8FAF8] text-[#081B10] antialiased">
         <QueryProvider>
           <ThemeProvider>{children}</ThemeProvider>
         </QueryProvider>

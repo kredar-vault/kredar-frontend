@@ -24,15 +24,15 @@
     color: var(--kredar-text);
   }
 
-  body {
-    min-height: 100%;
-    background: var(--kredar-surface);
-    color: var(--kredar-text);
-    font-family: var(--font-geist-sans), ui-sans-serif, system-ui, -apple-system,
-      BlinkMacSystemFont, "Segoe UI", sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+ body {
+  min-height: 100%;
+  background: var(--kredar-surface);
+  color: var(--kredar-text);
+  font-family: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system,
+    BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
   #__next {
     min-height: 100%;
@@ -56,22 +56,20 @@
   }
 
   .paid {
-    color: var(--white, #FFF);
-    font-family: Geist;
-    font-size: 48px;
-    font-style: normal;
-    font-weight: 600;
-    line-height: 56px;
-  }
+  color: #fff;
+  font-family: var(--font-jakarta);
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 56px;
+}
 
-  .managed {
-    color: var(--white, #FFF);
-    font-family: Geist;
-    font-size: 20px;
-    font-style: normal;
-    font-weight: 400;
-    line-height: 32px;
-  }
+.managed {
+  color: #fff;
+  font-family: var(--font-jakarta);
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 32px;
+}
 
   button,
   input,
@@ -135,10 +133,9 @@
     @apply mt-1 text-xs text-[#ef4444];
   }
 
-  .font-inter {
-    font-family: var(--font-inter), sans-serif;
-  }
-
+.font-jakarta {
+  font-family: var(--font-jakarta), sans-serif;
+}
   @keyframes fadeInUp {
     from {
       opacity: 0;
