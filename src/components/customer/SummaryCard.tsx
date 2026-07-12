@@ -5,7 +5,6 @@ import { Loader2 } from 'lucide-react';
 import { Customer } from '@/api/customers/types';
 import { useGenerateVirtualAccount } from '@/api/customers/hooks';
 import CustomerAvatar from './avatar';
-import Button from '../features/landing/Button';
 
 interface CustomerSummaryCardProps {
   customer: Customer;
@@ -48,14 +47,14 @@ export default function CustomerSummaryCard({ customer }: CustomerSummaryCardPro
               {customer.dedicatedAccountNumber ? (
                 <p className="text-[#101828] font-medium mt-1">{customer.dedicatedAccountNumber}</p>
               ) : (
-                <Button
+                <button
                   onClick={handleGenerateDva}
                   disabled={generateDva.isPending}
                   className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-[#0f8b4b] hover:text-[#0c703c] disabled:opacity-60 transition-colors"
                 >
                   {generateDva.isPending ? <Loader2 size={12} className="animate-spin" /> : null}
                   {generateDva.isPending ? 'Provisioning…' : 'Link DVA'}
-                </Button>
+                </button>
               )}
             </div>
           </div>
