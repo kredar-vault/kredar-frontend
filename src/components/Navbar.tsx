@@ -68,7 +68,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
       });
     }
     setShowNotifs(false);
-    router.push('/dashboard/inbox');
+    router.push('/dashboard/activity');
   };
 
   const markAllRead = () => {
@@ -151,13 +151,13 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
               <div className="flex items-center justify-between px-4 py-2.5 border-b border-gray-50">
                 <span className="text-xs font-bold text-gray-900">Notifications</span>
                 {unreadCount > 0 && (
-                  <Button
+                  <button
                     onClick={markAllRead}
                     className="flex items-center gap-1 text-[11px] text-[#006C49] font-bold hover:text-[#005237] transition-colors"
                   >
                     <Check size={11} />
                     Mark all read
-                  </Button>
+                  </button>
                 )}
               </div>
 
@@ -200,7 +200,7 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
               <button
                 onClick={() => {
                   setShowNotifs(false);
-                  router.push('/dashboard/inbox');
+                  router.push('/dashboard/activity');
                 }}
                 className="w-full py-2.5 text-xs font-semibold text-[#006C49] hover:bg-[#f0faf5] transition-colors border-t border-[#f0f4f1] text-center"
               >
@@ -225,10 +225,6 @@ export default function DashboardNavbar({ onToggleMobile }: NavbarProps) {
               {fallbackEmail}
             </span>
           </div>
-          <ChevronDown
-            size={12}
-            className="text-gray-400 group-hover:text-gray-700 transition-colors hidden sm:block ml-0.5"
-          />
         </button>
       </div>
     </header>
