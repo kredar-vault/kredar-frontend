@@ -1,6 +1,7 @@
 'use client';
 
 import { ChevronDown } from 'lucide-react';
+import Button from '../landing/Button';
 
 export interface ProfileData {
   businessName: string;
@@ -192,9 +193,9 @@ export default function ProfileTab({ profile, setProfile, onSave }: ProfileTabPr
         />
       </div>
 
-      <button type="submit" className="kredar-btn-primary">
+      <Button type="submit" className="kredar-btn-primary">
         Save Changes
-      </button>
+      </Button>
     </form>
   );
 }

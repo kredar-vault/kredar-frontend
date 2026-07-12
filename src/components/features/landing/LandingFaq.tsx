@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Button from './Button';
 
 const faqItems = [
   {
@@ -63,7 +64,7 @@ export default function LandingFaq() {
                 key={index}
                 className="border border-[#e4ebe6] rounded-xl bg-white overflow-hidden transition-all duration-200 shadow-[0_2px_8px_rgba(0,0,0,0.01)]"
               >
-                <button
+                <Button
                   type="button"
                   onClick={() => setOpenFaq(isOpen ? null : index)}
                   className="w-full flex items-center justify-between p-4 md:p-5 text-left font-bold text-xs md:text-sm text-gray-900 hover:text-[#006C49] transition-colors group"
@@ -76,7 +77,7 @@ export default function LandingFaq() {
                       isOpen && 'rotate-180 text-[#006C49]',
                     )}
                   />
-                </button>
+                </Button>
 
                 {/* Smooth Max-Height Transition Container */}
                 <div

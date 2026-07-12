@@ -4,6 +4,7 @@ import { ChevronDown, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import Button from '../landing/Button';
 
 const statusColors: Record<string, string> = {
   Reconciled: 'bg-[#edfdf2] text-[#117b43] border-[#daeedf]',
@@ -138,9 +139,9 @@ export default function RecentTransactionsTable() {
                       </span>
                     </td>
                     <td className="py-3.5 text-right opacity-40 group-hover:opacity-100 transition-opacity">
-                      <button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-lg hover:bg-[#f7faf6]">
+                      <Button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-lg hover:bg-[#f7faf6]">
                         <MoreVertical size={14} />
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

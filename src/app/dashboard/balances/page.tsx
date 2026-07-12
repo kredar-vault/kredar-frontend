@@ -5,12 +5,8 @@ import {
   ArrowDownLeft,
   ArrowUpRight,
   Wallet,
-  TrendingUp,
   Clock,
   CheckCircle2,
-  BarChart3,
-  CalendarClock,
-  Plus,
   Minus,
   Loader2,
   X,
@@ -18,21 +14,13 @@ import {
 } from 'lucide-react';
 import {
   useBalanceFull,
-  useRevenue,
   useBalanceActivity,
   useWithdraw,
-  useRevenueWithdraw,
-  useSimulateDeposit,
   ActivityItem,
 } from '@/api/balances/hooks';
-import { useTenantProfile } from '@/api/tenant/hooks';
-import { getPendingBusinessType } from '@/lib/cookies';
 import AccountLookupField from '@/components/ui/AccountLookupField';
 import { cn } from '@/lib/utils';
-
-function generateAccountReference() {
-  return `acct_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-}
+import Button from '@/components/features/landing/Button';
 
 const fmt = (v: number, currency = 'NGN') =>
   new Intl.NumberFormat('en-NG', {
@@ -66,13 +54,13 @@ function StatCard({
   loading?: boolean;
 }) {
   return (
-    <div className="bg-white border border-[#f0f4f1] rounded-2xl p-4 shadow-sm flex items-start justify-between">
+    <div className="bg-white border border-[#f0f4f1] rounded-2xl p-4 flex items-start justify-between">
       <div className="space-y-1 min-w-0">
-        <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">{label}</p>
+        <p className="text-xs font-medium text-gray-400">{label}</p>
         {loading ? (
           <div className="h-7 w-28 bg-gray-100 rounded animate-pulse" />
         ) : (
-          <p className="text-xl font-bold text-gray-900 tracking-tight truncate">{value}</p>
+          <p className="text-xl font-bold text-gray-900 truncate">{value}</p>
         )}
       </div>
       <div className={cn('p-2 rounded-xl flex-shrink-0', accent)}>{icon}</div>
@@ -143,15 +131,15 @@ function WithdrawModal({
 
   return (
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl space-y-5">
+      <div className="bg-white rounded-2xl w-full max-w-md p-6 space-y-5">
         <div className="flex items-center justify-between">
           <div>
             <h4 className="text-base font-bold text-[#081b10]">{title}</h4>
             <p className="text-xs text-[#8c9c94] mt-0.5">{subtitle}</p>
           </div>
-          <button onClick={onClose} className="text-[#667085] hover:text-black">
+          <Button onClick={onClose} className="text-[#667085] hover:text-black">
             <X size={18} />
-          </button>
+          </Button>
         </div>
 
         <AccountLookupField
@@ -196,19 +184,19 @@ function WithdrawModal({
         )}
 
         <div className="flex gap-3 pt-1">
-          <button
+          <Button
             onClick={onClose}
             className="flex-1 h-10 text-xs font-semibold rounded-xl border border-[#d8e1da] text-[#45504b] hover:bg-[#f7faf6] transition-colors"
           >
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={() => onConfirm({ bankCode, accountNumber, accountName, amount, narration })}
             disabled={!canSubmit || isPending}
             className="flex-1 h-10 text-xs font-semibold rounded-xl bg-[#0f8b4b] text-white disabled:opacity-50 flex items-center justify-center gap-2 transition-colors hover:bg-[#0c703c]"
           >
             {isPending ? <Loader2 size={14} className="animate-spin" /> : 'Confirm withdrawal'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -216,26 +204,13 @@ function WithdrawModal({
 }
 
 export default function BalancesPage() {
-  const { data: profile } = useTenantProfile();
   const { data: balance, isLoading: balLoading } = useBalanceFull();
-  const { data: revenue, isLoading: revLoading } = useRevenue();
   const { data: activity = [], isLoading: actLoading } = useBalanceActivity();
-
-  const rawType = ((profile?.businessType ?? '') || getPendingBusinessType() || '').toUpperCase();
-  const isPlatform = rawType.includes('PLATFORM');
-
   const withdrawMutation = useWithdraw();
-  const revenueWithdrawMutation = useRevenueWithdraw();
-  const depositMutation = useSimulateDeposit();
 
   const [withdrawOpen, setWithdrawOpen] = useState(false);
-  const [revenueWithdrawOpen, setRevenueWithdrawOpen] = useState(false);
-  const [depositOpen, setDepositOpen] = useState(false);
-  const [depositAmount, setDepositAmount] = useState('');
-  const [senderName, setSenderName] = useState('');
 
   const availableBalance = balance?.availableBalance ?? 0;
-  const availableRevenue = revenue?.availableRevenue ?? 0;
 
   const handleBalanceWithdraw = async (p: any) => {
     try {
@@ -251,192 +226,42 @@ export default function BalancesPage() {
     }
   };
 
-  const handleRevenueWithdraw = async (p: any) => {
-    try {
-      await revenueWithdrawMutation.mutateAsync({
-        amount: Number(p.amount),
-        bankCode: p.bankCode,
-        accountNumber: p.accountNumber,
-        narration: p.narration,
-      });
-      setRevenueWithdrawOpen(false);
-    } catch {
-      /* toast handled */
-    }
-  };
-
-  const handleDeposit = async () => {
-    if (!depositAmount || !senderName.trim()) return;
-    try {
-      await depositMutation.mutateAsync({
-        accountReference: generateAccountReference(),
-        amountNaira: Number(depositAmount),
-        senderName: senderName.trim(),
-        reversal: false,
-      });
-      setDepositOpen(false);
-      setDepositAmount('');
-      setSenderName('');
-    } catch {
-      /* toast handled */
-    }
-  };
-
   return (
-    <div className="max-w-5xl mx-auto space-y-6 pb-12">
-      <div className="flex items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">
-            {isPlatform ? 'Revenue' : 'Balances'}
-          </h1>
-          <p className="text-xs text-[#667085] mt-0.5">
-            {isPlatform
-              ? 'Track and withdraw your earned revenue.'
-              : 'Monitor and manage your funds.'}
-          </p>
-        </div>
-        {isPlatform && (
-          <button
-            onClick={() => setDepositOpen(true)}
-            className="flex h-9 items-center gap-1.5 rounded-xl bg-[#effaf2] text-[#0f8b4b] px-4 text-xs font-semibold hover:bg-[#d4eedb] transition-colors flex-shrink-0"
-          >
-            <Plus size={14} />
-            Simulate Deposit
-          </button>
-        )}
+    <div className="max-w-7xl mx-auto space-y-6 pb-12">
+      <div>
+        <h1 className="text-2xl font-bold tracking-tight text-[#081b10]">Balances</h1>
+        <p className="text-xs text-[#667085] mt-0.5">Monitor and manage your funds</p>
       </div>
 
-      {/* Main balance hero — MERCHANT only */}
-      {!isPlatform && (
-        <div className="bg-white border border-[#f0f4f1] rounded-2xl p-6 shadow-sm">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-            <div>
-              <p className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">
-                Available Balance
-              </p>
-              {balLoading ? (
-                <div className="h-10 w-48 bg-gray-100 rounded-xl animate-pulse" />
-              ) : (
-                <h2 className="text-4xl font-bold tracking-tight text-[#081b10]">
-                  {fmt(availableBalance, balance?.currency)}
-                </h2>
-              )}
-            </div>
-
-            <div className="flex gap-2.5 flex-shrink-0 flex-wrap">
-              <button
-                onClick={() => setDepositOpen(true)}
-                className="flex h-9 items-center gap-1.5 rounded-xl bg-[#effaf2] text-[#0f8b4b] px-4 text-xs font-semibold hover:bg-[#d4eedb] transition-colors"
-              >
-                <Plus size={14} />
-                Simulate Deposit
-              </button>
-              <button
-                onClick={() => setWithdrawOpen(true)}
-                disabled={!balance?.canWithdraw}
-                className="flex h-9 items-center gap-1.5 rounded-xl bg-[#0f8b4b] text-white px-4 text-xs font-semibold hover:bg-[#0c703c] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                <Minus size={14} />
-                Withdraw
-              </button>
-            </div>
+      {/* Main balance hero */}
+      <div className="bg-white border border-[#f0f4f1] rounded-2xl p-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <p className="text-xs font-medium text-gray-400 mb-1">Total Balance</p>
+            {balLoading ? (
+              <div className="h-10 w-48 bg-gray-100 rounded-xl animate-pulse" />
+            ) : (
+              <h2 className="text-4xl font-bold tracking-tight text-[#081b10]">
+                {fmt(availableBalance, balance?.currency)}
+              </h2>
+            )}
           </div>
-        </div>
-      )}
 
-      {/* Stats grid — MERCHANT only */}
-      {!isPlatform &&
-        (balLoading ? (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            {[1, 2, 3, 4].map((i) => (
-              <div
-                key={i}
-                className="bg-white border border-[#f0f4f1] rounded-2xl p-4 h-24 animate-pulse"
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <StatCard
-              label="Pending"
-              value={fmt(balance?.pendingBalance ?? 0)}
-              icon={<Clock size={16} />}
-              accent="bg-amber-50 text-amber-500"
-            />
-            <StatCard
-              label="Incoming Today"
-              value={fmt(balance?.incomingToday ?? 0)}
-              icon={<ArrowDownLeft size={16} />}
-              accent="bg-[#effaf2] text-[#0f8b4b]"
-            />
-            <StatCard
-              label="Settled Today"
-              value={fmt(balance?.settledToday ?? 0)}
-              icon={<CheckCircle2 size={16} />}
-              accent="bg-[#effaf2] text-[#0f8b4b]"
-            />
-            <StatCard
-              label="On Hold"
-              value={fmt(balance?.onHoldBalance ?? 0)}
-              icon={<Wallet size={16} />}
-              accent="bg-gray-100 text-gray-500"
-            />
-          </div>
-        ))}
-
-      {/* Platform revenue section */}
-      {isPlatform && !revLoading && revenue?.enabled && (
-        <div className="bg-white border border-[#f0f4f1] rounded-2xl p-5 shadow-sm">
-          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-            <div className="flex items-center gap-2">
-              <BarChart3 size={15} className="text-[#0f8b4b]" />
-              <h3 className="text-sm font-bold text-gray-900">Your Revenue</h3>
-              <span className="text-[10px] bg-[#effaf2] text-[#0f8b4b] font-semibold px-2 py-0.5 rounded-full">
-                Withdrawable
-              </span>
-            </div>
-            <button
-              onClick={() => setRevenueWithdrawOpen(true)}
-              disabled={availableRevenue <= 0}
-              className="flex h-8 items-center gap-1.5 rounded-xl bg-[#0f8b4b] text-white px-3 text-xs font-semibold hover:bg-[#0c703c] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          <div className="flex-shrink-0">
+            <Button
+              onClick={() => setWithdrawOpen(true)}
+              disabled={!balance?.canWithdraw}
+              className="flex h-9 items-center gap-1.5 rounded-xl bg-[#0f8b4b] text-white px-4 text-xs font-semibold hover:bg-[#0c703c] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
-              <Minus size={13} />
-              Withdraw Revenue
-            </button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <div className="col-span-2 sm:col-span-1">
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Available to Withdraw
-              </p>
-              <p className="text-2xl font-bold text-[#0f8b4b] mt-1">
-                {fmt(revenue.availableRevenue)}
-              </p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Total Earned
-              </p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{fmt(revenue.totalRevenue)}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                Today
-              </p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{fmt(revenue.todayRevenue)}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-semibold text-gray-400 uppercase tracking-wider">
-                This Month
-              </p>
-              <p className="text-2xl font-bold text-gray-900 mt-1">{fmt(revenue.monthlyRevenue)}</p>
-            </div>
+              <Minus size={14} />
+              Withdraw
+            </Button>
           </div>
         </div>
-      )}
+      </div>
 
       {/* Balance Activity */}
-      <div className="bg-white border border-[#f0f4f1] rounded-2xl shadow-sm overflow-hidden">
+      <div className="bg-white border border-[#f0f4f1] rounded-2xl overflow-hidden">
         <div className="flex items-center gap-2 px-5 py-4 border-b border-gray-50">
           <Activity size={15} className="text-gray-400" />
           <h3 className="text-sm font-bold text-gray-900">Balance Activity</h3>
@@ -468,7 +293,7 @@ export default function BalancesPage() {
         )}
       </div>
 
-      {/* Modals */}
+      {/* Withdraw modal */}
       {withdrawOpen && (
         <WithdrawModal
           title="Withdraw funds"
@@ -479,83 +304,6 @@ export default function BalancesPage() {
           isPending={withdrawMutation.isPending}
           onClose={() => setWithdrawOpen(false)}
         />
-      )}
-
-      {revenueWithdrawOpen && (
-        <WithdrawModal
-          title="Withdraw revenue"
-          subtitle={`Available revenue: ${fmt(availableRevenue)}`}
-          availableLabel="Available revenue"
-          availableAmount={availableRevenue}
-          onConfirm={handleRevenueWithdraw}
-          isPending={revenueWithdrawMutation.isPending}
-          onClose={() => setRevenueWithdrawOpen(false)}
-        />
-      )}
-
-      {depositOpen && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-xl p-6 max-w-sm w-full space-y-4">
-            <div className="flex items-center justify-between">
-              <h4 className="text-base font-bold text-[#081b10]">Simulate deposit</h4>
-              <button
-                onClick={() => {
-                  setDepositOpen(false);
-                  setDepositAmount('');
-                  setSenderName('');
-                }}
-                className="text-[#667085] hover:text-black"
-              >
-                <X size={18} />
-              </button>
-            </div>
-            <div className="space-y-3">
-              <div>
-                <label className="text-xs font-medium text-[#45504b]">Sender name</label>
-                <input
-                  type="text"
-                  value={senderName}
-                  onChange={(e) => setSenderName(e.target.value)}
-                  placeholder="e.g. John Doe"
-                  className="w-full mt-1 h-9 px-3 text-sm border border-[#d8e1da] rounded-lg outline-none focus:border-[#0f8b4b]"
-                />
-              </div>
-              <div>
-                <label className="text-xs font-medium text-[#45504b]">Amount (NGN)</label>
-                <input
-                  type="number"
-                  value={depositAmount}
-                  onChange={(e) => setDepositAmount(e.target.value)}
-                  placeholder="0.00"
-                  className="w-full mt-1 h-9 px-3 text-sm border border-[#d8e1da] rounded-lg outline-none focus:border-[#0f8b4b]"
-                />
-              </div>
-            </div>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                onClick={() => {
-                  setDepositOpen(false);
-                  setDepositAmount('');
-                  setSenderName('');
-                }}
-                className="h-9 text-xs font-semibold px-4 rounded-lg border border-[#d8e1da] text-[#45504b]"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleDeposit}
-                disabled={!depositAmount || !senderName.trim() || depositMutation.isPending}
-                className="h-9 text-xs font-semibold px-4 rounded-lg bg-[#0f8b4b] text-white disabled:opacity-50 flex items-center gap-2"
-              >
-                {depositMutation.isPending ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  'Simulate deposit'
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
       )}
     </div>
   );

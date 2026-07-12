@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { X, Loader2, ChevronDown } from 'lucide-react';
 import { TeamMember } from '@/api/team/types';
+import Button from '../landing/Button';
 
 interface TeamMemberModalProps {
   open: boolean;
@@ -61,12 +62,12 @@ export default function TeamMemberModal({
             </p>
           </div>
 
-          <button
+          <Button
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-gray-100"
           >
             <X size={18} />
-          </button>
+          </Button>
         </div>
 
         <div className="space-y-5 p-6">
@@ -115,11 +116,11 @@ export default function TeamMemberModal({
         </div>
 
         <div className="flex justify-end gap-3 border-t border-[#edf2ee] px-6 py-5">
-          <button type="button" onClick={onClose} disabled={loading} className="kredar-btn-outline">
+          <Button type="button" onClick={onClose} disabled={loading} className="kredar-btn-outline">
             Cancel
-          </button>
+          </Button>
 
-          <button
+          <Button
             type="button"
             onClick={handleSubmit}
             disabled={loading}
@@ -132,7 +133,7 @@ export default function TeamMemberModal({
             ) : (
               'Invite Member'
             )}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

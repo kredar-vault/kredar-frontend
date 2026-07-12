@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Menu, X } from 'lucide-react';
 import KredarLogo from '@/components/KredarLogo';
+import Button from './Button';
 
 interface NavButtonProps {
   children: React.ReactNode;
@@ -54,14 +55,14 @@ export default function Navbar() {
         </div>
 
         {/* MOBILE MENU TOGGLE */}
-        <button
+        <Button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className="flex h-8 w-8 items-center justify-center rounded-full border border-[#173822] text-white transition hover:text-white/80 md:hidden"
           aria-label="Toggle Menu"
         >
           {isOpen ? <X size={16} /> : <Menu size={16} />}
-        </button>
+        </Button>
       </div>
 
       {/* MOBILE OVERLAY MENU */}
