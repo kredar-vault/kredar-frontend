@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { Search, Download, MoreVertical } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
 import TransactionDetailsDrawer from '@/components/features/transactions/TransactionDetailsDrawer';
 import { TransactionItem } from '@/api/transactions/types';
 import { useCustomerMap } from '@/api/customers/useCustomerMao';
@@ -13,6 +13,7 @@ const STATUS_MAP: Record<string, { label: string; class: string }> = {
   Successful: { label: 'Successful', class: 'text-[#0f8b4b] bg-[#effaf2]' },
   Failed: { label: 'Failed', class: 'text-red-600 bg-red-50' },
   Pending: { label: 'Pending', class: 'text-amber-600 bg-amber-50' },
+  Overpaid: { label: 'Overpaid', class: 'text-blue-600 bg-blue-50' },
 };
 
 export default function TransactionsPage() {
@@ -168,7 +169,7 @@ export default function TransactionsPage() {
         </p>
       </div>
 
-      {/* Unified Stat Cards (No Icons, No Shadows, Title Case) */}
+      {/* Unified Stat Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
         {isLoading
           ? [...Array(5)].map((_, i) => (
@@ -191,7 +192,7 @@ export default function TransactionsPage() {
             ))}
       </div>
 
-      {/* Reorganized Filters Block */}
+      {/* Filters Block */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-2">
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="relative">
@@ -233,6 +234,7 @@ export default function TransactionsPage() {
               <option value="successful">Successful</option>
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
+              <option value="overpaid">Overpaid</option>
             </select>
             <span className="absolute right-3 pointer-events-none text-gray-400 text-[10px]">
               ▼
@@ -254,7 +256,7 @@ export default function TransactionsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-white">
-                {['Transaction ID', 'Date', 'Amount', 'Status', ''].map((h, idx) => (
+                {['Transaction ID', 'Date', 'Amount', 'Status'].map((h, idx) => (
                   <th
                     key={idx}
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-600 whitespace-nowrap"
@@ -268,8 +270,8 @@ export default function TransactionsPage() {
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    {[...Array(5)].map((_, j) => (
-                      <td key={j} className="px-6 py-4.5">
+                    {[...Array(4)].map((_, j) => (
+                      <td key={j} className="px-6 py-4">
                         <div className="h-6 bg-gray-100 rounded animate-pulse" />
                       </td>
                     ))}
@@ -277,7 +279,7 @@ export default function TransactionsPage() {
                 ))
               ) : filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-16 text-center text-sm text-gray-400">
+                  <td colSpan={4} className="px-6 py-16 text-center text-sm text-gray-400">
                     No transactions found
                   </td>
                 </tr>
@@ -290,19 +292,20 @@ export default function TransactionsPage() {
                   return (
                     <tr
                       key={tx.id}
-                      className="hover:bg-gray-50/40 transition-colors cursor-pointer p-2"
+                      className="hover:bg-gray-50/40 transition-colors cursor-pointer"
                       onClick={() => handleRowClick(tx)}
                     >
-                      <td className="px-6 py-4.5 font-medium text-gray-900 whitespace-nowrap">
+                      {/* Fixed: changed custom py-4.5 to supported native py-4 */}
+                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap font-mono text-xs max-w-xs truncate">
                         {tx.id}
                       </td>
-                      <td className="px-6 py-4.5 text-gray-500 text-xs whitespace-nowrap">
+                      <td className="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">
                         {tx.date}
                       </td>
-                      <td className="px-6 py-4.5 font-medium text-gray-900 whitespace-nowrap tabular-nums">
+                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap tabular-nums">
                         {tx.amount}
                       </td>
-                      <td className="px-6 py-4.5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full ${statusInfo.class}`}
                         >

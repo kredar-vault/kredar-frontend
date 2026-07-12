@@ -79,6 +79,7 @@ export default function ReconciliationPage() {
     if (!search) return true;
     const q = search.toLowerCase();
     return (
+      (t.id ?? '').toLowerCase().includes(q) ||
       (t.reference ?? '').toLowerCase().includes(q) ||
       (t.narration ?? '').toLowerCase().includes(q) ||
       (t.dedicatedAccountNumber ?? '').includes(q)
@@ -108,6 +109,43 @@ export default function ReconciliationPage() {
     },
   });
 
+  // Export Data Logic
+  const handleExport = () => {
+    if (filtered.length === 0) return;
+    const headers = [
+      'Transaction ID',
+      'Customer Name',
+      'Account Number',
+      'Reference',
+      'Amount',
+      'Date',
+      'Status',
+    ];
+    const rows = filtered.map((t) => [
+      t.id || '',
+      customerMap.get(t.customerId)?.fullName || '—',
+      t.dedicatedAccountNumber || '',
+      t.reference || '',
+      t.amount || 0,
+      t.createdAt ? t.createdAt.split('T')[0] : '',
+      t.status || '',
+    ]);
+
+    const csv = [headers, ...rows]
+      .map((row) => row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+      .join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `reconciliation-${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   const statCards = [
     { label: 'Matched', value: stats?.matched ?? 0 },
     { label: 'Needs Review', value: stats?.pendingReview ?? 0 },
@@ -125,7 +163,7 @@ export default function ReconciliationPage() {
         </p>
       </div>
 
-      {/* Unified Stat Cards (No Icons, No Shadows, Title Case) */}
+      {/* Unified Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {statCards.map((s) => (
           <div
@@ -192,12 +230,15 @@ export default function ReconciliationPage() {
           </div>
         </div>
 
-        <Button className="flex items-center gap-1.5 px-4 py-2 bg-[#0f8b4b] hover:bg-[#0a7040] rounded-xl text-xs font-semibold text-white transition-colors self-start md:self-auto">
+        <Button
+          onClick={handleExport}
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#0f8b4b] hover:bg-[#0a7040] rounded-xl text-xs font-semibold text-white transition-colors self-start md:self-auto"
+        >
           <Download size={13} /> Export
         </Button>
       </div>
 
-      {/* Styled Data Table Container */}
+      {/* Spaced and Fixed Data Table Container */}
       <div className="bg-white border border-gray-100 rounded-2xl overflow-hidden mt-2">
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
@@ -227,7 +268,7 @@ export default function ReconciliationPage() {
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
                     {[...Array(8)].map((_, j) => (
-                      <td key={j} className="px-6 py-4.5">
+                      <td key={j} className="px-6 py-4">
                         <div className="h-4 bg-gray-100 rounded animate-pulse" />
                       </td>
                     ))}
@@ -247,29 +288,30 @@ export default function ReconciliationPage() {
                   };
                   return (
                     <tr key={tx.id} className="hover:bg-gray-50/40 transition-colors">
-                      <td className="px-6 py-4.5 font-medium text-gray-900 whitespace-nowrap">
+                      {/* Fixed: py-4.5 switched back to supported py-4 */}
+                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap font-mono text-xs">
                         {tx.id ? `TRX${tx.id.slice(0, 7)}` : '—'}
                       </td>
-                      <td className="px-6 py-4.5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <CustomerIdentityCard
                           customerId={tx.customerId}
                           customerName={customerMap.get(tx.customerId)?.fullName}
                           dedicatedAccountNumber={tx.dedicatedAccountNumber}
                         />
                       </td>
-                      <td className="px-6 py-4.5 text-gray-500 font-mono text-xs whitespace-nowrap">
+                      <td className="px-6 py-4 text-gray-500 font-mono text-xs whitespace-nowrap">
                         {maskAccount(tx.dedicatedAccountNumber)}
                       </td>
-                      <td className="px-6 py-4.5 text-gray-500 text-xs whitespace-nowrap font-mono">
+                      <td className="px-6 py-4 text-gray-500 text-xs whitespace-nowrap font-mono max-w-xs truncate">
                         {tx.reference || '—'}
                       </td>
-                      <td className="px-6 py-4.5 font-medium text-gray-900 whitespace-nowrap tabular-nums">
+                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap tabular-nums">
                         {fmt(tx.amount ?? 0)}
                       </td>
-                      <td className="px-6 py-4.5 text-gray-500 text-xs whitespace-nowrap">
-                        {tx.createdAt ? new Date(tx.createdAt).toISOString().split('T')[0] : '—'}
+                      <td className="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">
+                        {tx.createdAt ? tx.createdAt.split('T')[0] : '—'}
                       </td>
-                      <td className="px-6 py-4.5 whitespace-nowrap">
+                      <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={cn(
                             'inline-flex items-center text-xs font-medium px-2.5 py-0.5 rounded-full',
@@ -279,7 +321,7 @@ export default function ReconciliationPage() {
                           {statusInfo.label}
                         </span>
                       </td>
-                      <td className="px-6 py-4.5 text-right whitespace-nowrap">
+                      <td className="px-6 py-4 text-right whitespace-nowrap">
                         <button
                           onClick={() => setPendingAction({ type: 'match', id: tx.id })}
                           className="p-1 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
