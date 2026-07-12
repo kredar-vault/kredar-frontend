@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
+import Button from '../landing/Button';
 
 const NIGERIAN_BANKS = [
   { code: '044', name: 'Access Bank' },
@@ -207,12 +208,12 @@ export default function Step3Account({ defaultValues, onNext, onBack }: Props) {
 
       {/* Footer */}
       <div className="mt-8 flex items-center justify-between">
-        <button type="button" onClick={onBack} className="kredar-btn-outline">
+        <Button type="button" onClick={onBack} className="kredar-btn-outline">
           Back
-        </button>
-        <button type="submit" className="kredar-btn-primary">
+        </Button>
+        <Button type="submit" className="kredar-btn-primary">
           Next
-        </button>
+        </Button>
       </div>
     </form>
   );

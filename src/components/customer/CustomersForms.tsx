@@ -5,6 +5,7 @@ import { Loader2, ArrowRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useCreateCustomer } from '@/api/customers/hooks';
+import Button from '../features/landing/Button';
 
 export default function CustomerForm() {
   const router = useRouter();
@@ -70,7 +71,7 @@ export default function CustomerForm() {
       </div>
 
       <div className="pt-4 flex justify-end">
-        <button
+        <Button
           type="submit"
           disabled={createCustomer.isPending}
           className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-gradient-to-br from-[#0a2e1f] to-[#041910] hover:from-[#0d3d29] hover:to-[#072619] px-5 text-xs font-bold text-white transition-all duration-300 disabled:cursor-not-allowed disabled:opacity-60 "
@@ -86,7 +87,7 @@ export default function CustomerForm() {
               <ArrowRight size={13} className="text-white/70" />
             </>
           )}
-        </button>
+        </Button>
       </div>
     </form>
   );

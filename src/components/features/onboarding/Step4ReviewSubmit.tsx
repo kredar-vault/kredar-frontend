@@ -8,6 +8,7 @@ import ReviewDetailsGrid from './ReviewDetailsGrid';
 import type { Step1Data } from './Step1BusinessInfo';
 import type { Step2Data } from './Step2BusinessVerification';
 import type { Step3Data } from './Step3Account';
+import Button from '../landing/Button';
 
 interface OnboardingData {
   businessInfo: Step1Data | null;
@@ -74,12 +75,12 @@ export default function Step4ReviewSubmit({ data, onBack, onSubmit }: Props) {
                 </div>
               </div>
             </div>
-            <button
+            <Button
               type="button"
               className="text-[#ef4444] hover:text-red-600 transition-colors p-1.5 hover:bg-[#fff0f0] rounded-lg"
             >
               <Trash2 size={16} />
-            </button>
+            </Button>
           </div>
 
           {/* Proof of Address */}
@@ -113,12 +114,12 @@ export default function Step4ReviewSubmit({ data, onBack, onSubmit }: Props) {
                 </div>
               </div>
             </div>
-            <button
+            <Button
               type="button"
               className="text-[#ef4444] hover:text-red-600 transition-colors p-1.5 hover:bg-[#fff0f0] rounded-lg"
             >
               <Trash2 size={16} />
-            </button>
+            </Button>
           </div>
         </div>
         <div className="mt-4 flex items-start gap-2 text-sm text-[#45504b]">
@@ -135,7 +136,7 @@ export default function Step4ReviewSubmit({ data, onBack, onSubmit }: Props) {
       {/* ── Custom Certification checkbox ── */}
       <div>
         <div className="flex items-start gap-3">
-          <button
+          <Button
             type="button"
             onClick={() => setCertified(!certified)}
             className={cn(
@@ -162,7 +163,7 @@ export default function Step4ReviewSubmit({ data, onBack, onSubmit }: Props) {
                 />
               </svg>
             )}
-          </button>
+          </Button>
           <label
             className="text-sm text-[#45504b] cursor-pointer leading-snug select-none"
             onClick={() => setCertified(!certified)}
@@ -194,12 +195,12 @@ export default function Step4ReviewSubmit({ data, onBack, onSubmit }: Props) {
 
       {/* Footer */}
       <div className="flex items-center justify-between pt-2">
-        <button type="button" onClick={onBack} className="kredar-btn-outline">
+        <Button type="button" onClick={onBack} className="kredar-btn-outline">
           Back
-        </button>
-        <button type="button" onClick={handleSubmit} className="kredar-btn-primary">
+        </Button>
+        <Button type="button" onClick={handleSubmit} className="kredar-btn-primary">
           Submit
-        </button>
+        </Button>
       </div>
     </div>
   );

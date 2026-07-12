@@ -2,6 +2,7 @@
 
 import { FileText, Trash2, Upload, Loader2, CheckCircle2, XCircle, RefreshCw } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Button from '../landing/Button';
 
 interface UploadingFileState {
   id: 'certificate' | 'proofOfAddress';
@@ -66,13 +67,13 @@ export default function DocUploadCard({
                   <XCircle size={13} className="text-[#ef4444]" />
                   <span className="text-xs text-[#ef4444] font-semibold">
                     Connection drop.{' '}
-                    <button
+                    <Button
                       type="button"
                       onClick={onRetry}
                       className="text-[#4f46e5] hover:underline font-bold inline-flex items-center gap-0.5 ml-1"
                     >
                       <RefreshCw size={10} /> Retry upload
-                    </button>
+                    </Button>
                   </span>
                 </div>
               )}
@@ -92,14 +93,14 @@ export default function DocUploadCard({
             </div>
           </div>
 
-          {/* Delete Action button */}
-          <button
+          {/* Delete Action Button */}
+          <Button
             type="button"
             onClick={onRemove}
             className="absolute top-4 right-4 text-[#ef4444] hover:text-red-600 transition-colors p-1.5 hover:bg-[#fff0f0] rounded-lg"
           >
             <Trash2 size={15} />
-          </button>
+          </Button>
         </div>
       ) : (
         /* Empty Upload area container */

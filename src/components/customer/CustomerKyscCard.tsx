@@ -7,6 +7,7 @@ import {
   useSubmitCustomerKyc,
   useUpdateKycDocumentStatus,
 } from '@/api/customers/hooks';
+import Button from '../features/landing/Button';
 
 interface CustomerKycCardProps {
   customerId: string;
@@ -57,14 +58,14 @@ export default function CustomerKycCard({ customerId }: CustomerKycCardProps) {
     <div className="bg-white rounded-md border border-[#EAECF0] p-6 mb-6">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-base font-bold text-[#101828]">KYC Documents</h3>
-        <button
+        <Button
           type="button"
           onClick={() => setShowForm(!showForm)}
           className="flex items-center gap-1.5 text-xs font-semibold text-[#0f8b4b] hover:text-[#0c7640]"
         >
           <Plus size={14} />
           Add document
-        </button>
+        </Button>
       </div>
 
       {showForm && (
@@ -96,20 +97,20 @@ export default function CustomerKycCard({ customerId }: CustomerKycCardProps) {
           </div>
 
           <div className="flex justify-end gap-2">
-            <button
+            <Button
               type="button"
               onClick={() => setShowForm(false)}
               className="h-8 text-xs font-semibold px-3 rounded-lg border border-[#d8e1da] text-[#45504b]"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={submitMutation.isPending}
               className="h-8 text-xs font-semibold px-3 rounded-lg bg-[#0f8b4b] text-white flex items-center gap-1.5 disabled:opacity-50"
             >
               {submitMutation.isPending ? <Loader2 size={13} className="animate-spin" /> : 'Submit'}
-            </button>
+            </Button>
           </div>
         </form>
       )}
@@ -155,7 +156,7 @@ export default function CustomerKycCard({ customerId }: CustomerKycCardProps) {
 
                 {doc.status === 'Pending' && (
                   <>
-                    <button
+                    <Button
                       type="button"
                       onClick={() => handleUpdateStatus(doc.id, 'Verified')}
                       disabled={updateStatusMutation.isPending}
@@ -163,8 +164,8 @@ export default function CustomerKycCard({ customerId }: CustomerKycCardProps) {
                       title="Approve"
                     >
                       <Check size={14} />
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       type="button"
                       onClick={() => handleUpdateStatus(doc.id, 'Rejected')}
                       disabled={updateStatusMutation.isPending}
@@ -172,7 +173,7 @@ export default function CustomerKycCard({ customerId }: CustomerKycCardProps) {
                       title="Reject"
                     >
                       <X size={14} />
-                    </button>
+                    </Button>
                   </>
                 )}
               </div>

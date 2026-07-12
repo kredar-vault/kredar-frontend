@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import AccountLookupField from '@/components/ui/AccountLookupField';
+import Button from '../landing/Button';
 
 type SettlementConfig = {
   settlementAccountNumber: string;
@@ -111,7 +112,7 @@ export default function SettlementTab() {
                 Automatically sweep settled funds to your account
               </p>
             </div>
-            <button
+            <Button
               type="button"
               onClick={() => setConfig((c) => ({ ...c, autoSettle: !c.autoSettle }))}
               className={`relative w-11 h-6 rounded-full transition-colors ${config.autoSettle ? 'bg-[#0f8b4b]' : 'bg-gray-200'}`}
@@ -119,11 +120,11 @@ export default function SettlementTab() {
               <span
                 className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${config.autoSettle ? 'translate-x-5' : ''}`}
               />
-            </button>
+            </Button>
           </div>
 
           <div className="flex justify-end">
-            <button
+            <Button
               type="submit"
               disabled={savingConfig}
               className="bg-[#0f8b4b] hover:bg-[#0c703c] disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors flex items-center gap-2"
@@ -132,7 +133,7 @@ export default function SettlementTab() {
                 <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               )}
               Save settings
-            </button>
+            </Button>
           </div>
         </form>
       )}

@@ -6,9 +6,6 @@ import { toast } from 'sonner';
 import ProfileTab, { ProfileData } from '@/components/features/settings/ProfileTab';
 import TeamTab from '@/components/features/settings/TeamTab';
 import DevelopersTab from '@/components/features/settings/DevelopersTab';
-import SecurityTab from '@/components/features/settings/SecurityTab';
-import SettlementTab from '@/components/features/settings/SettlementTab';
-import SplitsTab from '@/components/features/settings/SplitsTab';
 import { useTenantProfile, useUpdateProfile } from '@/api/tenant/hooks';
 import {
   useApiKeys,
@@ -32,9 +29,7 @@ const emptyProfile: ProfileData = {
 };
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<
-    'profile' | 'team' | 'developers' | 'settlement' | 'splits' | 'security'
-  >('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'team' | 'developers'>('profile');
   const [profile, setProfile] = useState<ProfileData>(emptyProfile);
 
   const { data: serverProfile, isLoading: isProfileLoading } = useTenantProfile();
@@ -121,22 +116,20 @@ export default function SettingsPage() {
       <div className="bg-white border border-[#d8e1da] rounded-md p-4 sm:p-6 min-h-[500px]">
         <div className="border-b border-[#f0f4f1] mb-6 -mx-4 sm:mx-0 px-4 sm:px-0 overflow-x-auto">
           <div className="flex gap-6 sm:gap-8 w-max sm:w-auto min-w-full">
-            {(['profile', 'team', 'developers', 'settlement', 'splits', 'security'] as const).map(
-              (tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveTab(tab)}
-                  className={cn(
-                    'pb-3 text-sm font-bold border-b-2 transition-all capitalize relative top-[1px] whitespace-nowrap shrink-0',
-                    activeTab === tab
-                      ? 'border-[#0f8b4b] text-[#0f8b4b]'
-                      : 'border-transparent text-[#45504b] hover:text-[#081b10]',
-                  )}
-                >
-                  {tab}
-                </button>
-              ),
-            )}
+            {(['profile', 'team', 'developers'] as const).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab)}
+                className={cn(
+                  'pb-3 text-sm font-bold border-b-2 transition-all capitalize relative top-[1px] whitespace-nowrap shrink-0',
+                  activeTab === tab
+                    ? 'border-[#0f8b4b] text-[#0f8b4b]'
+                    : 'border-transparent text-[#45504b] hover:text-[#081b10]',
+                )}
+              >
+                {tab}
+              </button>
+            ))}
           </div>
         </div>
 
@@ -170,9 +163,6 @@ export default function SettingsPage() {
                 onCloseNewKeyModal={() => setNewKeySecret(null)}
               />
             )}
-            {activeTab === 'settlement' && <SettlementTab />}
-            {activeTab === 'splits' && <SplitsTab />}
-            {activeTab === 'security' && <SecurityTab />}
           </>
         )}
       </div>

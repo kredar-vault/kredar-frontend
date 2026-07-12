@@ -5,6 +5,7 @@ import { api } from '@/lib/api';
 import { toast } from 'sonner';
 import { Plus, Trash2 } from 'lucide-react';
 import AccountLookupField from '@/components/ui/AccountLookupField';
+import Button from '../landing/Button';
 
 type Split = {
   id?: string;
@@ -117,13 +118,13 @@ export default function SplitsTab() {
                 <span className="text-xs font-bold text-[#45504b] uppercase tracking-wide">
                   Beneficiary {i + 1}
                 </span>
-                <button
+                <Button
                   type="button"
                   onClick={() => removeSplit(i)}
                   className="text-red-400 hover:text-red-600 transition-colors p-0.5"
                 >
                   <Trash2 size={14} />
-                </button>
+                </Button>
               </div>
 
               <div className="p-4 space-y-4">
@@ -207,16 +208,16 @@ export default function SplitsTab() {
           ))}
 
           <div className="flex items-center justify-between pt-2">
-            <button
+            <Button
               type="button"
               onClick={addSplit}
               className="flex items-center gap-1.5 text-sm font-semibold text-[#0f8b4b] hover:text-[#0c703c] transition-colors"
             >
               <Plus size={15} />
               Add beneficiary
-            </button>
+            </Button>
             {splits.length > 0 && (
-              <button
+              <Button
                 type="submit"
                 disabled={saving}
                 className="bg-[#0f8b4b] hover:bg-[#0c703c] disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition-colors flex items-center gap-2"
@@ -225,7 +226,7 @@ export default function SplitsTab() {
                   <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                 )}
                 Save split rules
-              </button>
+              </Button>
             )}
           </div>
         </form>
