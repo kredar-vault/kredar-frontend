@@ -3,6 +3,7 @@
 import { useCustomerTransactions } from '@/api/customers/hooks';
 import { ChevronDown, Download, MoreVertical } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Button from '../features/landing/Button';
 
 interface CustomerStatementProps {
   customerId: string;
@@ -52,10 +53,10 @@ export default function CustomerStatement({ customerId }: CustomerStatementProps
             />
           </div>
 
-          <button className="h-8 px-3 bg-[#0f8b4b] hover:bg-[#0c7640] text-white text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
+          <Button className="h-8 px-3 bg-[#0f8b4b] hover:bg-[#0c7640] text-white text-[11px] font-bold rounded-lg flex items-center gap-1.5 transition-colors shadow-sm">
             <Download size={11} />
             <span>Export</span>
-          </button>
+          </Button>
         </div>
       </div>
 
@@ -110,9 +111,9 @@ export default function CustomerStatement({ customerId }: CustomerStatementProps
                       </span>
                     </td>
                     <td className="py-3.5 text-right">
-                      <button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-md hover:bg-[#f7faf6]">
+                      <Button className="text-[#45504b] hover:text-[#081b10] p-1 rounded-md hover:bg-[#f7faf6]">
                         <MoreVertical size={13} />
-                      </button>
+                      </Button>
                     </td>
                   </tr>
                 );

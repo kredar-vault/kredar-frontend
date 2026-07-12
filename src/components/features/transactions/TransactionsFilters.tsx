@@ -1,15 +1,18 @@
 'use client';
 
 import { Search, Download, ChevronDown } from 'lucide-react';
+import Button from '../landing/Button';
 
 interface TransactionsFiltersProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  onExport: () => void;
 }
 
 export default function TransactionsFilters({
   searchQuery,
   setSearchQuery,
+  onExport,
 }: TransactionsFiltersProps) {
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
@@ -60,9 +63,7 @@ export default function TransactionsFilters({
         <div className="relative">
           <select className="kredar-select h-9 text-xs pl-3 pr-8 w-32 border-[#d8e1da]">
             <option>Status</option>
-            <option>Reconciled</option>
-            <option>Underpaid</option>
-            <option>Overpaid</option>
+            <option>success</option>
             <option>Pending</option>
             <option>Failed</option>
             <option>Reversed</option>
@@ -76,10 +77,13 @@ export default function TransactionsFilters({
 
       <div>
         {/* Export Button (Green) */}
-        <button className="kredar-btn-primary flex items-center gap-2 h-9 px-4 text-xs font-semibold">
+        <Button
+          onClick={onExport}
+          className="kredar-btn-primary flex items-center gap-2 h-9 px-4 text-xs font-semibold"
+        >
           <Download size={14} />
           Export
-        </button>
+        </Button>
       </div>
     </div>
   );

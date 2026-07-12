@@ -6,6 +6,7 @@ import DrawerReconciliation from './DrawerReconciliation';
 import { cn } from '@/lib/utils';
 import { TransactionItem } from '@/api/transactions/types';
 import CustomerIdentityCard from '@/components/ui/CustomerIdentityCard';
+import Button from '../landing/Button';
 
 interface TransactionDetailsDrawerProps {
   isOpen: boolean;
@@ -13,13 +14,18 @@ interface TransactionDetailsDrawerProps {
   transaction: TransactionItem | null;
 }
 
+// Simplified 3-state status — matches the table, no reconciliation language.
+function toSimpleStatus(status: string): 'Successful' | 'Failed' | 'Pending' {
+  const s = (status || '').toLowerCase();
+  if (['reconciled', 'succeeded', 'success', 'overpaid'].includes(s)) return 'Successful';
+  if (['failed', 'reversed'].includes(s)) return 'Failed';
+  return 'Pending';
+}
+
 const statusColors: Record<string, string> = {
-  Reconciled: 'bg-[#effaf2] text-[#0f8b4b] border-[#d4eedb]',
-  Overpaid: 'bg-[#eff6ff] text-[#2563eb] border-[#dbeafe]',
+  Successful: 'bg-[#effaf2] text-[#0f8b4b] border-[#d4eedb]',
   Failed: 'bg-[#fef2f2] text-[#ef4444] border-[#fee2e2]',
   Pending: 'bg-[#fff7ed] text-[#ea580c] border-[#ffedd5]',
-  Underpaid: 'bg-[#fefce8] text-[#ca8a04] border-[#fef9c3]',
-  Reversed: 'bg-[#f3f4f6] text-[#4b5563] border-[#e5e7eb]',
 };
 
 export default function TransactionDetailsDrawer({
@@ -67,6 +73,8 @@ export default function TransactionDetailsDrawer({
 
   if (!tx) return null;
 
+  const simpleStatus = toSimpleStatus(tx.status);
+
   return (
     <div className="fixed inset-0 z-50 overflow-hidden">
       {/* Overlay Backdrop */}
@@ -91,12 +99,12 @@ export default function TransactionDetailsDrawer({
             <h2 className="text-2xl font-bold text-[#081b10]">Transaction Details</h2>
             <p className="text-sm font-semibold text-[#45504b]">{tx.id}</p>
           </div>
-          <button
+          <Button
             onClick={onClose}
             className="p-1.5 hover:bg-[#f3f4f6] rounded-lg transition-colors text-[#45504b]"
           >
             <X size={20} />
-          </button>
+          </Button>
         </div>
 
         {/* Scrollable details content */}
@@ -116,10 +124,10 @@ export default function TransactionDetailsDrawer({
                 <span
                   className={cn(
                     'inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border',
-                    statusColors[tx.status],
+                    statusColors[simpleStatus],
                   )}
                 >
-                  {tx.status}
+                  {simpleStatus}
                 </span>
               </span>
 
@@ -176,7 +184,7 @@ export default function TransactionDetailsDrawer({
             </div>
           </section>
 
-          {/* Section 3: Reconciliation details */}
+          {/* Section 3: Transaction status (simplified, no reconciliation language) */}
           <DrawerReconciliation
             status={tx.status}
             expectedAmount={tx.expectedAmount}
@@ -188,13 +196,13 @@ export default function TransactionDetailsDrawer({
 
         {/* Footer Actions */}
         <div className="p-6 border-t border-[#f0f4f1] flex items-center justify-end gap-3 bg-[#f7faf6]/20">
-          <button onClick={onClose} className="kredar-btn-outline h-10 px-5 text-sm">
+          <Button onClick={onClose} className="kredar-btn-outline h-10 px-5 text-sm">
             Cancel
-          </button>
-          <button className="kredar-btn-primary flex items-center gap-2 h-10 px-5 text-sm font-semibold">
+          </Button>
+          <Button className="kredar-btn-primary flex items-center gap-2 h-10 px-5 text-sm font-semibold">
             <Download size={15} />
             Export
-          </button>
+          </Button>
         </div>
       </div>
     </div>

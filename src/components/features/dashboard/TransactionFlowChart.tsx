@@ -12,6 +12,7 @@ import {
 } from 'recharts';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import Button from '../landing/Button';
 
 export default function TransactionFlowChart() {
   const { data: transactions = [], isLoading } = useQuery({
@@ -76,10 +77,10 @@ export default function TransactionFlowChart() {
             />
           </div>
 
-          <button className="h-8 px-2.5 bg-white border border-[#eef2ef] rounded-lg text-[11px] font-semibold flex items-center gap-1.5 text-[#45504b] hover:bg-[#f7faf6] transition-colors">
+          <Button className="h-8 px-2.5 bg-white border border-[#eef2ef] rounded-lg text-[11px] font-semibold flex items-center gap-1.5 text-[#45504b] hover:bg-[#f7faf6] transition-colors">
             <Filter size={12} />
             <span>Filters</span>
-          </button>
+          </Button>
         </div>
       </div>
 

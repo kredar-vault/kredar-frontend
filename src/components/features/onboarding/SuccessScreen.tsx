@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { CheckCircle2 } from 'lucide-react';
 import KredarLogo from '@/components/KredarLogo';
+import Button from '../landing/Button';
 
 export default function SuccessScreen() {
   const router = useRouter();
@@ -33,9 +34,9 @@ export default function SuccessScreen() {
           <p className="text-sm text-[#45504b]">Welcome to the future of finance</p>
 
           {/* CTA */}
-          <button onClick={() => router.replace('/dashboard')} className="kredar-btn-primary mt-2">
+          <Button onClick={() => router.replace('/dashboard')} className="kredar-btn-primary mt-2">
             Go to Dashboard
-          </button>
+          </Button>
         </div>
       </div>
     </div>

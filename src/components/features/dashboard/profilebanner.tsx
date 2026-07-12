@@ -9,6 +9,7 @@ import {
   dismissBanner,
   setOnboardingCompleteFlag,
 } from '@/lib/onboarding-status';
+import Button from '../landing/Button';
 
 type OnboardingStatus = 'NotStarted' | 'UnderReview' | 'Approved' | null;
 
@@ -78,15 +79,6 @@ export default function ProfileCompletionBanner() {
             </p>
           </div>
         </div>
-
-        <button
-          type="button"
-          onClick={handleDismiss}
-          aria-label="Dismiss"
-          className="text-gray-400 hover:text-[#0c1424] p-1.5 rounded-lg hover:bg-white/60 shrink-0 transition"
-        >
-          <X size={16} />
-        </button>
       </div>
     );
   }
@@ -104,13 +96,13 @@ export default function ProfileCompletionBanner() {
         </div>
       </div>
 
-      <button
+      <Button
         type="button"
         onClick={handleComplete}
         className="h-9 rounded-full bg-[#006C49] px-4 text-xs font-semibold text-white transition hover:bg-[#005237] shrink-0"
       >
         Complete profile
-      </button>
+      </Button>
     </div>
   );
 }

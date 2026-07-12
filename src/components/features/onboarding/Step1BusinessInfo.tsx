@@ -5,6 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { AlertCircle } from 'lucide-react';
 import BusinessInfoFormFields from './BusinessInfoFormFields';
+import Button from '../landing/Button';
 
 const schema = z.object({
   businessName: z
@@ -77,12 +78,12 @@ export default function Step1BusinessInfo({ defaultValues, onNext, onBack }: Pro
 
       {/* Footer */}
       <div className="mt-8 flex items-center justify-between">
-        <button type="button" onClick={onBack} className="kredar-btn-outline">
+        <Button type="button" onClick={onBack} className="kredar-btn-outline">
           Back
-        </button>
-        <button type="submit" className="kredar-btn-primary">
+        </Button>
+        <Button type="submit" className="kredar-btn-primary">
           Next
-        </button>
+        </Button>
       </div>
     </form>
   );

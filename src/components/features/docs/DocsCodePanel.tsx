@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Check, Copy } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import Button from '../landing/Button';
 
 interface Snippets {
   curl: string;
@@ -40,7 +41,7 @@ export default function DocsCodePanel({ snippets, activeSection }: DocsCodePanel
       <div className="bg-white/5 border-b border-white/10 px-4 py-2 flex items-center justify-between text-xs">
         <div className="flex gap-2.5">
           {(['curl', 'js', 'python'] as const).map((tab) => (
-            <button
+            <Button
               key={tab}
               onClick={() => setActiveTab(tab)}
               className={cn(
@@ -49,7 +50,7 @@ export default function DocsCodePanel({ snippets, activeSection }: DocsCodePanel
               )}
             >
               {tab === 'js' ? 'Node.js' : tab}
-            </button>
+            </Button>
           ))}
         </div>
         <div className="flex items-center gap-1.5">
@@ -79,13 +80,13 @@ export default function DocsCodePanel({ snippets, activeSection }: DocsCodePanel
       {/* Footer Info */}
       <div className="bg-white/5 border-t border-white/10 p-3.5 text-[10px] text-white/40 font-mono flex justify-between items-center">
         <span>Content-Type: application/json</span>
-        <button
+        <Button
           onClick={handleCopy}
           className="text-white/60 hover:text-white transition-colors flex items-center gap-1.5"
         >
           {copied ? <Check size={11} /> : <Copy size={11} />}
           {copied ? 'Copied!' : 'Copy Code'}
-        </button>
+        </Button>
       </div>
     </div>
   );

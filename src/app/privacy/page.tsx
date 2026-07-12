@@ -6,7 +6,7 @@ import LandingFooter from '@/components/features/landing/LandingFooter';
 
 export default function PrivacyPage() {
   return (
-    <div className="min-h-screen bg-[#030A05] text-white flex flex-col font-sans selection:bg-[#006C49]/30">
+    <div className="min-h-screen bg-[#030A05] text-white flex flex-col selection:bg-[#006C49]/30">
       {/* Top Navbar */}
       <Navbar />
 
