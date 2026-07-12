@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Trash2, Plus, Users } from 'lucide-react';
+import { Trash2, Plus, Users, MoreVertical } from 'lucide-react';
 import { TeamMember } from '@/api/team/types';
 import Button from '../landing/Button';
 
@@ -113,12 +113,12 @@ export default function TeamTable({
                   </p>
 
                   <div className="relative flex justify-end overflow-visible">
-                    <Button
+                    <button
                       onClick={() => setOpenMenu(openMenu === member.id ? null : member.id)}
                       className="flex h-9 w-9 items-center justify-center rounded-lg hover:bg-[#f5f5f5]"
                     >
-                      :
-                    </Button>
+                      <MoreVertical size={16} />
+                    </button>
 
                     {openMenu === member.id && (
                       <div className="absolute right-0 top-11 z-[9999] w-48 rounded-xl border border-[#edf2ee] bg-white py-2 shadow-2xl">
@@ -129,7 +129,7 @@ export default function TeamTable({
                           }}
                           className="flex w-full items-center gap-3 px-4 py-3 text-sm text-[#081b10] hover:bg-[#f7faf8]"
                         >
-                          edit Edit Member
+                          Edit Member
                         </Button>
 
                         <Button
