@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { ChevronRight, StickyNote } from 'lucide-react';
+import { ChevronRight, ChevronLeft, StickyNote } from 'lucide-react';
 import { toast } from 'sonner';
 import { useQuery } from '@tanstack/react-query';
 
@@ -48,8 +48,18 @@ const statusStyles: Record<string, string> = {
   Restricted: 'bg-[#fff5f5] text-[#e11d48] border-[#ffe4e6]',
 };
 
+const PAGE_SIZE = 15;
+
 export default function CustomersTable({ customers }: CustomersTableProps) {
   const generateVirtualAcc = useGenerateVirtualAccount();
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [customers]);
+
+  const totalPages = Math.max(1, Math.ceil(customers.length / PAGE_SIZE));
+  const paged = customers.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
 
   if (!customers.length) {
     return (
@@ -85,7 +95,7 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
           </thead>
 
           <tbody className="divide-y divide-[#f7faf6]">
-            {customers.map((customer) => {
+            {paged.map((customer) => {
               const currentStatus = customer.status || 'Pending';
               const mappedStatus =
                 currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1).toLowerCase();
@@ -164,6 +174,28 @@ export default function CustomersTable({ customers }: CustomersTableProps) {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between pt-4 mt-1 border-t border-[#f7faf6]">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#667085] hover:text-[#081b10] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft size={14} /> Previous
+          </button>
+          <span className="text-xs text-[#667085]">
+            Page {page} of {totalPages} · {customers.length} customers
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#667085] hover:text-[#081b10] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Next <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

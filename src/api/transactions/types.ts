@@ -23,6 +23,7 @@ export interface TransactionItem {
   expectedAmount?: number | string;
   receivedAmount?: number | string;
   difference?: number | string;
+  direction?: 'in' | 'out';
 }
 
 export interface CreateTransactionPayload {

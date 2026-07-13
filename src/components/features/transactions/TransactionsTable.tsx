@@ -1,6 +1,7 @@
 'use client';
 
-import { ArrowDownLeft, ArrowUpRight } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { ArrowDownLeft, ArrowUpRight, ChevronLeft, ChevronRight } from 'lucide-react';
 import { TransactionItem } from '@/api/transactions/types';
 import { cn } from '@/lib/utils';
 
@@ -12,11 +13,12 @@ interface TransactionsTableProps {
 
 const INCOMING_STATUSES = ['reconciled', 'overpaid', 'underpaid'];
 const FAILED_STATUSES = ['failed', 'reversed'];
+const PAGE_SIZE = 20;
 
 function getDirection(tx: TransactionItem): 'in' | 'out' {
+  if (tx.direction) return tx.direction;
   const narration = (tx.narration || '').toLowerCase();
   const status = (tx.status || '').toLowerCase();
-
   if (narration.includes('transfer from') || INCOMING_STATUSES.includes(status)) return 'in';
   if (narration.includes('transfer to') || FAILED_STATUSES.includes(status)) return 'out';
   return 'in';
@@ -56,6 +58,12 @@ function formatDateTime(tx: TransactionItem): string {
 }
 
 export default function TransactionsTable({ transactions, onRowClick }: TransactionsTableProps) {
+  const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    setPage(1);
+  }, [transactions]);
+
   if (transactions.length === 0) {
     return (
       <div className="w-full bg-white rounded-2xl p-6 border border-[#f0f4f1]/60 shadow-sm">
@@ -65,10 +73,13 @@ export default function TransactionsTable({ transactions, onRowClick }: Transact
     );
   }
 
+  const totalPages = Math.max(1, Math.ceil(transactions.length / PAGE_SIZE));
+  const paged = transactions.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
   return (
     <div className="w-full">
       <div className="divide-y divide-gray-50">
-        {transactions.map((tx) => {
+        {paged.map((tx) => {
           const direction = getDirection(tx);
           const label = getLabel(tx, direction);
           const dateTime = formatDateTime(tx);
@@ -122,7 +133,7 @@ export default function TransactionsTable({ transactions, onRowClick }: Transact
                         : 'text-gray-900',
                   )}
                 >
-                  {direction === 'in' && !isFailed ? '+' : ''}
+                  {direction === 'in' && !isFailed ? '+' : direction === 'out' ? '-' : ''}
                   {tx.amount}
                 </span>
                 <span
@@ -142,6 +153,28 @@ export default function TransactionsTable({ transactions, onRowClick }: Transact
           );
         })}
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between px-2 pt-4 mt-2 border-t border-gray-50">
+          <button
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={page === 1}
+            className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-[#081b10] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            <ChevronLeft size={14} /> Previous
+          </button>
+          <span className="text-xs text-gray-400">
+            Page {page} of {totalPages} · {transactions.length} records
+          </span>
+          <button
+            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+            disabled={page === totalPages}
+            className="flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-[#081b10] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+          >
+            Next <ChevronRight size={14} />
+          </button>
+        </div>
+      )}
     </div>
   );
 }
