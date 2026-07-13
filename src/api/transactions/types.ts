@@ -24,6 +24,7 @@ export interface TransactionItem {
   receivedAmount?: number | string;
   difference?: number | string;
   direction?: 'in' | 'out';
+  createdAt?: string;
 }
 
 export interface CreateTransactionPayload {

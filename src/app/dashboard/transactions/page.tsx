@@ -152,6 +152,7 @@ export default function TransactionsPage() {
         tx.currency,
       ),
       direction: 'in' as const,
+      createdAt: tx.createdAt || tx.date || '',
     };
   });
 
@@ -180,11 +181,14 @@ export default function TransactionsPage() {
       receivedAmount: formattedAmount,
       difference: formatCurrency(0, 'NGN'),
       direction: 'out' as const,
+      createdAt: tr.createdAt || '',
     };
   });
 
   const allMappedItems: TransactionItem[] = [...mappedTransactions, ...mappedTransfers].sort(
-    (a, b) => (a.date && b.date ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0),
+    (a, b) =>
+      new Date(b.createdAt || b.date || 0).getTime() -
+      new Date(a.createdAt || a.date || 0).getTime(),
   );
 
   const filteredTransactions = allMappedItems.filter((t) => {

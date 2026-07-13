@@ -17,7 +17,8 @@ interface TransactionDetailsDrawerProps {
 // Simplified 3-state status — matches the table, no reconciliation language.
 function toSimpleStatus(status: string): 'Successful' | 'Failed' | 'Pending' {
   const s = (status || '').toLowerCase();
-  if (['reconciled', 'succeeded', 'success', 'overpaid'].includes(s)) return 'Successful';
+  if (['reconciled', 'succeeded', 'successful', 'success', 'overpaid'].includes(s))
+    return 'Successful';
   if (['failed', 'reversed'].includes(s)) return 'Failed';
   return 'Pending';
 }
@@ -27,6 +28,41 @@ const statusColors: Record<string, string> = {
   Failed: 'bg-[#fef2f2] text-[#ef4444] border-[#fee2e2]',
   Pending: 'bg-[#fff7ed] text-[#ea580c] border-[#ffedd5]',
 };
+
+function exportTx(tx: TransactionItem) {
+  const headers = [
+    'Transaction ID',
+    'Date',
+    'Customer',
+    'Account',
+    'Amount',
+    'Status',
+    'Reference',
+    'Narration',
+  ];
+  const row = [
+    tx.id,
+    tx.date,
+    tx.customerName || '',
+    tx.accountNumber || '',
+    tx.amount,
+    tx.status,
+    tx.reference || '',
+    tx.narration || '',
+  ];
+  const csv = [headers, row]
+    .map((r) => r.map((c) => `"${String(c).replace(/"/g, '""')}"`).join(','))
+    .join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `transaction-${tx.id}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
 
 export default function TransactionDetailsDrawer({
   isOpen,
@@ -199,7 +235,10 @@ export default function TransactionDetailsDrawer({
           <Button onClick={onClose} className="kredar-btn-outline h-10 px-5 text-sm">
             Cancel
           </Button>
-          <Button className="kredar-btn-primary flex items-center gap-2 h-10 px-5 text-sm font-semibold">
+          <Button
+            onClick={() => tx && exportTx(tx)}
+            className="kredar-btn-primary flex items-center gap-2 h-10 px-5 text-sm font-semibold"
+          >
             <Download size={15} />
             Export
           </Button>
