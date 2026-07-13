@@ -48,7 +48,7 @@ const statusStyles: Record<string, string> = {
   Restricted: 'bg-[#fff5f5] text-[#e11d48] border-[#ffe4e6]',
 };
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 8;
 
 export default function CustomersTable({ customers }: CustomersTableProps) {
   const generateVirtualAcc = useGenerateVirtualAccount();
