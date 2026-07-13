@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
-import { Search, Download } from 'lucide-react';
+import {
+  Search,
+  Download,
+  ChevronLeft,
+  ChevronRight,
+  ArrowDownLeft,
+  ArrowUpRight,
+} from 'lucide-react';
 import TransactionDetailsDrawer from '@/components/features/transactions/TransactionDetailsDrawer';
 import { TransactionItem } from '@/api/transactions/types';
 import { useCustomerMap } from '@/api/customers/useCustomerMao';
@@ -11,14 +18,20 @@ import Button from '@/components/features/landing/Button';
 
 const STATUS_MAP: Record<string, { label: string; class: string }> = {
   Successful: { label: 'Successful', class: 'text-[#0f8b4b] bg-[#effaf2]' },
+  Succeeded: { label: 'Successful', class: 'text-[#0f8b4b] bg-[#effaf2]' },
+  Reconciled: { label: 'Reconciled', class: 'text-[#0f8b4b] bg-[#effaf2]' },
   Failed: { label: 'Failed', class: 'text-red-600 bg-red-50' },
   Pending: { label: 'Pending', class: 'text-amber-600 bg-amber-50' },
   Overpaid: { label: 'Overpaid', class: 'text-blue-600 bg-blue-50' },
 };
 
+const TX_PAGE_SIZE = 20;
+
 export default function TransactionsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+  const [dirFilter, setDirFilter] = useState('all');
+  const [txPage, setTxPage] = useState(1);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedTx, setSelectedTx] = useState<TransactionItem | null>(null);
   const { customerMap } = useCustomerMap();
@@ -31,7 +44,7 @@ export default function TransactionsPage() {
     },
   });
 
-  const { data: transactions = [], isLoading } = useQuery({
+  const { data: transactions = [], isLoading: txLoading } = useQuery({
     queryKey: ['transactions'],
     queryFn: async () => {
       const res = await api.get('/transactions');
@@ -42,6 +55,20 @@ export default function TransactionsPage() {
           : [];
     },
   });
+
+  const { data: transfers = [], isLoading: transfersLoading } = useQuery({
+    queryKey: ['transfers'],
+    queryFn: async () => {
+      const res = await api.get('/transfers');
+      return Array.isArray(res.data)
+        ? res.data
+        : Array.isArray(res.data?.data)
+          ? res.data.data
+          : [];
+    },
+  });
+
+  const isLoading = txLoading || transfersLoading;
 
   const handleRowClick = (tx: TransactionItem) => {
     setSelectedTx(tx);
@@ -124,17 +151,60 @@ export default function TransactionsPage() {
         ),
         tx.currency,
       ),
+      direction: 'in' as const,
     };
   });
 
-  const filteredTransactions = mappedTransactions.filter((t) => {
+  const mappedTransfers: TransactionItem[] = transfers.map((tr: any) => {
+    const dateStr = tr.createdAt?.split('T')[0] || '';
+    const formattedAmount = formatCurrency(tr.amount || 0, 'NGN');
+    const trStatus = tr.status || 'Pending';
+    const rawMapped = trStatus.charAt(0).toUpperCase() + trStatus.slice(1).toLowerCase();
+    const mappedStatus = rawMapped === 'Succeeded' ? 'Successful' : rawMapped;
+
+    return {
+      id: tr.id || '',
+      date: dateStr,
+      amount: formattedAmount,
+      status: mappedStatus,
+      reference: tr.merchantTxRef || tr.providerReference || '',
+      fee: formatCurrency(0, 'NGN'),
+      currency: 'NGN',
+      method: 'Bank Transfer',
+      time: '',
+      customerId: '',
+      customerName: tr.recipientName || null,
+      accountNumber: tr.recipientAccountNumber || '',
+      narration: tr.narration || `Transfer to ${tr.recipientName || tr.recipientAccountNumber}`,
+      expectedAmount: formattedAmount,
+      receivedAmount: formattedAmount,
+      difference: formatCurrency(0, 'NGN'),
+      direction: 'out' as const,
+    };
+  });
+
+  const allMappedItems: TransactionItem[] = [...mappedTransactions, ...mappedTransfers].sort(
+    (a, b) => (a.date && b.date ? new Date(b.date).getTime() - new Date(a.date).getTime() : 0),
+  );
+
+  const filteredTransactions = allMappedItems.filter((t) => {
     const matchesSearch =
+      !searchQuery ||
       t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (t.customerName && t.customerName.toLowerCase().includes(searchQuery.toLowerCase()));
+      (t.customerName && t.customerName.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (t.narration && t.narration.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      (t.reference && t.reference.toLowerCase().includes(searchQuery.toLowerCase()));
     const matchesStatus =
       statusFilter === 'all' || t.status.toLowerCase() === statusFilter.toLowerCase();
-    return matchesSearch && matchesStatus;
+    const matchesDir = dirFilter === 'all' || t.direction === dirFilter;
+    return matchesSearch && matchesStatus && matchesDir;
   });
+
+  const txTotalPages = Math.max(1, Math.ceil(filteredTransactions.length / TX_PAGE_SIZE));
+  const pagedTransactions = filteredTransactions.slice(
+    (txPage - 1) * TX_PAGE_SIZE,
+    txPage * TX_PAGE_SIZE,
+  );
 
   const todayStr = new Date().toISOString().split('T')[0];
   const todayTransactions = transactions.filter((tx: any) =>
@@ -144,12 +214,13 @@ export default function TransactionsPage() {
     (sum: number, tx: any) => sum + (tx.amount || 0),
     0,
   );
-  const pendingTransactions = transactions.filter(
-    (tx: any) => (tx.status || '').toLowerCase() === 'pending',
-  ).length;
-  const failedTransactions = transactions.filter((tx: any) =>
-    ['failed', 'reversed'].includes((tx.status || '').toLowerCase()),
-  ).length;
+  const pendingTransactions =
+    transactions.filter((tx: any) => (tx.status || '').toLowerCase() === 'pending').length +
+    transfers.filter((tr: any) => (tr.status || '').toLowerCase() === 'pending').length;
+  const failedTransactions =
+    transactions.filter((tx: any) =>
+      ['failed', 'reversed'].includes((tx.status || '').toLowerCase()),
+    ).length + transfers.filter((tr: any) => (tr.status || '').toLowerCase() === 'failed').length;
 
   const statCards = [
     { label: 'Total payments today', value: formatCurrency(totalPaymentsToday) },
@@ -201,7 +272,10 @@ export default function TransactionsPage() {
               type="text"
               placeholder="Search by TRX ID..."
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setTxPage(1);
+              }}
               className="pl-9 pr-3 py-2 text-xs border border-gray-200 rounded-xl focus:outline-none focus:ring-1 focus:ring-[#0f8b4b] w-56 text-gray-700 bg-white"
             />
           </div>
@@ -227,7 +301,10 @@ export default function TransactionsPage() {
           <div className="relative flex items-center">
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value);
+                setTxPage(1);
+              }}
               className="appearance-none text-xs border border-gray-200 rounded-xl pl-3 pr-8 py-2 focus:outline-none text-gray-600 bg-white min-w-[110px]"
             >
               <option value="all">Status</option>
@@ -235,6 +312,24 @@ export default function TransactionsPage() {
               <option value="pending">Pending</option>
               <option value="failed">Failed</option>
               <option value="overpaid">Overpaid</option>
+            </select>
+            <span className="absolute right-3 pointer-events-none text-gray-400 text-[10px]">
+              ▼
+            </span>
+          </div>
+
+          <div className="relative flex items-center">
+            <select
+              value={dirFilter}
+              onChange={(e) => {
+                setDirFilter(e.target.value);
+                setTxPage(1);
+              }}
+              className="appearance-none text-xs border border-gray-200 rounded-xl pl-3 pr-8 py-2 focus:outline-none text-gray-600 bg-white min-w-[100px]"
+            >
+              <option value="all">Direction</option>
+              <option value="in">Pay-in</option>
+              <option value="out">Pay-out</option>
             </select>
             <span className="absolute right-3 pointer-events-none text-gray-400 text-[10px]">
               ▼
@@ -256,7 +351,7 @@ export default function TransactionsPage() {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100 bg-white">
-                {['Transaction ID', 'Date', 'Amount', 'Status'].map((h, idx) => (
+                {['Type', 'Transaction ID', 'Date', 'Amount', 'Status'].map((h, idx) => (
                   <th
                     key={idx}
                     className="px-6 py-4 text-left text-xs font-semibold text-gray-600 whitespace-nowrap"
@@ -270,7 +365,7 @@ export default function TransactionsPage() {
               {isLoading ? (
                 [...Array(5)].map((_, i) => (
                   <tr key={i}>
-                    {[...Array(4)].map((_, j) => (
+                    {[...Array(5)].map((_, j) => (
                       <td key={j} className="px-6 py-4">
                         <div className="h-6 bg-gray-100 rounded animate-pulse" />
                       </td>
@@ -279,30 +374,47 @@ export default function TransactionsPage() {
                 ))
               ) : filteredTransactions.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-16 text-center text-sm text-gray-400">
+                  <td colSpan={5} className="px-6 py-16 text-center text-sm text-gray-400">
                     No transactions found
                   </td>
                 </tr>
               ) : (
-                filteredTransactions.map((tx) => {
+                pagedTransactions.map((tx) => {
                   const statusInfo = STATUS_MAP[tx.status] || {
                     label: tx.status,
                     class: 'text-gray-500 bg-gray-100',
                   };
+                  const isOut = tx.direction === 'out';
                   return (
                     <tr
                       key={tx.id}
                       className="hover:bg-gray-50/40 transition-colors cursor-pointer"
                       onClick={() => handleRowClick(tx)}
                     >
-                      {/* Fixed: changed custom py-4.5 to supported native py-4 */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center gap-2">
+                          <div
+                            className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isOut ? 'bg-blue-50 text-blue-500' : 'bg-[#effaf2] text-[#0f8b4b]'}`}
+                          >
+                            {isOut ? <ArrowUpRight size={13} /> : <ArrowDownLeft size={13} />}
+                          </div>
+                          <span
+                            className={`text-[10px] font-semibold ${isOut ? 'text-blue-500' : 'text-[#0f8b4b]'}`}
+                          >
+                            {isOut ? 'Pay-out' : 'Pay-in'}
+                          </span>
+                        </div>
+                      </td>
                       <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap font-mono text-xs max-w-xs truncate">
                         {tx.id}
                       </td>
                       <td className="px-6 py-4 text-gray-500 text-xs whitespace-nowrap">
                         {tx.date}
                       </td>
-                      <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap tabular-nums">
+                      <td
+                        className={`px-6 py-4 font-bold whitespace-nowrap tabular-nums text-xs ${isOut ? 'text-gray-900' : 'text-[#0f8b4b]'}`}
+                      >
+                        {isOut ? '-' : '+'}
                         {tx.amount}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
@@ -319,6 +431,28 @@ export default function TransactionsPage() {
             </tbody>
           </table>
         </div>
+
+        {txTotalPages > 1 && (
+          <div className="flex items-center justify-between px-6 py-3 border-t border-gray-100">
+            <button
+              onClick={() => setTxPage((p) => Math.max(1, p - 1))}
+              disabled={txPage === 1}
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#0f8b4b] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              <ChevronLeft size={14} /> Previous
+            </button>
+            <span className="text-xs text-gray-400">
+              Page {txPage} of {txTotalPages} · {filteredTransactions.length} records
+            </span>
+            <button
+              onClick={() => setTxPage((p) => Math.min(txTotalPages, p + 1))}
+              disabled={txPage === txTotalPages}
+              className="flex items-center gap-1.5 text-xs font-semibold text-gray-500 hover:text-[#0f8b4b] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            >
+              Next <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
       </div>
 
       <TransactionDetailsDrawer
