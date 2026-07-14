@@ -1,75 +1,155 @@
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
+import { Suspense, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
+import { CheckCircle2, XCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { api } from '@/lib/api';
+import { clearAuthCookies, setToken, setCurrentUser, setOnboardingComplete } from '@/lib/cookies';
 
 function AcceptInviteContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
-  const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
-  const [errorMessage, setErrorMessage] = useState('This link is invalid or has expired.');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [done, setDone] = useState(false);
 
-  useEffect(() => {
-    if (!token) {
-      setErrorMessage('No invite token found in this link.');
-      setStatus('error');
+  if (!token) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f7faf6] px-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-[#d8e1da] p-10 w-full max-w-md text-center">
+          <XCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
+          <h1 className="text-xl font-bold text-[#081b10] mb-2">Invalid link</h1>
+          <p className="text-sm text-[#45504b]">
+            No invite token found. Ask your admin to resend the invite.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (password !== confirmPassword) {
+      setError('Passwords do not match.');
+      return;
+    }
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters.');
       return;
     }
 
-    api
-      .post('/team/accept', { token })
-      .then(() => setStatus('success'))
-      .catch((err) => {
-        const msg = err?.response?.data?.message;
-        if (msg) setErrorMessage(msg);
-        setStatus('error');
-      });
-  }, [token]);
+    setLoading(true);
+    try {
+      const res = await api.post('/team/accept', { token, password, confirmPassword });
+      const auth = res.data?.data ?? res.data;
+
+      clearAuthCookies();
+      setToken(auth.token);
+      setCurrentUser({ email: auth.email });
+      setOnboardingComplete(true); // team members skip onboarding — employer already set it up
+      api.defaults.headers.common['Authorization'] = `Bearer ${auth.token}`;
+
+      setDone(true);
+      setTimeout(() => router.replace('/dashboard'), 1200);
+    } catch (err: any) {
+      setError(err?.response?.data?.message || 'Something went wrong. Try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (done) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f7faf6] px-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-[#d8e1da] p-10 w-full max-w-md text-center">
+          <CheckCircle2 className="w-16 h-16 text-[#0f8b4b] mx-auto mb-6" />
+          <h1 className="text-xl font-bold text-[#081b10] mb-2">You&apos;re in!</h1>
+          <p className="text-sm text-[#45504b]">Taking you to the dashboard…</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#f7faf6] px-4">
-      <div className="bg-white rounded-2xl shadow-sm border border-[#d8e1da] p-10 w-full max-w-md text-center">
-        {status === 'loading' && (
-          <>
-            <Loader2 className="w-12 h-12 text-[#0f8b4b] mx-auto mb-6 animate-spin" />
-            <h1 className="text-xl font-bold text-[#081b10] mb-2">Accepting your invite…</h1>
-            <p className="text-sm text-[#45504b]">Just a moment while we verify your invitation.</p>
-          </>
-        )}
+      <div className="bg-white rounded-2xl shadow-sm border border-[#d8e1da] p-10 w-full max-w-md">
+        <div className="mb-8 text-center">
+          <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-[#eef9f2] mb-4">
+            <CheckCircle2 className="w-7 h-7 text-[#0f8b4b]" />
+          </div>
+          <h1 className="text-xl font-bold text-[#081b10]">Set your password</h1>
+          <p className="mt-1 text-sm text-[#45504b]">
+            Create a password to access the Kredar dashboard.
+          </p>
+        </div>
 
-        {status === 'success' && (
-          <>
-            <CheckCircle2 className="w-16 h-16 text-[#0f8b4b] mx-auto mb-6" />
-            <h1 className="text-xl font-bold text-[#081b10] mb-2">You're in!</h1>
-            <p className="text-sm text-[#45504b] mb-8">
-              Your invitation has been accepted. Sign in to access the dashboard.
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#081b10]">Password</label>
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                minLength={8}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Min. 8 characters"
+                className="w-full rounded-xl border border-[#d8e1da] bg-[#f7faf6] px-4 py-3 pr-11 text-sm text-[#081b10] outline-none focus:border-[#0f8b4b] focus:ring-2 focus:ring-[#0f8b4b]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#667085] hover:text-[#081b10]"
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-xs font-semibold text-[#081b10]">Confirm password</label>
+            <div className="relative">
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Re-enter your password"
+                className="w-full rounded-xl border border-[#d8e1da] bg-[#f7faf6] px-4 py-3 pr-11 text-sm text-[#081b10] outline-none focus:border-[#0f8b4b] focus:ring-2 focus:ring-[#0f8b4b]/20"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirm((v) => !v)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#667085] hover:text-[#081b10]"
+              >
+                {showConfirm ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
+            </div>
+          </div>
+
+          {error && (
+            <p className="text-xs font-medium text-red-600 bg-red-50 rounded-lg px-3 py-2">
+              {error}
             </p>
-            <button
-              onClick={() => router.replace('/auth/login')}
-              className="w-full bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-sm font-semibold py-3 rounded-xl transition-colors"
-            >
-              Sign in to Kredar
-            </button>
-          </>
-        )}
+          )}
 
-        {status === 'error' && (
-          <>
-            <XCircle className="w-16 h-16 text-red-500 mx-auto mb-6" />
-            <h1 className="text-xl font-bold text-[#081b10] mb-2">Invite failed</h1>
-            <p className="text-sm text-[#45504b] mb-8">{errorMessage}</p>
-            <button
-              onClick={() => router.replace('/auth/login')}
-              className="w-full border border-[#d8e1da] text-[#081b10] text-sm font-semibold py-3 rounded-xl hover:bg-[#f7faf6] transition-colors"
-            >
-              Back to sign in
-            </button>
-          </>
-        )}
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-[#0f8b4b] hover:bg-[#0c703c] disabled:opacity-60 text-white text-sm font-semibold py-3 rounded-xl transition-colors flex items-center justify-center gap-2"
+          >
+            {loading && <Loader2 size={16} className="animate-spin" />}
+            {loading ? 'Setting up…' : 'Set password & go to dashboard'}
+          </button>
+        </form>
       </div>
     </div>
   );
