@@ -109,7 +109,7 @@ export default function TeamTable({
                   </div>
 
                   <p className="text-sm text-[#667085]">
-                    {new Date(member.createdAt).toLocaleDateString()}
+                    {new Date(member.dateAdded).toLocaleDateString()}
                   </p>
 
                   <div className="relative flex justify-end overflow-visible">
@@ -177,7 +177,7 @@ export default function TeamTable({
                       </span>
 
                       <p className="mt-3 text-xs text-[#98A2B3]">
-                        Added {new Date(member.createdAt).toLocaleDateString()}
+                        Added {new Date(member.dateAdded).toLocaleDateString()}
                       </p>
                     </div>
                   </div>

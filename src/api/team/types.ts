@@ -3,7 +3,8 @@ export interface TeamMember {
   fullName: string;
   email: string;
   role: string;
-  createdAt: string;
+  status: string;
+  dateAdded: string;
 }
 
 export interface CreateTeamMemberPayload {
