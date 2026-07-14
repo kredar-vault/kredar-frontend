@@ -11,6 +11,7 @@ function AcceptInviteContent() {
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
 
+  const [step, setStep] = useState<'landing' | 'password'>('landing');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -73,6 +74,29 @@ function AcceptInviteContent() {
           <CheckCircle2 className="w-16 h-16 text-[#0f8b4b] mx-auto mb-6" />
           <h1 className="text-xl font-bold text-[#081b10] mb-2">You&apos;re in!</h1>
           <p className="text-sm text-[#45504b]">Taking you to the dashboard…</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'landing') {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#f7faf6] px-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-[#d8e1da] p-10 w-full max-w-md text-center">
+          <div className="inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-[#eef9f2] mb-6">
+            <CheckCircle2 className="w-8 h-8 text-[#0f8b4b]" />
+          </div>
+          <h1 className="text-xl font-bold text-[#081b10] mb-2">You&apos;ve been invited</h1>
+          <p className="text-sm text-[#45504b] mb-8 leading-relaxed">
+            You have been invited to join a team on Kredar. Accept the invitation to set up your
+            account and access the dashboard.
+          </p>
+          <button
+            onClick={() => setStep('password')}
+            className="w-full bg-[#0f8b4b] hover:bg-[#0c703c] text-white text-sm font-semibold py-3.5 rounded-xl transition-colors"
+          >
+            Accept Invitation
+          </button>
         </div>
       </div>
     );
