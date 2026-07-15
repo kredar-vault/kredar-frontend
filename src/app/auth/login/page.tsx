@@ -90,30 +90,18 @@ function LoginForm() {
 
       toast.success('Logged in successfully!');
 
-      // We still check onboarding completeness here — not to decide where to
-      // redirect (that's always /dashboard now), but to feed the "complete
-      // your profile" banner shown on the dashboard.
-      //
-      // Confirmed shape from GET /api/v1/onboarding:
-      // { isSuccess, message, data: { status: "NotStarted" | ..., legalName, ... } }
-      // Treating anything other than "NotStarted" as "don't nag them anymore" —
-      // once they've submitted, the banner's job is done. If Rejected should
-      // still show the banner (to prompt a resubmit), tell me and I'll add
-      // that case back in explicitly.
-      let onboardingDone = false;
-      try {
-        const onboardingRes = await api.get('/onboarding');
-        const onboarding = onboardingRes.data?.data;
-        onboardingDone = onboarding?.status !== 'NotStarted';
-      } catch (err) {
-        console.error('Failed to fetch onboarding status during login:', err);
-      }
+      // Redirect immediately — don't block on the onboarding check.
+      // Fire it in the background so the cookie is ready by the time
+      // the dashboard renders the "complete your profile" banner.
+      api
+        .get('/onboarding')
+        .then((res) => {
+          const done = res.data?.data?.status !== 'NotStarted';
+          setOnboardingComplete(done);
+          setOnboardingCompleteFlag(done);
+        })
+        .catch(() => {});
 
-      setOnboardingComplete(onboardingDone);
-      setOnboardingCompleteFlag(onboardingDone);
-
-      // Always land on the dashboard now. The banner (driven by the flag
-      // above) is what nudges incomplete profiles, not a hard redirect.
       router.replace('/dashboard');
     } catch (e: any) {
       const msg =
